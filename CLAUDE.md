@@ -1,4 +1,4 @@
-# Quizly
+# Quizzly
 
 React + Express App for a real-time multiplayer quiz game. The full product/feature spec lives in [scope.md](./scope.md) — treat it as the authoritative source for features, edge cases, and the color palette.
 
