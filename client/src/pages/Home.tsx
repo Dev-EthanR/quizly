@@ -7,6 +7,7 @@ import {
   joinRoomSchema,
   type JoinRoomFormValues,
 } from "../lib/schemas/joinRoom";
+import { getRandomUsername } from "../lib/usernames";
 
 function Home() {
   const navigate = useNavigate();
@@ -19,7 +20,8 @@ function Home() {
   });
 
   const onSubmit = (values: JoinRoomFormValues) => {
-    navigate(`/lobby/${values.roomCode}`, { state: { name: values.name } });
+    const name = values.name || getRandomUsername();
+    navigate(`/lobby/${values.roomCode}`, { state: { name } });
   };
 
   return (
@@ -41,7 +43,7 @@ function Home() {
         >
           <Input
             label="Username"
-            placeholder="Foxy"
+            placeholder="Foxy Fusion"
             maxLength={20}
             error={errors.name?.message}
             className=" caret-primary"
