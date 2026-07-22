@@ -17,6 +17,7 @@ Neither workspace is scaffolded yet — this file documents the committed stack 
 
 - React + Vite + TypeScript
 - TailwindCSS
+- clsx — conditional/composed className construction
 - React Router v6
 - React Context + useReducer — game, lobby, chat state
 - TanStack Query — REST API calls
@@ -76,6 +77,7 @@ Never hardcode localhost — use `VITE_API_URL` and `VITE_SOCKET_URL` env vars.
 - TypeScript strict mode across both workspaces.
 - No comments unless explaining a non-obvious "why."
 - Reuse existing patterns/utilities before adding new ones; no premature abstraction.
+- Always declare a named `interface` or `type` for object shapes (props, state, API payloads, etc.) instead of inline object type literals — including `as` casts, e.g. `useLocation() as LobbyLocation` with `interface LobbyLocation { state?: { name?: string } }` rather than `useLocation() as { state?: { name?: string } }`.
 
 ---
 
@@ -117,6 +119,7 @@ When helping with server code:
 - Use TanStack Query for all REST API calls
 - Never store auth token in localStorage — keep in memory via AuthContext
 - TailwindCSS only — no inline styles, no CSS modules
+- Use `clsx` for conditional or multi-part className strings instead of template literals/ternaries
 - TypeScript strict — no any, no type assertions unless absolutely necessary
 - All components must handle loading, error, and empty states
 - Ask before adding any new dependency
