@@ -77,6 +77,7 @@ Never hardcode localhost — use `VITE_API_URL` and `VITE_SOCKET_URL` env vars.
 - TypeScript strict mode across both workspaces.
 - No comments unless explaining a non-obvious "why."
 - Reuse existing patterns/utilities before adding new ones; no premature abstraction.
+- All `<button>` elements must use `cursor-pointer`.
 - Always declare a named `interface` or `type` for object shapes (props, state, API payloads, etc.) instead of inline object type literals — including `as` casts, e.g. `useLocation() as LobbyLocation` with `interface LobbyLocation { state?: { name?: string } }` rather than `useLocation() as { state?: { name?: string } }`.
 
 ---

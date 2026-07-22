@@ -1,27 +1,36 @@
-import { useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
+import AvatarColorField from "../components/ui/AvatarColorField";
 import {
   joinRoomSchema,
   type JoinRoomFormValues,
 } from "../lib/schemas/joinRoom";
 import { getRandomUsername } from "../lib/usernames";
+import { getInitials } from "../lib/initials";
+import { AVATAR_COLORS } from "../lib/avatarColors";
 
 function Home() {
   const navigate = useNavigate();
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<JoinRoomFormValues>({
     resolver: zodResolver(joinRoomSchema),
+    defaultValues: { name: "", color: AVATAR_COLORS[0].id, roomCode: "" },
   });
 
+  const name = useWatch({ control, name: "name" });
+
   const onSubmit = (values: JoinRoomFormValues) => {
-    const name = values.name || getRandomUsername();
-    navigate(`/lobby/${values.roomCode}`, { state: { name } });
+    const resolvedName = values.name || getRandomUsername();
+    navigate(`/lobby/${values.roomCode}`, {
+      state: { name: resolvedName, color: values.color },
+    });
   };
 
   return (
@@ -30,7 +39,7 @@ function Home() {
         Quiz<span className="text-primary">zly</span>
       </h1>
 
-      <div className="flex w-full max-w-sm flex-col gap-4 rounded-xl border border-border bg-surface p-6">
+      <div className="flex w-fit max-w-full flex-col gap-4 rounded-xl border border-border bg-surface p-6">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-foreground">Join a game</h2>
           <p className="mt-1 text-muted">Enter a room code to join a game</p>
@@ -43,12 +52,13 @@ function Home() {
         >
           <Input
             label="Username"
-            placeholder="Foxy Fusion"
+            placeholder="NovaFox"
             maxLength={20}
             error={errors.name?.message}
             className=" caret-primary"
             {...register("name")}
           />
+
           <Input
             label="Room code"
             placeholder="X9L2P3"
@@ -58,6 +68,19 @@ function Home() {
             error={errors.roomCode?.message}
             {...register("roomCode")}
           />
+
+          <Controller
+            name="color"
+            control={control}
+            render={({ field }) => (
+              <AvatarColorField
+                value={field.value ?? AVATAR_COLORS[0].id}
+                onChange={field.onChange}
+                initials={getInitials(name)}
+              />
+            )}
+          />
+
           <Button type="submit" disabled={isSubmitting}>
             Join Game
           </Button>

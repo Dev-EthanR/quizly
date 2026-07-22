@@ -1,10 +1,8 @@
 import { z } from "zod";
 
 export const joinRoomSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .max(20, "Username must be 20 characters or less"),
+  name: z.string().trim().max(20, "Username must be 20 characters or less"),
+  color: z.string().optional(),
   roomCode: z
     .string()
     .trim()
