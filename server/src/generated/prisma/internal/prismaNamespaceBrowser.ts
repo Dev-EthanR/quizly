@@ -54,7 +54,8 @@ export const ModelName = {
   User: 'User',
   Account: 'Account',
   Session: 'Session',
-  VerificationToken: 'VerificationToken'
+  VerificationToken: 'VerificationToken',
+  Quiz: 'Quiz'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -124,6 +125,21 @@ export const VerificationTokenScalarFieldEnum = {
 } as const
 
 export type VerificationTokenScalarFieldEnum = (typeof VerificationTokenScalarFieldEnum)[keyof typeof VerificationTokenScalarFieldEnum]
+
+
+export const QuizScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  coverImage: 'coverImage',
+  category: 'category',
+  status: 'status',
+  questionCount: 'questionCount',
+  ownerId: 'ownerId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type QuizScalarFieldEnum = (typeof QuizScalarFieldEnum)[keyof typeof QuizScalarFieldEnum]
 
 
 export const SortOrder = {
