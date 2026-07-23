@@ -8,10 +8,16 @@ const app = express();
 const PORT = 3000;
 
 app.set("trust proxy", true);
-app.use(cors());
-app.use("/api/auth/*splat", authHandler);
+app.use(
+  cors({
+    origin: process.env.PUBLIC_FRONTEND_URL ?? "http://localhost:5173",
+    credentials: true,
+  }),
+);
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
+app.use("/api/auth", authHandler);
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");
 });

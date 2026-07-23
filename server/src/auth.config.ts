@@ -22,54 +22,19 @@ export const authConfig: ExpressAuthConfig = {
     }),
   ],
   callbacks: {
-    async signIn({
-      user,
-    }: {
-      user: {
-        email?: string | null;
-        name?: string | null;
-        image?: string | null;
-      };
-    }) {
-      if (!user.email) return false;
-
-      await prisma.user.upsert({
-        where: { email: user.email },
-        update: {
-          name: user.name ?? undefined,
-          avatar: user.image ?? undefined,
-        },
-        create: {
-          email: user.email,
-          name: user.name ?? user.email.split("@")[0],
-          avatar: user.image,
-        },
-      });
-
-      return true;
-    },
-    async jwt({ token }: { token: Record<string, unknown> }) {
-      if (token.email) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: token.email as string },
-        });
-        if (dbUser) token.userId = dbUser.id;
-      }
-      return token;
-    },
-    async session({
-      session,
-      token,
-    }: {
-      session: any;
-      token: Record<string, unknown>;
-    }) {
-      if (session.user) session.user.id = token.userId as string;
+    async session({ session, user }: { session: any; user: { id: string } }) {
+      if (session.user) session.user.id = user.id;
       return session;
+    },
+    async redirect({ url }: { url: string }) {
+      if (url.startsWith("/")) return `${frontendUrl}${url}`;
+      if (new URL(url).origin === frontendUrl) return url;
+      return frontendUrl;
     },
   },
   trustHost: true,
   secret,
   adapter: PrismaAdapter(prisma),
   session: { strategy: "database" as const },
+  basePath: "/api/auth",
 };
