@@ -1,18 +1,12 @@
 import { Router } from "express";
-import { z } from "zod";
+import { registerSchema } from "shared";
 import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcrypt";
 
 const router = Router();
 
-const schema = z.object({
-  email: z.email(),
-  password: z.string().min(8),
-  name: z.string().min(1).max(20),
-});
-
 router.post("/register", async (req, res) => {
-  const parsed = schema.safeParse(req.body);
+  const parsed = registerSchema.safeParse(req.body);
   if (!parsed.success)
     return res.status(400).json({ error: parsed.error.flatten() });
 

@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useReducer, type ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { fetchSession, signInWithGoogle, signOutUser } from "../lib/auth";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  fetchSession,
+  registerUser,
+  signInWithCredentials,
+  signInWithGoogle,
+  signOutUser,
+  type CredentialsPayload,
+  type RegisterPayload,
+} from "../lib/auth";
 import {
   AuthContext,
   type AuthContextValue,
@@ -31,6 +39,7 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
+  const queryClient = useQueryClient();
   const [state, dispatch] = useReducer(authReducer, {
     status: "loading",
     user: null,
@@ -57,6 +66,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     [],
   );
 
+  const handleSignInWithCredentials = useCallback(
+    async (
+      payload: CredentialsPayload,
+      callbackUrl: string = window.location.origin,
+    ) => {
+      await signInWithCredentials(payload, callbackUrl);
+      await queryClient.invalidateQueries({ queryKey: ["session"] });
+    },
+    [queryClient],
+  );
+
+  const handleRegister = useCallback(async (payload: RegisterPayload) => {
+    await registerUser(payload);
+  }, []);
+
   const handleSignOut = useCallback(
     async (callbackUrl: string = window.location.origin) => {
       await signOutUser(callbackUrl);
@@ -67,6 +91,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const value: AuthContextValue = {
     ...state,
     signInWithGoogle: handleSignInWithGoogle,
+    signInWithCredentials: handleSignInWithCredentials,
+    register: handleRegister,
     signOut: handleSignOut,
   };
 

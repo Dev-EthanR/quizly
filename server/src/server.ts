@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import { requireAuth } from "./middleware";
 import { authHandler } from "./routes/auth.route";
+import registerRouter from "./routes/register.route";
 
 const app = express();
 const PORT = 3000;
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/auth", authHandler);
+app.use("/api", registerRouter);
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");
 });

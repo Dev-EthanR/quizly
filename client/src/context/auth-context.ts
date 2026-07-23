@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { AuthUser } from "../lib/auth";
+import type { AuthUser, CredentialsPayload, RegisterPayload } from "../lib/auth";
 
 export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 
@@ -10,6 +10,11 @@ export interface AuthState {
 
 export interface AuthContextValue extends AuthState {
   signInWithGoogle: (callbackUrl?: string) => Promise<void>;
+  signInWithCredentials: (
+    payload: CredentialsPayload,
+    callbackUrl?: string,
+  ) => Promise<void>;
+  register: (payload: RegisterPayload) => Promise<void>;
   signOut: (callbackUrl?: string) => Promise<void>;
 }
 

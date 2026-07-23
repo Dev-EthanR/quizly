@@ -1,36 +1,25 @@
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
-import clsx from "clsx";
-import Input from "../components/ui/Input";
-import Button from "../components/ui/Button";
-import GoogleIcon from "../components/ui/GoogleIcon";
-import { useAuth } from "../context/useAuth";
+import { useNavigate } from "react-router-dom";
+import AuthModeTabs, { type AuthMode } from "../components/auth/AuthModeTabs";
+import GoogleSignInButton from "../components/auth/GoogleSignInButton";
+import SignInForm from "../components/auth/SignInForm";
+import SignUpForm from "../components/auth/SignUpForm";
 
-interface SignInLocationState {
-  state?: {
-    from?: string;
-  };
-}
-
-type AuthMode = "signin" | "signup";
+const HOST_PATH = "/host";
 
 function SignIn() {
-  const { signInWithGoogle } = useAuth();
-  const { state } = useLocation() as SignInLocationState;
+  const navigate = useNavigate();
   const [mode, setMode] = useState<AuthMode>("signin");
-  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
-  const redirectPath = state?.from ?? "/host";
-  const callbackUrl = `${window.location.origin}${redirectPath}`;
+  const callbackUrl = `${window.location.origin}${HOST_PATH}`;
 
-  const handleGoogleSignIn = async () => {
-    setIsRedirecting(true);
-    try {
-      await signInWithGoogle(callbackUrl);
-    } catch {
-      setIsRedirecting(false);
-    }
+  const switchMode = (nextMode: AuthMode) => {
+    setMode(nextMode);
+    setFormError(null);
   };
+
+  const handleSuccess = () => navigate(HOST_PATH, { replace: true });
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4">
@@ -39,32 +28,7 @@ function SignIn() {
       </h1>
 
       <div className="flex w-full max-w-sm flex-col gap-4 rounded-xl border border-border bg-surface p-6">
-        <div className="flex rounded-lg border border-border p-1">
-          <button
-            type="button"
-            onClick={() => setMode("signin")}
-            className={clsx(
-              "flex-1 cursor-pointer rounded-md py-2 text-sm font-semibold transition-colors",
-              mode === "signin"
-                ? "bg-primary text-foreground"
-                : "text-muted hover:text-foreground",
-            )}
-          >
-            Sign in
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode("signup")}
-            className={clsx(
-              "flex-1 cursor-pointer rounded-md py-2 text-sm font-semibold transition-colors",
-              mode === "signup"
-                ? "bg-primary text-foreground"
-                : "text-muted hover:text-foreground",
-            )}
-          >
-            Sign up
-          </button>
-        </div>
+        <AuthModeTabs mode={mode} onChange={switchMode} />
 
         <div className="text-center">
           <h2 className="text-2xl font-bold text-foreground">
@@ -77,16 +41,7 @@ function SignIn() {
           </p>
         </div>
 
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={handleGoogleSignIn}
-          disabled={isRedirecting}
-          className="flex items-center justify-center gap-2"
-        >
-          <GoogleIcon className="h-5 w-5" />
-          {isRedirecting ? "Redirecting..." : "Continue with Google"}
-        </Button>
+        <GoogleSignInButton callbackUrl={callbackUrl} />
 
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-border" />
@@ -94,19 +49,25 @@ function SignIn() {
           <div className="h-px flex-1 bg-border" />
         </div>
 
-        <fieldset disabled className="flex flex-col gap-4 opacity-50">
-          {mode === "signup" && (
-            <Input label="Username" placeholder="NovaFox" maxLength={20} />
-          )}
-          <Input label="Email" type="email" placeholder="you@example.com" />
-          <Input label="Password" type="password" placeholder="********" />
-          <Button type="submit" variant="secondary">
-            {mode === "signin" ? "Sign in" : "Sign up"} with email
-          </Button>
-        </fieldset>
-        <p className="text-center text-xs text-muted">
-          Email {mode === "signin" ? "sign-in" : "sign-up"} is coming soon
-        </p>
+        {formError && (
+          <p className="rounded-lg bg-danger/10 px-3 py-2 text-center text-sm text-danger">
+            {formError}
+          </p>
+        )}
+
+        {mode === "signin" ? (
+          <SignInForm
+            callbackUrl={callbackUrl}
+            onSuccess={handleSuccess}
+            onError={setFormError}
+          />
+        ) : (
+          <SignUpForm
+            callbackUrl={callbackUrl}
+            onSuccess={handleSuccess}
+            onError={setFormError}
+          />
+        )}
       </div>
     </div>
   );
