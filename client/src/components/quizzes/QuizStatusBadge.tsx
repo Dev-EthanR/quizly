@@ -1,0 +1,28 @@
+import clsx from "clsx";
+import type { QuizStatus } from "../../lib/quizzes";
+
+interface QuizStatusBadgeProps {
+  status: QuizStatus;
+}
+
+const STATUS_LABEL: Record<QuizStatus, string> = {
+  draft: "Draft",
+  published: "Published",
+};
+
+function QuizStatusBadge({ status }: QuizStatusBadgeProps) {
+  return (
+    <span
+      className={clsx(
+        "shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold",
+        status === "published"
+          ? "bg-secondary/15 text-secondary"
+          : "bg-warning/15 text-warning",
+      )}
+    >
+      {STATUS_LABEL[status]}
+    </span>
+  );
+}
+
+export default QuizStatusBadge;
