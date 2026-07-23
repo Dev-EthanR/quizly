@@ -6,9 +6,11 @@ interface FindManyByOwnerParams {
   status?: QuizStatus | undefined;
 }
 
-export function findManyByOwner({ ownerId, status }: FindManyByOwnerParams) {
-  return prisma.quiz.findMany({
-    where: { ownerId, ...(status ? { status } : {}) },
-    orderBy: { updatedAt: "desc" },
-  });
-}
+export const quizzesRepository = {
+  findManyByOwner({ ownerId, status }: FindManyByOwnerParams) {
+    return prisma.quiz.findMany({
+      where: { ownerId, ...(status ? { status } : {}) },
+      orderBy: { updatedAt: "desc" },
+    });
+  },
+};

@@ -1,4 +1,4 @@
-import * as quizzesRepository from "../repositories/quizzes.repository.js";
+import { quizzesRepository } from "../repositories/quizzes.repository.js";
 import type { QuizStatus } from "shared";
 
 interface ListMyQuizzesParams {

@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import * as usersRepository from "../repositories/users.repository.js";
+import { usersRepository } from "../repositories/users.repository.js";
 
 interface RegisterUserParams {
   name: string;
