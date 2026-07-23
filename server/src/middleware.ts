@@ -14,6 +14,19 @@ export function asyncHandler(
   };
 }
 
+export function errorHandler(
+  err: unknown,
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  if (res.headersSent) {
+    return next(err);
+  }
+  console.error(err);
+  res.status(500).json({ error: "Internal server error" });
+}
+
 export async function requireAuth(
   req: Request,
   res: Response,

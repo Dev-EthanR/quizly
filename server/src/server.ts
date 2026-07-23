@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import express from "express";
 import cors from "cors";
-import { requireAuth } from "./middleware";
+import { errorHandler, requireAuth } from "./middleware";
 import { authHandler } from "./routes/auth.route";
 import registerRouter from "./routes/register.route";
 import quizzesRouter from "./routes/quizzes.route";
@@ -34,6 +34,8 @@ app.get("/api/profile", requireAuth, (req: Request, res: Response) => {
   const { session } = res.locals;
   res.render("profile", { user: session?.user });
 });
+app.use(errorHandler);
+
 app.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
