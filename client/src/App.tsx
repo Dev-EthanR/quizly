@@ -3,6 +3,9 @@ import Home from "./pages/Home";
 import Host from "./pages/Host";
 import Lobby from "./pages/Lobby";
 import SignIn from "./pages/SignIn";
+import Discovery from "./pages/Discovery";
+import MyQuizzes from "./pages/MyQuizzes";
+import Settings from "./pages/Settings";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function App() {
@@ -13,6 +16,9 @@ function App() {
       <Route path="/lobby/:roomCode" element={<Lobby />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/host" element={<Host />} />
+        <Route path="/discovery" element={<Discovery />} />
+        <Route path="/my-quizzes" element={<MyQuizzes />} />
+        <Route path="/settings" element={<Settings />} />
       </Route>
     </Routes>
   );
