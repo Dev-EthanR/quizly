@@ -1,9 +1,11 @@
 import { useLocation, useParams } from "react-router-dom";
 import Avatar from "../components/ui/Avatar";
 import RoomNotFound from "../components/lobby/RoomNotFound";
+import ReconnectingOverlay from "../components/lobby/ReconnectingOverlay";
 import { AVATAR_COLORS } from "../lib/avatarColors";
 import { getInitials } from "../lib/initials";
 import { ROOM_CODE_REGEX } from "../lib/schemas/joinRoom";
+import { useOnlineStatus } from "../hooks/useOnlineStatus";
 
 interface LobbyLocation {
   state?: {
@@ -21,6 +23,7 @@ function Lobby() {
 
   const isValidRoomCode =
     !!roomCode && ROOM_CODE_REGEX.test(roomCode.toUpperCase());
+  const isOnline = useOnlineStatus();
 
   if (!isValidRoomCode) {
     return <RoomNotFound roomCode={roomCode} />;
@@ -28,6 +31,8 @@ function Lobby() {
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-2 px-4">
+      {!isOnline && <ReconnectingOverlay />}
+
       <p className="text-foreground">
         Joining room <span className="font-bold text-primary">{roomCode}</span>
       </p>

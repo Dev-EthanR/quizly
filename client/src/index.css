@@ -11,6 +11,18 @@
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
   --color-foreground: #f4f4f8;
+  --animate-dot-fade: dot-fade 1.4s ease-in-out infinite;
+}
+
+@keyframes dot-fade {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
 }
 
 body {
