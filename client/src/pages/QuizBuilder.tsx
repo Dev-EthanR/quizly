@@ -1,15 +1,20 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { publishQuizSchema, saveQuizDraftSchema, type QuizStatus } from "shared";
+import { publishQuizContentSchema, publishQuizSchema, saveQuizDraftSchema } from "shared";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import QuestionList from "../components/quizzes/QuestionList";
 import QuestionPreviewPanel from "../components/quizzes/QuestionPreviewPanel";
+import PublishQuizModal from "../components/quizzes/PublishQuizModal";
 import { QuizBuilderProvider } from "../context/QuizBuilderContext";
 import { useQuizBuilder } from "../context/useQuizBuilder";
-import { createQuiz, type SaveQuizPayload } from "../lib/quizzes";
+import {
+  createQuiz,
+  type PublishQuizMetadata,
+  type SaveQuizPayload,
+} from "../lib/quizzes";
 
 interface QuizBuilderRouteParams {
   quizId?: string;
@@ -21,6 +26,7 @@ function QuizBuilderForm() {
   const navigate = useNavigate();
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
 
   const resolvedSelectedId = selectedQuestionId ?? state.questions[0]?.id ?? null;
   const previewIndex = state.questions.findIndex(
@@ -39,10 +45,9 @@ function QuizBuilderForm() {
     },
   });
 
-  const handleSave = (status: QuizStatus) => {
-    const payload: SaveQuizPayload = { ...state, status };
-    const schema = status === "published" ? publishQuizSchema : saveQuizDraftSchema;
-    const parsed = schema.safeParse(payload);
+  const handleSaveDraft = () => {
+    const payload: SaveQuizPayload = { ...state, status: "draft" };
+    const parsed = saveQuizDraftSchema.safeParse(payload);
 
     if (!parsed.success) {
       setValidationErrors(
@@ -52,6 +57,37 @@ function QuizBuilderForm() {
     }
 
     setValidationErrors([]);
+    saveMutation.mutate(payload);
+  };
+
+  const handleOpenPublishModal = () => {
+    const parsed = publishQuizContentSchema.safeParse(state);
+
+    if (!parsed.success) {
+      setValidationErrors(
+        Array.from(new Set(parsed.error.issues.map((issue) => issue.message))),
+      );
+      return;
+    }
+
+    setValidationErrors([]);
+    setIsPublishModalOpen(true);
+  };
+
+  const handleConfirmPublish = (metadata: PublishQuizMetadata) => {
+    const payload: SaveQuizPayload = { ...state, status: "published", ...metadata };
+    const parsed = publishQuizSchema.safeParse(payload);
+
+    if (!parsed.success) {
+      setValidationErrors(
+        Array.from(new Set(parsed.error.issues.map((issue) => issue.message))),
+      );
+      setIsPublishModalOpen(false);
+      return;
+    }
+
+    setValidationErrors([]);
+    setIsPublishModalOpen(false);
     saveMutation.mutate(payload);
   };
 
@@ -105,18 +141,26 @@ function QuizBuilderForm() {
           type="button"
           variant="secondary"
           disabled={saveMutation.isPending}
-          onClick={() => handleSave("draft")}
+          onClick={handleSaveDraft}
         >
           {saveMutation.isPending ? "Saving..." : "Save draft"}
         </Button>
         <Button
           type="button"
           disabled={saveMutation.isPending}
-          onClick={() => handleSave("published")}
+          onClick={handleOpenPublishModal}
         >
           {saveMutation.isPending ? "Publishing..." : "Publish"}
         </Button>
       </div>
+
+      {isPublishModalOpen && (
+        <PublishQuizModal
+          onClose={() => setIsPublishModalOpen(false)}
+          onConfirm={handleConfirmPublish}
+          isSubmitting={saveMutation.isPending}
+        />
+      )}
     </div>
   );
 }

@@ -51,11 +51,35 @@ export const saveQuizDraftSchema = z.object({
 
 export type SaveQuizDraftInput = z.infer<typeof saveQuizDraftSchema>;
 
-export const publishQuizSchema = saveQuizDraftSchema.extend({
+export const publishQuizContentSchema = saveQuizDraftSchema.extend({
   questions: z
     .array(quizQuestionSchema)
     .min(1, "Add at least one question to publish"),
 });
+
+export type PublishQuizContentInput = z.infer<typeof publishQuizContentSchema>;
+
+export const quizDifficultySchema = z.enum(["easy", "medium", "hard"]);
+
+export type QuizDifficulty = z.infer<typeof quizDifficultySchema>;
+
+export const quizVisibilitySchema = z.enum(["public", "private"]);
+
+export type QuizVisibility = z.infer<typeof quizVisibilitySchema>;
+
+export const publishQuizMetadataSchema = z.object({
+  category: z.string().trim().min(1, "Category is required"),
+  difficulty: quizDifficultySchema,
+  tags: z.array(z.string().trim().min(1).max(24)).max(10).default([]),
+  visibility: quizVisibilitySchema,
+  coverImage: z.string().trim().optional(),
+});
+
+export type PublishQuizMetadataInput = z.infer<typeof publishQuizMetadataSchema>;
+
+export const publishQuizSchema = publishQuizContentSchema.extend(
+  publishQuizMetadataSchema.shape,
+);
 
 export type PublishQuizInput = z.infer<typeof publishQuizSchema>;
 

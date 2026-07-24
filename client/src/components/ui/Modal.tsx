@@ -1,4 +1,6 @@
-import { useEffect, type MouseEvent, type ReactNode } from "react";
+import { type MouseEvent, type ReactNode } from "react";
+import clsx from "clsx";
+import { useModal } from "../../hooks/useModal";
 
 interface ModalProps {
   title: ReactNode;
@@ -6,17 +8,18 @@ interface ModalProps {
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
+  maxWidthClassName?: string;
 }
 
-function Modal({ title, ariaLabel, onClose, children, footer }: ModalProps) {
-  useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") onClose();
-    }
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onClose]);
+function Modal({
+  title,
+  ariaLabel,
+  onClose,
+  children,
+  footer,
+  maxWidthClassName = "max-w-5xl",
+}: ModalProps) {
+  useModal(onClose);
 
   const handleOverlayClick = (event: MouseEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget) onClose();
@@ -32,7 +35,10 @@ function Modal({ title, ariaLabel, onClose, children, footer }: ModalProps) {
         role="dialog"
         aria-modal="true"
         aria-label={ariaLabel}
-        className="flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-border bg-surface"
+        className={clsx(
+          "flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl border border-border bg-surface",
+          maxWidthClassName,
+        )}
       >
         <div className="flex items-center justify-between border-b border-border px-6 py-5">
           <h2 className="text-xl font-semibold text-foreground">{title}</h2>

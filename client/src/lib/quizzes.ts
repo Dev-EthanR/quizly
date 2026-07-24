@@ -1,7 +1,7 @@
 import axios from "axios";
-import type { QuizStatus } from "shared";
+import type { QuizDifficulty, QuizStatus, QuizVisibility } from "shared";
 
-export type { QuizStatus };
+export type { QuizStatus, QuizDifficulty, QuizVisibility };
 export type QuizStatusFilter = "all" | QuizStatus;
 
 export interface Quiz {
@@ -37,9 +37,28 @@ export interface QuizDraft {
   questions: QuizQuestionDraft[];
 }
 
-export interface SaveQuizPayload extends QuizDraft {
-  status: QuizStatus;
+export interface QuizCategory {
+  id: string;
+  name: string;
 }
+
+export interface PublishQuizMetadata {
+  category: string;
+  difficulty: QuizDifficulty;
+  tags: string[];
+  visibility: QuizVisibility;
+  coverImage?: string;
+}
+
+export interface SaveDraftPayload extends QuizDraft {
+  status: "draft";
+}
+
+export interface PublishQuizPayload extends QuizDraft, PublishQuizMetadata {
+  status: "published";
+}
+
+export type SaveQuizPayload = SaveDraftPayload | PublishQuizPayload;
 
 export interface SaveQuizResponse {
   id: string;
@@ -83,6 +102,11 @@ export async function createQuiz(
   payload: SaveQuizPayload,
 ): Promise<SaveQuizResponse> {
   const { data } = await api.post<SaveQuizResponse>("/api/quizzes", payload);
+  return data;
+}
+
+export async function fetchQuizCategories(): Promise<QuizCategory[]> {
+  const { data } = await api.get<QuizCategory[]>("/api/quizzes/categories");
   return data;
 }
 
