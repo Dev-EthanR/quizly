@@ -1,7 +1,9 @@
 import { useLocation, useParams } from "react-router-dom";
 import Avatar from "../components/ui/Avatar";
+import RoomNotFound from "../components/lobby/RoomNotFound";
 import { AVATAR_COLORS } from "../lib/avatarColors";
 import { getInitials } from "../lib/initials";
+import { ROOM_CODE_REGEX } from "../lib/schemas/joinRoom";
 
 interface LobbyLocation {
   state?: {
@@ -16,6 +18,13 @@ function Lobby() {
   const selectedColor =
     AVATAR_COLORS.find((color) => color.id === state?.color) ??
     AVATAR_COLORS[0];
+
+  const isValidRoomCode =
+    !!roomCode && ROOM_CODE_REGEX.test(roomCode.toUpperCase());
+
+  if (!isValidRoomCode) {
+    return <RoomNotFound roomCode={roomCode} />;
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-2 px-4">
