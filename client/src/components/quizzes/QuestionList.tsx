@@ -12,7 +12,17 @@ interface EditingQuestion {
   original: QuizQuestionDraft;
 }
 
-function QuestionList() {
+interface QuestionListProps {
+  selectedQuestionId: string | null;
+  onSelectQuestion: (questionId: string) => void;
+  onQuestionRemoved: (questionId: string) => void;
+}
+
+function QuestionList({
+  selectedQuestionId,
+  onSelectQuestion,
+  onQuestionRemoved,
+}: QuestionListProps) {
   const { state, dispatch } = useQuizBuilder();
   const [editing, setEditing] = useState<EditingQuestion | null>(null);
 
@@ -24,12 +34,14 @@ function QuestionList() {
   const handleAddQuestion = () => {
     const question = createEmptyQuestion();
     dispatch({ type: "ADD_QUESTION", question });
+    onSelectQuestion(question.id);
     setEditing({ questionId: question.id, isNew: true, original: question });
   };
 
   const handleRemoveQuestion = (questionId: string) => {
     dispatch({ type: "REMOVE_QUESTION", questionId });
     if (editing?.questionId === questionId) setEditing(null);
+    onQuestionRemoved(questionId);
   };
 
   const handleDiscardEdit = () => {
@@ -61,9 +73,16 @@ function QuestionList() {
               key={question.id}
               question={question}
               index={index}
-              onEdit={() =>
-                setEditing({ questionId: question.id, isNew: false, original: question })
-              }
+              isSelected={question.id === selectedQuestionId}
+              onSelect={() => onSelectQuestion(question.id)}
+              onEdit={() => {
+                onSelectQuestion(question.id);
+                setEditing({
+                  questionId: question.id,
+                  isNew: false,
+                  original: question,
+                });
+              }}
               onRemove={() => handleRemoveQuestion(question.id)}
             />
           ))}
