@@ -1,0 +1,75 @@
+import { useState } from "react";
+import type { QuizQuestionDraft } from "../../lib/quizzes";
+import { getQuestionErrors, isQuestionValid } from "../../lib/questionValidation";
+import Modal from "../ui/Modal";
+import Button from "../ui/Button";
+import QuestionEditor from "./QuestionEditor";
+
+interface QuestionModalProps {
+  question: QuizQuestionDraft;
+  index: number;
+  isNew: boolean;
+  onDelete: () => void;
+  onDiscard: () => void;
+  onClose: () => void;
+}
+
+function QuestionModal({
+  question,
+  index,
+  isNew,
+  onDelete,
+  onDiscard,
+  onClose,
+}: QuestionModalProps) {
+  const [hasAttemptedDone, setHasAttemptedDone] = useState(false);
+  const modalLabel = isNew ? "Create question" : "Edit question";
+  const errors = hasAttemptedDone ? getQuestionErrors(question) : null;
+
+  const handleDismiss = () => {
+    if (isNew) {
+      onDelete();
+      return;
+    }
+    onDiscard();
+  };
+
+  const handleDone = () => {
+    if (!isQuestionValid(question)) {
+      setHasAttemptedDone(true);
+      return;
+    }
+    onClose();
+  };
+
+  return (
+    <Modal
+      title={
+        <span className="flex items-center gap-3">
+          <span className="rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-xs font-bold text-primary">
+            Question {index + 1}
+          </span>
+          <span className="text-base font-semibold text-foreground">
+            {modalLabel}
+          </span>
+        </span>
+      }
+      ariaLabel={`${modalLabel}: Question ${index + 1}`}
+      onClose={handleDismiss}
+      footer={
+        <>
+          <Button type="button" variant="secondary" onClick={handleDismiss}>
+            Cancel
+          </Button>
+          <Button type="button" onClick={handleDone}>
+            Done
+          </Button>
+        </>
+      }
+    >
+      <QuestionEditor question={question} errors={errors} />
+    </Modal>
+  );
+}
+
+export default QuestionModal;
