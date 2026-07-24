@@ -5,6 +5,7 @@ import clsx from "clsx";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/ui/Button";
 import QuizCard from "../components/quizzes/QuizCard";
+import QuizCardSkeleton from "../components/quizzes/QuizCardSkeleton";
 import { fetchMyQuizzes, type QuizStatusFilter } from "../lib/quizzes";
 
 interface FilterOption {
@@ -17,6 +18,8 @@ const FILTER_OPTIONS: FilterOption[] = [
   { label: "Published", value: "published" },
   { label: "Drafts", value: "draft" },
 ];
+
+const SKELETON_COUNT = 6;
 
 const EMPTY_MESSAGE: Record<QuizStatusFilter, string> = {
   all: "You haven't created any quizzes yet.",
@@ -69,9 +72,11 @@ function MyQuizzes() {
 
         <div className="mt-8">
           {isLoading && (
-            <p className="py-24 text-center text-muted">
-              Loading your quizzes...
-            </p>
+            <div className="flex flex-col gap-4">
+              {Array.from({ length: SKELETON_COUNT }).map((_, index) => (
+                <QuizCardSkeleton key={index} />
+              ))}
+            </div>
           )}
 
           {!isLoading && isError && (
