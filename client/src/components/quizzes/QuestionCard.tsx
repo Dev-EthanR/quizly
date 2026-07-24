@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import type { KeyboardEvent, MouseEvent } from "react";
+import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import type { QuizQuestionDraft } from "../../lib/quizzes";
 import { isQuestionValid } from "../../lib/questionValidation";
 
@@ -69,23 +70,27 @@ function QuestionCard({
         </span>
       </div>
 
-      <button
-        type="button"
-        aria-label="Edit question"
-        onClick={handleEditClick}
-        className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border text-muted transition-colors hover:border-primary/40 hover:bg-primary/15 hover:text-primary"
-      >
-        ✎
-      </button>
+      <div className="flex shrink-0 items-center gap-1.5">
+        <button
+          type="button"
+          aria-label="Edit question"
+          title="Edit question"
+          onClick={handleEditClick}
+          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-primary/40 bg-primary/10 text-primary transition-colors hover:border-violet-400/60 hover:bg-violet-400/15 hover:text-violet-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+        >
+          <FiEdit2 className="h-4 w-4" />
+        </button>
 
-      <button
-        type="button"
-        aria-label="Delete question"
-        onClick={handleRemoveClick}
-        className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-border text-muted transition-colors hover:border-danger/40 hover:bg-danger/15 hover:text-danger"
-      >
-        ✕
-      </button>
+        <button
+          type="button"
+          aria-label="Delete question"
+          title="Delete question"
+          onClick={handleRemoveClick}
+          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg border border-danger/40 bg-danger/10 text-danger transition-colors hover:border-red-400/60 hover:bg-red-400/15 hover:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/50"
+        >
+          <FiTrash2 className="h-4 w-4" />
+        </button>
+      </div>
     </div>
   );
 }
