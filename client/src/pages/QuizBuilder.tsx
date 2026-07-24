@@ -56,7 +56,7 @@ function QuizBuilderForm() {
   };
 
   return (
-    <div className="mx-auto flex max-w-[1440px] flex-col gap-8 px-4 py-10">
+    <div className="mx-auto flex max-w-360 flex-col gap-8 px-4 py-10">
       <Link
         to="/my-quizzes"
         className="flex items-center gap-2 self-start text-sm font-semibold text-muted hover:text-foreground"
@@ -64,7 +64,7 @@ function QuizBuilderForm() {
         ← Back to My Quizzes
       </Link>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="flex flex-col gap-8">
           <Input
             label="Quiz title"
