@@ -67,8 +67,36 @@ export const quizVisibilitySchema = z.enum(["public", "private"]);
 
 export type QuizVisibility = z.infer<typeof quizVisibilitySchema>;
 
+export const quizCategorySchema = z.enum([
+  "generalKnowledge",
+  "science",
+  "history",
+  "geography",
+  "entertainment",
+  "sports",
+  "technology",
+  "artsLiterature",
+  "music",
+  "moviesTv",
+]);
+
+export type QuizCategory = z.infer<typeof quizCategorySchema>;
+
+export const quizCategoryLabels: Record<QuizCategory, string> = {
+  generalKnowledge: "General Knowledge",
+  science: "Science",
+  history: "History",
+  geography: "Geography",
+  entertainment: "Entertainment",
+  sports: "Sports",
+  technology: "Technology",
+  artsLiterature: "Arts & Literature",
+  music: "Music",
+  moviesTv: "Movies & TV",
+};
+
 export const publishQuizMetadataSchema = z.object({
-  category: z.string().trim().min(1, "Category is required"),
+  category: quizCategorySchema,
   difficulty: quizDifficultySchema,
   tags: z.array(z.string().trim().min(1).max(24)).max(10).default([]),
   visibility: quizVisibilitySchema,

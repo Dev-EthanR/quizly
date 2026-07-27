@@ -1,7 +1,12 @@
 import axios from "axios";
-import type { QuizDifficulty, QuizStatus, QuizVisibility } from "shared";
+import type {
+  QuizCategory,
+  QuizDifficulty,
+  QuizStatus,
+  QuizVisibility,
+} from "shared";
 
-export type { QuizStatus, QuizDifficulty, QuizVisibility };
+export type { QuizStatus, QuizCategory, QuizDifficulty, QuizVisibility };
 export type QuizStatusFilter = "all" | QuizStatus;
 
 export interface Quiz {
@@ -9,7 +14,7 @@ export interface Quiz {
   title: string;
   coverImage: string | null;
   status: QuizStatus;
-  category: string | null;
+  category: QuizCategory | null;
   questionCount: number;
   updatedAt: string;
 }
@@ -37,13 +42,13 @@ export interface QuizDraft {
   questions: QuizQuestionDraft[];
 }
 
-export interface QuizCategory {
-  id: string;
+export interface QuizCategoryOption {
+  id: QuizCategory;
   name: string;
 }
 
 export interface PublishQuizMetadata {
-  category: string;
+  category: QuizCategory;
   difficulty: QuizDifficulty;
   tags: string[];
   visibility: QuizVisibility;
@@ -62,6 +67,39 @@ export type SaveQuizPayload = SaveDraftPayload | PublishQuizPayload;
 
 export interface SaveQuizResponse {
   id: string;
+}
+
+export interface QuizDetailAnswer {
+  id: string;
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface QuizDetailQuestion {
+  id: string;
+  prompt: string;
+  timeLimitSeconds: number;
+  points: number;
+  answers: QuizDetailAnswer[];
+}
+
+export interface QuizDetail {
+  id: string;
+  title: string;
+  status: QuizStatus;
+  category: QuizCategory | null;
+  coverImage: string | null;
+  questions: QuizDetailQuestion[];
+}
+
+interface UpdateQuizDraftParams {
+  id: string;
+  payload: SaveQuizPayload;
+}
+
+interface PublishQuizParams {
+  id: string;
+  payload: SaveQuizPayload;
 }
 
 export interface GeneratedQuiz {
@@ -105,8 +143,37 @@ export async function createQuiz(
   return data;
 }
 
-export async function fetchQuizCategories(): Promise<QuizCategory[]> {
-  const { data } = await api.get<QuizCategory[]>("/api/quizzes/categories");
+export async function fetchQuizById(id: string): Promise<QuizDetail> {
+  const { data } = await api.get<QuizDetail>(`/api/quizzes/${id}`);
+  return data;
+}
+
+export async function updateQuizDraft({
+  id,
+  payload,
+}: UpdateQuizDraftParams): Promise<SaveQuizResponse> {
+  const { data } = await api.patch<SaveQuizResponse>(
+    `/api/quizzes/${id}`,
+    payload,
+  );
+  return data;
+}
+
+export async function publishQuiz({
+  id,
+  payload,
+}: PublishQuizParams): Promise<SaveQuizResponse> {
+  const { data } = await api.post<SaveQuizResponse>(
+    `/api/quizzes/${id}/publish`,
+    payload,
+  );
+  return data;
+}
+
+export async function fetchQuizCategories(): Promise<QuizCategoryOption[]> {
+  const { data } = await api.get<QuizCategoryOption[]>(
+    "/api/quizzes/categories",
+  );
   return data;
 }
 

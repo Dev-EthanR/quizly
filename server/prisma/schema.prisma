@@ -71,19 +71,65 @@ enum QuizStatus {
   published
 }
 
+enum QuizCategory {
+  generalKnowledge
+  science
+  history
+  geography
+  entertainment
+  sports
+  technology
+  artsLiterature
+  music
+  moviesTv
+}
+
 model Quiz {
-  id            String     @id @default(cuid())
+  id            String        @id @default(cuid())
   title         String
   coverImage    String?
-  category      String?
-  status        QuizStatus @default(draft)
-  questionCount Int        @default(0)
+  category      QuizCategory?
+  status        QuizStatus    @default(draft)
+  questionCount Int           @default(0)
 
-  ownerId String
-  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId   String
+  owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  questions Question[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([ownerId, status])
+}
+
+model Question {
+  id               String @id
+  prompt           String
+  order            Int
+  timeLimitSeconds Int
+  points           Int
+
+  quizId  String
+  quiz    Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  answers Answer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([quizId])
+}
+
+model Answer {
+  id        String  @id
+  text      String
+  isCorrect Boolean @default(false)
+  order     Int
+
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([questionId])
 }

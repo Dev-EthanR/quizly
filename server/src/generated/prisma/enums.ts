@@ -15,3 +15,19 @@ export const QuizStatus = {
 } as const
 
 export type QuizStatus = (typeof QuizStatus)[keyof typeof QuizStatus]
+
+
+export const QuizCategory = {
+  generalKnowledge: 'generalKnowledge',
+  science: 'science',
+  history: 'history',
+  geography: 'geography',
+  entertainment: 'entertainment',
+  sports: 'sports',
+  technology: 'technology',
+  artsLiterature: 'artsLiterature',
+  music: 'music',
+  moviesTv: 'moviesTv'
+} as const
+
+export type QuizCategory = (typeof QuizCategory)[keyof typeof QuizCategory]

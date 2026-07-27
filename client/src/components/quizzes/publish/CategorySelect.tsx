@@ -1,9 +1,10 @@
 import clsx from "clsx";
+import type { QuizCategory } from "shared";
 import { useQuizCategories } from "../../../hooks/useQuizCategories";
 
 interface CategorySelectProps {
-  value: string;
-  onChange: (value: string) => void;
+  value: QuizCategory | "";
+  onChange: (value: QuizCategory | "") => void;
   error?: string;
 }
 
@@ -18,7 +19,9 @@ function CategorySelect({ value, onChange, error }: CategorySelectProps) {
       <select
         id="quiz-category"
         value={value}
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) =>
+          onChange(event.target.value as QuizCategory | "")
+        }
         disabled={categoriesQuery.isLoading}
         className={clsx(
           "rounded-lg border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary",
@@ -29,7 +32,7 @@ function CategorySelect({ value, onChange, error }: CategorySelectProps) {
           {categoriesQuery.isLoading ? "Loading categories..." : "Select a category"}
         </option>
         {categoriesQuery.data?.map((option) => (
-          <option key={option.id} value={option.name}>
+          <option key={option.id} value={option.id}>
             {option.name}
           </option>
         ))}

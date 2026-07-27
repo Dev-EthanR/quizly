@@ -42,3 +42,13 @@ export type VerificationToken = Prisma.VerificationTokenModel
  * 
  */
 export type Quiz = Prisma.QuizModel
+/**
+ * Model Question
+ * 
+ */
+export type Question = Prisma.QuestionModel
+/**
+ * Model Answer
+ * 
+ */
+export type Answer = Prisma.AnswerModel

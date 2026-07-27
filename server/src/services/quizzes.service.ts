@@ -1,11 +1,168 @@
 import { quizzesRepository } from "../repositories/quizzes.repository.js";
-import type { QuizStatus } from "shared";
+import type {
+  PublishQuizInput,
+  QuizStatus,
+  SaveQuizDraftInput,
+} from "shared";
 
 interface ListMyQuizzesParams {
   ownerId: string;
   status?: QuizStatus | undefined;
 }
 
-export function listMyQuizzes({ ownerId, status }: ListMyQuizzesParams) {
-  return quizzesRepository.findManyByOwner({ ownerId, status });
+interface DraftAnswerInput {
+  id: string;
+  text: string;
 }
+
+interface DraftQuestionInput {
+  id: string;
+  prompt: string;
+  answers: DraftAnswerInput[];
+  correctAnswerIds: string[];
+  timeLimitSeconds: number;
+  points: number;
+}
+
+function toQuestionInputs(questions: DraftQuestionInput[]) {
+  return questions.map((question, questionIndex) => ({
+    id: question.id,
+    prompt: question.prompt,
+    order: questionIndex,
+    timeLimitSeconds: question.timeLimitSeconds,
+    points: question.points,
+    answers: question.answers.map((answer, answerIndex) => ({
+      id: answer.id,
+      text: answer.text,
+      isCorrect: question.correctAnswerIds.includes(answer.id),
+      order: answerIndex,
+    })),
+  }));
+}
+
+interface CreateQuizParams {
+  ownerId: string;
+  draft: SaveQuizDraftInput;
+}
+
+interface CreatePublishedQuizParams {
+  ownerId: string;
+  input: PublishQuizInput;
+}
+
+type QuizMutationResult<T> =
+  | { status: "ok"; quiz: T }
+  | { status: "not_found" }
+  | { status: "forbidden" };
+
+interface UpdateQuizDraftParams {
+  id: string;
+  ownerId: string;
+  draft: SaveQuizDraftInput;
+}
+
+interface PublishQuizParams {
+  id: string;
+  ownerId: string;
+  input: PublishQuizInput;
+}
+
+interface GetQuizForOwnerParams {
+  id: string;
+  ownerId: string;
+}
+
+export const quizzesService = {
+  listMyQuizzes({ ownerId, status }: ListMyQuizzesParams) {
+    return quizzesRepository.findManyByOwner({ ownerId, status });
+  },
+
+  createQuiz({ ownerId, draft }: CreateQuizParams) {
+    return quizzesRepository.create({
+      ownerId,
+      title: draft.title,
+      questions: toQuestionInputs(draft.questions),
+    });
+  },
+
+  createPublishedQuiz({ ownerId, input }: CreatePublishedQuizParams) {
+    return quizzesRepository.createPublished({
+      ownerId,
+      title: input.title,
+      category: input.category,
+      coverImage: input.coverImage,
+      questions: toQuestionInputs(input.questions),
+    });
+  },
+
+  async getQuizForOwner({
+    id,
+    ownerId,
+  }: GetQuizForOwnerParams): Promise<
+    QuizMutationResult<NonNullable<Awaited<ReturnType<typeof quizzesRepository.findById>>>>
+  > {
+    const quiz = await quizzesRepository.findById(id);
+    if (!quiz) {
+      return { status: "not_found" };
+    }
+    if (quiz.ownerId !== ownerId) {
+      return { status: "forbidden" };
+    }
+
+    return { status: "ok", quiz };
+  },
+
+  async updateQuizDraft({
+    id,
+    ownerId,
+    draft,
+  }: UpdateQuizDraftParams): Promise<
+    QuizMutationResult<NonNullable<Awaited<ReturnType<typeof quizzesRepository.replaceQuestions>>>>
+  > {
+    const existing = await quizzesRepository.findById(id);
+    if (!existing) {
+      return { status: "not_found" };
+    }
+    if (existing.ownerId !== ownerId) {
+      return { status: "forbidden" };
+    }
+
+    const quiz = await quizzesRepository.replaceQuestions({
+      id,
+      title: draft.title,
+      questions: toQuestionInputs(draft.questions),
+    });
+
+    return { status: "ok", quiz: quiz! };
+  },
+
+  async publishQuiz({
+    id,
+    ownerId,
+    input,
+  }: PublishQuizParams): Promise<
+    QuizMutationResult<Awaited<ReturnType<typeof quizzesRepository.publish>>>
+  > {
+    const existing = await quizzesRepository.findById(id);
+    if (!existing) {
+      return { status: "not_found" };
+    }
+    if (existing.ownerId !== ownerId) {
+      return { status: "forbidden" };
+    }
+
+    await quizzesRepository.replaceQuestions({
+      id,
+      title: input.title,
+      questions: toQuestionInputs(input.questions),
+    });
+
+    const quiz = await quizzesRepository.publish({
+      id,
+      category: input.category,
+      coverImage: input.coverImage,
+    });
+
+    return { status: "ok", quiz };
+  },
+};

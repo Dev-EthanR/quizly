@@ -1,4 +1,4 @@
-import type { QuizQuestionDraft } from "./quizzes";
+import type { QuizDetail, QuizQuestionDraft } from "./quizzes";
 import type {
   QuizBuilderAction,
   QuizBuilderState,
@@ -29,6 +29,25 @@ export function createEmptyDraft(): QuizBuilderState {
   return {
     title: "",
     questions: [],
+  };
+}
+
+export function hydrateBuilderState(quiz: QuizDetail): QuizBuilderState {
+  return {
+    title: quiz.title,
+    questions: quiz.questions.map((question) => ({
+      id: question.id,
+      prompt: question.prompt,
+      answers: question.answers.map((answer) => ({
+        id: answer.id,
+        text: answer.text,
+      })),
+      correctAnswerIds: question.answers
+        .filter((answer) => answer.isCorrect)
+        .map((answer) => answer.id),
+      timeLimitSeconds: question.timeLimitSeconds,
+      points: question.points,
+    })),
   };
 }
 

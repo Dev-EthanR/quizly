@@ -1,7 +1,12 @@
-import { publishQuizMetadataSchema, type QuizDifficulty, type QuizVisibility } from "shared";
+import {
+  publishQuizMetadataSchema,
+  type QuizCategory,
+  type QuizDifficulty,
+  type QuizVisibility,
+} from "shared";
 
 export interface PublishMetadataDraft {
-  category: string;
+  category: QuizCategory | "";
   difficulty: QuizDifficulty | null;
   tags: string[];
   visibility: QuizVisibility;

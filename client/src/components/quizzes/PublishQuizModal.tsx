@@ -10,6 +10,7 @@ import { useCoverImageDropzone } from "../../hooks/useCoverImageDropzone";
 import { useTagInput } from "../../hooks/useTagInput";
 import type {
   PublishQuizMetadata,
+  QuizCategory,
   QuizDifficulty,
   QuizVisibility,
 } from "../../lib/quizzes";
@@ -28,7 +29,7 @@ interface PublishQuizModalProps {
 const MAX_TAGS = 10;
 
 function PublishQuizModal({ onClose, onConfirm, isSubmitting }: PublishQuizModalProps) {
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState<QuizCategory | "">("");
   const [difficulty, setDifficulty] = useState<QuizDifficulty | null>(null);
   const [visibility, setVisibility] = useState<QuizVisibility>("public");
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
@@ -51,7 +52,7 @@ function PublishQuizModal({ onClose, onConfirm, isSubmitting }: PublishQuizModal
       return;
     }
     onConfirm({
-      category: category.trim(),
+      category: category as QuizCategory,
       difficulty: difficulty as QuizDifficulty,
       tags: tagState.tags,
       visibility,

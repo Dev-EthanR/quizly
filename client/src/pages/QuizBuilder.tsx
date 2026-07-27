@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { publishQuizContentSchema, publishQuizSchema, saveQuizDraftSchema } from "shared";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/ui/Button";
@@ -10,8 +10,12 @@ import QuestionPreviewPanel from "../components/quizzes/QuestionPreviewPanel";
 import PublishQuizModal from "../components/quizzes/PublishQuizModal";
 import { QuizBuilderProvider } from "../context/QuizBuilderContext";
 import { useQuizBuilder } from "../context/useQuizBuilder";
+import { hydrateBuilderState } from "../lib/quizBuilderReducer";
 import {
   createQuiz,
+  fetchQuizById,
+  publishQuiz,
+  updateQuizDraft,
   type PublishQuizMetadata,
   type SaveQuizPayload,
 } from "../lib/quizzes";
@@ -21,7 +25,11 @@ interface QuizBuilderRouteParams {
   [key: string]: string | undefined;
 }
 
-function QuizBuilderForm() {
+interface QuizBuilderFormProps {
+  quizId?: string;
+}
+
+function QuizBuilderForm({ quizId }: QuizBuilderFormProps) {
   const { state, dispatch } = useQuizBuilder();
   const navigate = useNavigate();
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
@@ -39,9 +47,14 @@ function QuizBuilderForm() {
   };
 
   const saveMutation = useMutation({
-    mutationFn: createQuiz,
+    mutationFn: (payload: SaveQuizPayload) => {
+      if (!quizId) return createQuiz(payload);
+      return payload.status === "published"
+        ? publishQuiz({ id: quizId, payload })
+        : updateQuizDraft({ id: quizId, payload });
+    },
     onSuccess: (result) => {
-      navigate(`/quizzes/${result.id}/edit`, { replace: true });
+      if (!quizId) navigate(`/quizzes/${result.id}/edit`, { replace: true });
     },
   });
 
@@ -165,6 +178,52 @@ function QuizBuilderForm() {
   );
 }
 
+interface QuizBuilderEditLoaderProps {
+  quizId: string;
+}
+
+function QuizBuilderEditLoader({ quizId }: QuizBuilderEditLoaderProps) {
+  const {
+    data: quiz,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["quiz", quizId],
+    queryFn: () => fetchQuizById(quizId),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center px-4 py-24">
+        <p className="text-muted">Loading quiz...</p>
+      </div>
+    );
+  }
+
+  if (isError || !quiz) {
+    return (
+      <div className="flex flex-col items-center gap-3 px-4 py-24 text-center">
+        <p className="text-danger">Couldn't load this quiz.</p>
+        <div className="flex gap-3">
+          <Button variant="secondary" onClick={() => refetch()}>
+            Try again
+          </Button>
+          <Link to="/my-quizzes">
+            <Button variant="secondary">Back to My Quizzes</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <QuizBuilderProvider initialState={hydrateBuilderState(quiz)}>
+      <QuizBuilderForm quizId={quizId} />
+    </QuizBuilderProvider>
+  );
+}
+
 function QuizBuilder() {
   const { quizId } = useParams<QuizBuilderRouteParams>();
 
@@ -172,9 +231,7 @@ function QuizBuilder() {
     <div className="min-h-screen">
       <Navbar />
       {quizId ? (
-        <div className="flex items-center justify-center px-4 py-24">
-          <p className="text-muted">Editing existing quizzes is coming soon.</p>
-        </div>
+        <QuizBuilderEditLoader quizId={quizId} />
       ) : (
         <QuizBuilderProvider>
           <QuizBuilderForm />
