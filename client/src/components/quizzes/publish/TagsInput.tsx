@@ -24,7 +24,7 @@ function TagsInput({ state, maxTags, error }: TagsInputProps) {
             key={tag}
             className="flex items-center gap-1 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-xs font-semibold text-primary"
           >
-            {tag}
+            #{tag}
             <button
               type="button"
               aria-label={`Remove tag ${tag}`}

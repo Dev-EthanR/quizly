@@ -10,6 +10,7 @@ import Input from "../components/ui/Input";
 import QuestionList from "../components/quizzes/QuestionList";
 import QuestionPreviewPanel from "../components/quizzes/QuestionPreviewPanel";
 import PublishQuizModal, { MAX_TAGS } from "../components/quizzes/PublishQuizModal";
+import ConfirmDialog from "../components/ui/ConfirmDialog";
 import VisibilitySelect from "../components/quizzes/publish/VisibilitySelect";
 import CategorySelect from "../components/quizzes/publish/CategorySelect";
 import CoverImageDropzone from "../components/quizzes/publish/CoverImageDropzone";
@@ -33,6 +34,7 @@ import {
   type QuizCategory,
   type QuizDetail,
   type QuizDifficulty,
+  type QuizVisibility,
   type SaveQuizPayload,
 } from "../lib/quizzes";
 
@@ -53,6 +55,9 @@ function QuizBuilderForm({ quizId, quiz }: QuizBuilderFormProps) {
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [hasAttemptedSaveChanges, setHasAttemptedSaveChanges] = useState(false);
+  const [pendingVisibility, setPendingVisibility] = useState<QuizVisibility | null>(
+    null,
+  );
 
   const isPublished = quiz?.status === "published";
 
@@ -264,7 +269,13 @@ function QuizBuilderForm({ quizId, quiz }: QuizBuilderFormProps) {
         )}
       >
         {isPublished && (
-          <VisibilitySelect value={visibility} onChange={setVisibility} compact />
+          <VisibilitySelect
+            value={visibility}
+            onChange={(value) => {
+              if (value !== visibility) setPendingVisibility(value);
+            }}
+            compact
+          />
         )}
 
         <div className="flex gap-3">
@@ -304,6 +315,23 @@ function QuizBuilderForm({ quizId, quiz }: QuizBuilderFormProps) {
           onClose={() => setIsPublishModalOpen(false)}
           onConfirm={handleConfirmPublish}
           isSubmitting={saveMutation.isPending}
+        />
+      )}
+
+      {pendingVisibility && (
+        <ConfirmDialog
+          title="Change quiz visibility?"
+          message={
+            pendingVisibility === "private"
+              ? "This quiz will no longer appear on the Discovery page, and only you will be able to host it."
+              : "This quiz will become visible to everyone on the Discovery page and can be hosted by anyone."
+          }
+          confirmLabel={pendingVisibility === "private" ? "Make private" : "Make public"}
+          onConfirm={() => {
+            setVisibility(pendingVisibility);
+            setPendingVisibility(null);
+          }}
+          onCancel={() => setPendingVisibility(null)}
         />
       )}
     </div>

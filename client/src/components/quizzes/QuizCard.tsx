@@ -62,7 +62,7 @@ function QuizCard({ quiz }: QuizCardProps) {
                   key={tag}
                   className="rounded-full border border-primary/40 bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary"
                 >
-                  {tag}
+                  #{tag}
                 </span>
               ))}
             </div>
