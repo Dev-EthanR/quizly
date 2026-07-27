@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { FiPlay } from "react-icons/fi";
-import { quizCategoryLabels, quizDifficultyLabels } from "shared";
 import QuizStatusBadge from "./QuizStatusBadge";
 import Button from "../ui/Button";
 import type { Quiz } from "../../lib/quizzes";
@@ -11,7 +10,7 @@ interface QuizCardProps {
 
 function QuizCard({ quiz }: QuizCardProps) {
   return (
-    <div className="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 transition-colors hover:border-primary">
+    <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 transition-colors hover:border-primary sm:flex-row sm:items-center">
       <Link
         to={`/quizzes/${quiz.id}/edit`}
         className="flex min-w-0 flex-1 items-center gap-4"
@@ -38,11 +37,7 @@ function QuizCard({ quiz }: QuizCardProps) {
             <QuizStatusBadge status={quiz.status} />
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted">
-            {quiz.category && <span>{quizCategoryLabels[quiz.category]}</span>}
-            {quiz.difficulty && (
-              <span>{quizDifficultyLabels[quiz.difficulty]}</span>
-            )}
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted">
             <span>
               {quiz.questionCount}{" "}
               {quiz.questionCount === 1 ? "question" : "questions"}
@@ -71,7 +66,10 @@ function QuizCard({ quiz }: QuizCardProps) {
       </Link>
 
       <Link to={`/host/${quiz.id}`} className="shrink-0">
-        <Button type="button" className="flex items-center gap-2">
+        <Button
+          type="button"
+          className="flex w-full items-center justify-center gap-2 sm:w-auto"
+        >
           <FiPlay className="h-4 w-4" />
           Host
         </Button>
