@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { quizDifficultyLabels } from "shared";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { DISCOVER_QUIZZES_PAGE_SIZE, quizDifficultyLabels } from "shared";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/ui/Button";
+import Pagination from "../components/ui/Pagination";
 import DiscoveryQuizCard from "../components/quizzes/DiscoveryQuizCard";
 import DiscoveryQuizCardSkeleton from "../components/quizzes/DiscoveryQuizCardSkeleton";
 import { useQuizCategories } from "../hooks/useQuizCategories";
@@ -12,7 +13,7 @@ import {
   type QuizDifficulty,
 } from "../lib/quizzes";
 
-const SKELETON_COUNT = 8;
+const SKELETON_COUNT = DISCOVER_QUIZZES_PAGE_SIZE;
 const DIFFICULTY_OPTIONS: QuizDifficulty[] = ["easy", "medium", "hard"];
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -21,6 +22,7 @@ function Discovery() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<QuizCategory | "">("");
   const [difficulty, setDifficulty] = useState<QuizDifficulty | "">("");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     const timeout = setTimeout(
@@ -30,22 +32,30 @@ function Discovery() {
     return () => clearTimeout(timeout);
   }, [searchInput]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [search, category, difficulty]);
+
   const categoriesQuery = useQuizCategories();
 
   const {
-    data: quizzes,
+    data: result,
     isLoading,
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["discover-quizzes", search, category, difficulty],
+    queryKey: ["discover-quizzes", search, category, difficulty, page],
     queryFn: () =>
       fetchDiscoverQuizzes({
         search: search || undefined,
         category: category || undefined,
         difficulty: difficulty || undefined,
+        page,
       }),
+    placeholderData: keepPreviousData,
   });
+
+  const quizzes = result?.quizzes;
 
   return (
     <div className="min-h-screen">
@@ -119,11 +129,21 @@ function Discovery() {
           )}
 
           {!isLoading && !isError && quizzes && quizzes.length > 0 && (
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
-              {quizzes.map((quiz) => (
-                <DiscoveryQuizCard key={quiz.id} quiz={quiz} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 xl:grid-cols-3">
+                {quizzes.map((quiz) => (
+                  <DiscoveryQuizCard key={quiz.id} quiz={quiz} />
+                ))}
+              </div>
+
+              <div className="mt-8">
+                <Pagination
+                  page={page}
+                  totalPages={result?.totalPages ?? 1}
+                  onPageChange={setPage}
+                />
+              </div>
+            </>
           )}
         </div>
       </div>

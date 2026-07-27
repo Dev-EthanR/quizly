@@ -1,10 +1,11 @@
 import { quizzesRepository } from "../repositories/quizzes.repository.js";
-import type {
-  PublishQuizInput,
-  QuizCategory,
-  QuizDifficulty,
-  QuizStatus,
-  SaveQuizDraftInput,
+import {
+  DISCOVER_QUIZZES_PAGE_SIZE,
+  type PublishQuizInput,
+  type QuizCategory,
+  type QuizDifficulty,
+  type QuizStatus,
+  type SaveQuizDraftInput,
 } from "shared";
 
 interface ListMyQuizzesParams {
@@ -16,6 +17,7 @@ interface DiscoverQuizzesParams {
   search?: string | undefined;
   category?: QuizCategory | undefined;
   difficulty?: QuizDifficulty | undefined;
+  page: number;
 }
 
 interface DraftAnswerInput {
@@ -85,25 +87,31 @@ export const quizzesService = {
     return quizzesRepository.findManyByOwner({ ownerId, status });
   },
 
-  async discoverQuizzes({ search, category, difficulty }: DiscoverQuizzesParams) {
-    const quizzes = await quizzesRepository.findPublished({
+  async discoverQuizzes({ search, category, difficulty, page }: DiscoverQuizzesParams) {
+    const { quizzes, totalCount } = await quizzesRepository.findPublished({
       search,
       category,
       difficulty,
+      page,
     });
 
-    return quizzes.map((quiz) => ({
-      id: quiz.id,
-      title: quiz.title,
-      coverImage: quiz.coverImage,
-      category: quiz.category,
-      difficulty: quiz.difficulty,
-      tags: quiz.tags,
-      questionCount: quiz.questionCount,
-      playCount: quiz.playCount,
-      ownerName: quiz.owner.name,
-      ownerImage: quiz.owner.image,
-    }));
+    return {
+      quizzes: quizzes.map((quiz) => ({
+        id: quiz.id,
+        title: quiz.title,
+        coverImage: quiz.coverImage,
+        category: quiz.category,
+        difficulty: quiz.difficulty,
+        tags: quiz.tags,
+        questionCount: quiz.questionCount,
+        playCount: quiz.playCount,
+        ownerName: quiz.owner.name,
+        ownerImage: quiz.owner.image,
+      })),
+      page,
+      totalPages: Math.max(1, Math.ceil(totalCount / DISCOVER_QUIZZES_PAGE_SIZE)),
+      totalCount,
+    };
   },
 
   createQuiz({ ownerId, draft }: CreateQuizParams) {

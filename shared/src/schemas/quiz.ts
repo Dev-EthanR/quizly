@@ -117,10 +117,13 @@ export const publishQuizSchema = publishQuizContentSchema.extend(
 
 export type PublishQuizInput = z.infer<typeof publishQuizSchema>;
 
+export const DISCOVER_QUIZZES_PAGE_SIZE = 21;
+
 export const discoverQuizzesQuerySchema = z.object({
   search: z.string().trim().max(80).optional(),
   category: quizCategorySchema.optional(),
   difficulty: quizDifficultySchema.optional(),
+  page: z.coerce.number().int().min(1).default(1),
 });
 
 export type DiscoverQuizzesQuery = z.infer<typeof discoverQuizzesQuerySchema>;

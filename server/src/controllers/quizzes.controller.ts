@@ -26,8 +26,8 @@ export const quizzesController = {
       return res.status(400).json({ error: parsed.error.flatten() });
     }
 
-    const quizzes = await quizzesService.discoverQuizzes(parsed.data);
-    res.json(quizzes);
+    const result = await quizzesService.discoverQuizzes(parsed.data);
+    res.json(result);
   },
 
   async listMyQuizzes(req: Request, res: Response) {

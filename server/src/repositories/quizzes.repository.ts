@@ -1,9 +1,10 @@
 import { prisma } from "../lib/prisma.js";
-import type {
-  QuizCategory,
-  QuizDifficulty,
-  QuizStatus,
-  QuizVisibility,
+import {
+  DISCOVER_QUIZZES_PAGE_SIZE,
+  type QuizCategory,
+  type QuizDifficulty,
+  type QuizStatus,
+  type QuizVisibility,
 } from "shared";
 
 interface FindManyByOwnerParams {
@@ -63,6 +64,23 @@ interface FindPublishedParams {
   search?: string | undefined;
   category?: QuizCategory | undefined;
   difficulty?: QuizDifficulty | undefined;
+  page: number;
+}
+
+function buildPublishedWhere({
+  search,
+  category,
+  difficulty,
+}: Omit<FindPublishedParams, "page">) {
+  return {
+    status: "published" as const,
+    visibility: "public" as const,
+    ...(category ? { category } : {}),
+    ...(difficulty ? { difficulty } : {}),
+    ...(search
+      ? { title: { contains: search, mode: "insensitive" as const } }
+      : {}),
+  };
 }
 
 const quizWithQuestionsInclude = {
@@ -109,20 +127,21 @@ export const quizzesRepository = {
     });
   },
 
-  findPublished({ search, category, difficulty }: FindPublishedParams) {
-    return prisma.quiz.findMany({
-      where: {
-        status: "published",
-        visibility: "public",
-        ...(category ? { category } : {}),
-        ...(difficulty ? { difficulty } : {}),
-        ...(search
-          ? { title: { contains: search, mode: "insensitive" as const } }
-          : {}),
-      },
-      orderBy: { playCount: "desc" },
-      include: { owner: { select: { name: true, image: true } } },
-    });
+  async findPublished({ search, category, difficulty, page }: FindPublishedParams) {
+    const where = buildPublishedWhere({ search, category, difficulty });
+
+    const [quizzes, totalCount] = await Promise.all([
+      prisma.quiz.findMany({
+        where,
+        orderBy: { playCount: "desc" },
+        include: { owner: { select: { name: true, image: true } } },
+        skip: (page - 1) * DISCOVER_QUIZZES_PAGE_SIZE,
+        take: DISCOVER_QUIZZES_PAGE_SIZE,
+      }),
+      prisma.quiz.count({ where }),
+    ]);
+
+    return { quizzes, totalCount };
   },
 
   create({ ownerId, title, questions }: CreateQuizParams) {

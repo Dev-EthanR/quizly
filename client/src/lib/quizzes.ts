@@ -118,6 +118,14 @@ export interface DiscoverQuizzesParams {
   search?: string;
   category?: QuizCategory;
   difficulty?: QuizDifficulty;
+  page: number;
+}
+
+export interface DiscoverQuizzesResult {
+  quizzes: DiscoverQuiz[];
+  page: number;
+  totalPages: number;
+  totalCount: number;
 }
 
 interface UpdateQuizDraftParams {
@@ -200,10 +208,11 @@ export async function publishQuiz({
 
 export async function fetchDiscoverQuizzes(
   params: DiscoverQuizzesParams,
-): Promise<DiscoverQuiz[]> {
-  const { data } = await api.get<DiscoverQuiz[]>("/api/quizzes/discover", {
-    params,
-  });
+): Promise<DiscoverQuizzesResult> {
+  const { data } = await api.get<DiscoverQuizzesResult>(
+    "/api/quizzes/discover",
+    { params },
+  );
   return data;
 }
 
