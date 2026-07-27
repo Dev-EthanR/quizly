@@ -91,6 +91,7 @@ model Quiz {
   category      QuizCategory?
   status        QuizStatus    @default(draft)
   questionCount Int           @default(0)
+  playCount     Int           @default(0)
 
   ownerId   String
   owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)

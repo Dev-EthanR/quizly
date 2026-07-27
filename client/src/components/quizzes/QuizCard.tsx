@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
+import { FiPlay } from "react-icons/fi";
 import QuizStatusBadge from "./QuizStatusBadge";
+import Button from "../ui/Button";
 import type { Quiz } from "../../lib/quizzes";
 
 interface QuizCardProps {
@@ -8,39 +10,55 @@ interface QuizCardProps {
 
 function QuizCard({ quiz }: QuizCardProps) {
   return (
-    <Link
-      to={`/quizzes/${quiz.id}/edit`}
-      className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-colors hover:border-primary"
-    >
-      <div className="flex h-32 items-center justify-center bg-chat">
-        {quiz.coverImage ? (
-          <img
-            src={quiz.coverImage}
-            alt=""
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <span className="text-3xl font-bold text-muted">
-            {quiz.title.charAt(0).toUpperCase()}
-          </span>
-        )}
-      </div>
-
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-foreground">{quiz.title}</h3>
-          <QuizStatusBadge status={quiz.status} />
+    <div className="flex items-center gap-4 rounded-xl border border-border bg-surface p-4 transition-colors hover:border-primary">
+      <Link
+        to={`/quizzes/${quiz.id}/edit`}
+        className="flex min-w-0 flex-1 items-center gap-4"
+      >
+        <div className="flex h-16 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-chat">
+          {quiz.coverImage ? (
+            <img
+              src={quiz.coverImage}
+              alt=""
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span className="text-xl font-bold text-muted">
+              {quiz.title.charAt(0).toUpperCase()}
+            </span>
+          )}
         </div>
 
-        <div className="mt-auto flex items-center justify-between text-sm text-muted">
-          <span>
-            {quiz.questionCount}{" "}
-            {quiz.questionCount === 1 ? "question" : "questions"}
-          </span>
-          <span>Updated {new Date(quiz.updatedAt).toLocaleDateString()}</span>
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <h3 className="truncate font-semibold text-foreground">
+              {quiz.title}
+            </h3>
+            <QuizStatusBadge status={quiz.status} />
+          </div>
+
+          <div className="flex items-center gap-4 text-sm text-muted">
+            <span>
+              {quiz.questionCount}{" "}
+              {quiz.questionCount === 1 ? "question" : "questions"}
+            </span>
+            <span>
+              {quiz.playCount} {quiz.playCount === 1 ? "play" : "plays"}
+            </span>
+            <span>
+              Updated {new Date(quiz.updatedAt).toLocaleDateString()}
+            </span>
+          </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+
+      <Link to={`/host/${quiz.id}`} className="shrink-0">
+        <Button type="button" className="flex items-center gap-2">
+          <FiPlay className="h-4 w-4" />
+          Host
+        </Button>
+      </Link>
+    </div>
   );
 }
 

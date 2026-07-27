@@ -16,6 +16,7 @@ export interface Quiz {
   status: QuizStatus;
   category: QuizCategory | null;
   questionCount: number;
+  playCount: number;
   updatedAt: string;
 }
 

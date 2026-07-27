@@ -23,6 +23,7 @@ Neither workspace is scaffolded yet — this file documents the committed stack 
 - TanStack Query — REST API calls
 - Socket.io client — real-time events
 - Uploadthing — file uploads
+- react-icons — icon components (prefer `react-icons/fi`, the Feather set)
 
 ### Server
 
@@ -121,6 +122,7 @@ When helping with server code:
 - Never store auth token in localStorage — keep in memory via AuthContext
 - TailwindCSS only — no inline styles, no CSS modules
 - Use `clsx` for conditional or multi-part className strings instead of template literals/ternaries
+- Use `react-icons` (prefer `react-icons/fi`, the Feather set) for icons instead of inline SVGs or other icon libraries
 - TypeScript strict — no any, no type assertions unless absolutely necessary
 - All components must handle loading, error, and empty states
 - Ask before adding any new dependency

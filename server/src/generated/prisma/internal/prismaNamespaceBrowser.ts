@@ -136,6 +136,7 @@ export const QuizScalarFieldEnum = {
   category: 'category',
   status: 'status',
   questionCount: 'questionCount',
+  playCount: 'playCount',
   ownerId: 'ownerId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

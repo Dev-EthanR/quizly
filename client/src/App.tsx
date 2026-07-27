@@ -19,6 +19,7 @@ function App() {
       <Route path="/removed" element={<Removed />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/host" element={<Host />} />
+        <Route path="/host/:quizId" element={<Host />} />
         <Route path="/discovery" element={<Discovery />} />
         <Route path="/my-quizzes" element={<MyQuizzes />} />
         <Route path="/quizzes/new" element={<QuizBuilder />} />

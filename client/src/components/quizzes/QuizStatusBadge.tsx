@@ -17,7 +17,7 @@ function QuizStatusBadge({ status }: QuizStatusBadgeProps) {
         "shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold",
         status === "published"
           ? "bg-secondary/15 text-secondary"
-          : "bg-warning/15 text-warning",
+          : "bg-muted/15 text-muted",
       )}
     >
       {STATUS_LABEL[status]}

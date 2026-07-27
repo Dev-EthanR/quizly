@@ -11,9 +11,12 @@ function QuizCardSkeleton() {
 
         <div className="flex items-center gap-4">
           <div className="h-4 w-20 animate-pulse rounded bg-chat" />
+          <div className="h-4 w-16 animate-pulse rounded bg-chat" />
           <div className="h-4 w-24 animate-pulse rounded bg-chat" />
         </div>
       </div>
+
+      <div className="h-11 w-20 shrink-0 animate-pulse rounded-lg bg-chat" />
     </div>
   );
 }

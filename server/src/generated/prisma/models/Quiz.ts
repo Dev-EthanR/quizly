@@ -28,10 +28,12 @@ export type AggregateQuiz = {
 
 export type QuizAvgAggregateOutputType = {
   questionCount: number | null
+  playCount: number | null
 }
 
 export type QuizSumAggregateOutputType = {
   questionCount: number | null
+  playCount: number | null
 }
 
 export type QuizMinAggregateOutputType = {
@@ -41,6 +43,7 @@ export type QuizMinAggregateOutputType = {
   category: $Enums.QuizCategory | null
   status: $Enums.QuizStatus | null
   questionCount: number | null
+  playCount: number | null
   ownerId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -53,6 +56,7 @@ export type QuizMaxAggregateOutputType = {
   category: $Enums.QuizCategory | null
   status: $Enums.QuizStatus | null
   questionCount: number | null
+  playCount: number | null
   ownerId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -65,6 +69,7 @@ export type QuizCountAggregateOutputType = {
   category: number
   status: number
   questionCount: number
+  playCount: number
   ownerId: number
   createdAt: number
   updatedAt: number
@@ -74,10 +79,12 @@ export type QuizCountAggregateOutputType = {
 
 export type QuizAvgAggregateInputType = {
   questionCount?: true
+  playCount?: true
 }
 
 export type QuizSumAggregateInputType = {
   questionCount?: true
+  playCount?: true
 }
 
 export type QuizMinAggregateInputType = {
@@ -87,6 +94,7 @@ export type QuizMinAggregateInputType = {
   category?: true
   status?: true
   questionCount?: true
+  playCount?: true
   ownerId?: true
   createdAt?: true
   updatedAt?: true
@@ -99,6 +107,7 @@ export type QuizMaxAggregateInputType = {
   category?: true
   status?: true
   questionCount?: true
+  playCount?: true
   ownerId?: true
   createdAt?: true
   updatedAt?: true
@@ -111,6 +120,7 @@ export type QuizCountAggregateInputType = {
   category?: true
   status?: true
   questionCount?: true
+  playCount?: true
   ownerId?: true
   createdAt?: true
   updatedAt?: true
@@ -210,6 +220,7 @@ export type QuizGroupByOutputType = {
   category: $Enums.QuizCategory | null
   status: $Enums.QuizStatus
   questionCount: number
+  playCount: number
   ownerId: string
   createdAt: Date
   updatedAt: Date
@@ -245,6 +256,7 @@ export type QuizWhereInput = {
   category?: Prisma.EnumQuizCategoryNullableFilter<"Quiz"> | $Enums.QuizCategory | null
   status?: Prisma.EnumQuizStatusFilter<"Quiz"> | $Enums.QuizStatus
   questionCount?: Prisma.IntFilter<"Quiz"> | number
+  playCount?: Prisma.IntFilter<"Quiz"> | number
   ownerId?: Prisma.StringFilter<"Quiz"> | string
   createdAt?: Prisma.DateTimeFilter<"Quiz"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Quiz"> | Date | string
@@ -259,6 +271,7 @@ export type QuizOrderByWithRelationInput = {
   category?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
+  playCount?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -276,6 +289,7 @@ export type QuizWhereUniqueInput = Prisma.AtLeast<{
   category?: Prisma.EnumQuizCategoryNullableFilter<"Quiz"> | $Enums.QuizCategory | null
   status?: Prisma.EnumQuizStatusFilter<"Quiz"> | $Enums.QuizStatus
   questionCount?: Prisma.IntFilter<"Quiz"> | number
+  playCount?: Prisma.IntFilter<"Quiz"> | number
   ownerId?: Prisma.StringFilter<"Quiz"> | string
   createdAt?: Prisma.DateTimeFilter<"Quiz"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Quiz"> | Date | string
@@ -290,6 +304,7 @@ export type QuizOrderByWithAggregationInput = {
   category?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
+  playCount?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -310,6 +325,7 @@ export type QuizScalarWhereWithAggregatesInput = {
   category?: Prisma.EnumQuizCategoryNullableWithAggregatesFilter<"Quiz"> | $Enums.QuizCategory | null
   status?: Prisma.EnumQuizStatusWithAggregatesFilter<"Quiz"> | $Enums.QuizStatus
   questionCount?: Prisma.IntWithAggregatesFilter<"Quiz"> | number
+  playCount?: Prisma.IntWithAggregatesFilter<"Quiz"> | number
   ownerId?: Prisma.StringWithAggregatesFilter<"Quiz"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Quiz"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Quiz"> | Date | string
@@ -322,6 +338,7 @@ export type QuizCreateInput = {
   category?: $Enums.QuizCategory | null
   status?: $Enums.QuizStatus
   questionCount?: number
+  playCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   owner: Prisma.UserCreateNestedOneWithoutQuizzesInput
@@ -335,6 +352,7 @@ export type QuizUncheckedCreateInput = {
   category?: $Enums.QuizCategory | null
   status?: $Enums.QuizStatus
   questionCount?: number
+  playCount?: number
   ownerId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -348,6 +366,7 @@ export type QuizUpdateInput = {
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  playCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   owner?: Prisma.UserUpdateOneRequiredWithoutQuizzesNestedInput
@@ -361,6 +380,7 @@ export type QuizUncheckedUpdateInput = {
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  playCount?: Prisma.IntFieldUpdateOperationsInput | number
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -374,6 +394,7 @@ export type QuizCreateManyInput = {
   category?: $Enums.QuizCategory | null
   status?: $Enums.QuizStatus
   questionCount?: number
+  playCount?: number
   ownerId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -386,6 +407,7 @@ export type QuizUpdateManyMutationInput = {
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  playCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -397,6 +419,7 @@ export type QuizUncheckedUpdateManyInput = {
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  playCount?: Prisma.IntFieldUpdateOperationsInput | number
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -419,6 +442,7 @@ export type QuizCountOrderByAggregateInput = {
   category?: Prisma.SortOrder
   status?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
+  playCount?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -426,6 +450,7 @@ export type QuizCountOrderByAggregateInput = {
 
 export type QuizAvgOrderByAggregateInput = {
   questionCount?: Prisma.SortOrder
+  playCount?: Prisma.SortOrder
 }
 
 export type QuizMaxOrderByAggregateInput = {
@@ -435,6 +460,7 @@ export type QuizMaxOrderByAggregateInput = {
   category?: Prisma.SortOrder
   status?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
+  playCount?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -447,6 +473,7 @@ export type QuizMinOrderByAggregateInput = {
   category?: Prisma.SortOrder
   status?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
+  playCount?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -454,6 +481,7 @@ export type QuizMinOrderByAggregateInput = {
 
 export type QuizSumOrderByAggregateInput = {
   questionCount?: Prisma.SortOrder
+  playCount?: Prisma.SortOrder
 }
 
 export type QuizScalarRelationFilter = {
@@ -540,6 +568,7 @@ export type QuizCreateWithoutOwnerInput = {
   category?: $Enums.QuizCategory | null
   status?: $Enums.QuizStatus
   questionCount?: number
+  playCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   questions?: Prisma.QuestionCreateNestedManyWithoutQuizInput
@@ -552,6 +581,7 @@ export type QuizUncheckedCreateWithoutOwnerInput = {
   category?: $Enums.QuizCategory | null
   status?: $Enums.QuizStatus
   questionCount?: number
+  playCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   questions?: Prisma.QuestionUncheckedCreateNestedManyWithoutQuizInput
@@ -593,6 +623,7 @@ export type QuizScalarWhereInput = {
   category?: Prisma.EnumQuizCategoryNullableFilter<"Quiz"> | $Enums.QuizCategory | null
   status?: Prisma.EnumQuizStatusFilter<"Quiz"> | $Enums.QuizStatus
   questionCount?: Prisma.IntFilter<"Quiz"> | number
+  playCount?: Prisma.IntFilter<"Quiz"> | number
   ownerId?: Prisma.StringFilter<"Quiz"> | string
   createdAt?: Prisma.DateTimeFilter<"Quiz"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Quiz"> | Date | string
@@ -605,6 +636,7 @@ export type QuizCreateWithoutQuestionsInput = {
   category?: $Enums.QuizCategory | null
   status?: $Enums.QuizStatus
   questionCount?: number
+  playCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   owner: Prisma.UserCreateNestedOneWithoutQuizzesInput
@@ -617,6 +649,7 @@ export type QuizUncheckedCreateWithoutQuestionsInput = {
   category?: $Enums.QuizCategory | null
   status?: $Enums.QuizStatus
   questionCount?: number
+  playCount?: number
   ownerId: string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -645,6 +678,7 @@ export type QuizUpdateWithoutQuestionsInput = {
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  playCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   owner?: Prisma.UserUpdateOneRequiredWithoutQuizzesNestedInput
@@ -657,6 +691,7 @@ export type QuizUncheckedUpdateWithoutQuestionsInput = {
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  playCount?: Prisma.IntFieldUpdateOperationsInput | number
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -669,6 +704,7 @@ export type QuizCreateManyOwnerInput = {
   category?: $Enums.QuizCategory | null
   status?: $Enums.QuizStatus
   questionCount?: number
+  playCount?: number
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -680,6 +716,7 @@ export type QuizUpdateWithoutOwnerInput = {
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  playCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   questions?: Prisma.QuestionUpdateManyWithoutQuizNestedInput
@@ -692,6 +729,7 @@ export type QuizUncheckedUpdateWithoutOwnerInput = {
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  playCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   questions?: Prisma.QuestionUncheckedUpdateManyWithoutQuizNestedInput
@@ -704,6 +742,7 @@ export type QuizUncheckedUpdateManyWithoutOwnerInput = {
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  playCount?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -746,6 +785,7 @@ export type QuizSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   category?: boolean
   status?: boolean
   questionCount?: boolean
+  playCount?: boolean
   ownerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -761,6 +801,7 @@ export type QuizSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   category?: boolean
   status?: boolean
   questionCount?: boolean
+  playCount?: boolean
   ownerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -774,6 +815,7 @@ export type QuizSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   category?: boolean
   status?: boolean
   questionCount?: boolean
+  playCount?: boolean
   ownerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -787,12 +829,13 @@ export type QuizSelectScalar = {
   category?: boolean
   status?: boolean
   questionCount?: boolean
+  playCount?: boolean
   ownerId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type QuizOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "coverImage" | "category" | "status" | "questionCount" | "ownerId" | "createdAt" | "updatedAt", ExtArgs["result"]["quiz"]>
+export type QuizOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "coverImage" | "category" | "status" | "questionCount" | "playCount" | "ownerId" | "createdAt" | "updatedAt", ExtArgs["result"]["quiz"]>
 export type QuizInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   questions?: boolean | Prisma.Quiz$questionsArgs<ExtArgs>
@@ -818,6 +861,7 @@ export type $QuizPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     category: $Enums.QuizCategory | null
     status: $Enums.QuizStatus
     questionCount: number
+    playCount: number
     ownerId: string
     createdAt: Date
     updatedAt: Date
@@ -1252,6 +1296,7 @@ export interface QuizFieldRefs {
   readonly category: Prisma.FieldRef<"Quiz", 'QuizCategory'>
   readonly status: Prisma.FieldRef<"Quiz", 'QuizStatus'>
   readonly questionCount: Prisma.FieldRef<"Quiz", 'Int'>
+  readonly playCount: Prisma.FieldRef<"Quiz", 'Int'>
   readonly ownerId: Prisma.FieldRef<"Quiz", 'String'>
   readonly createdAt: Prisma.FieldRef<"Quiz", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Quiz", 'DateTime'>
