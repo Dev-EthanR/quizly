@@ -12,6 +12,7 @@ export function useSaveQuizMutation(quizId: string) {
         ["discover-quiz", quizId],
         (current) => (current ? { ...current, isSaved: nextSaved } : current),
       );
+      queryClient.invalidateQueries({ queryKey: ["saved-quizzes"] });
     },
   });
 }

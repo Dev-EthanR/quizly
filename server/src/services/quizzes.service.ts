@@ -175,6 +175,24 @@ export const quizzesService = {
     return { status: "ok" as const };
   },
 
+  async listSavedQuizzes(userId: string) {
+    const savedQuizzes = await quizzesRepository.findSavedByUser(userId);
+
+    return savedQuizzes.map(({ quiz }) => ({
+      id: quiz.id,
+      title: quiz.title,
+      description: quiz.description,
+      coverImage: quiz.coverImage,
+      category: quiz.category,
+      difficulty: quiz.difficulty,
+      tags: quiz.tags,
+      questionCount: quiz.questionCount,
+      playCount: quiz.playCount,
+      ownerName: quiz.owner.name,
+      ownerImage: quiz.owner.image,
+    }));
+  },
+
   createQuiz({ ownerId, draft }: CreateQuizParams) {
     return quizzesRepository.create({
       ownerId,

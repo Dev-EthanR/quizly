@@ -240,6 +240,11 @@ export async function fetchDiscoverQuizById(
   return data;
 }
 
+export async function fetchSavedQuizzes(): Promise<DiscoverQuiz[]> {
+  const { data } = await api.get<DiscoverQuiz[]>("/api/quizzes/saved");
+  return data;
+}
+
 export async function saveQuiz(id: string): Promise<void> {
   await api.post(`/api/quizzes/${id}/save`);
 }

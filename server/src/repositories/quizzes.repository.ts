@@ -269,4 +269,19 @@ export const quizzesRepository = {
       where: { userId, quizId },
     });
   },
+
+  findSavedByUser(userId: string) {
+    return prisma.savedQuiz.findMany({
+      where: {
+        userId,
+        quiz: { status: "published", visibility: "public" },
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        quiz: {
+          include: { owner: { select: { name: true, image: true } } },
+        },
+      },
+    });
+  },
 };

@@ -76,6 +76,16 @@ export const quizzesController = {
     res.status(204).send();
   },
 
+  async listSavedQuizzes(req: Request, res: Response) {
+    const session = await getSession(req, authConfig);
+    if (!session?.user?.id) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const quizzes = await quizzesService.listSavedQuizzes(session.user.id);
+    res.json(quizzes);
+  },
+
   async listMyQuizzes(req: Request, res: Response) {
     const parsed = listQuizzesQuerySchema.safeParse(req.query);
     if (!parsed.success) {

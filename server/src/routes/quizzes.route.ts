@@ -26,6 +26,12 @@ router.post(
 );
 
 router.get(
+  "/quizzes/saved",
+  requireAuth,
+  asyncHandler(quizzesController.listSavedQuizzes),
+);
+
+router.get(
   "/quizzes/:id",
   requireAuth,
   asyncHandler(quizzesController.getQuiz),
