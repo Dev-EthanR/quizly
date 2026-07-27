@@ -117,6 +117,14 @@ export const publishQuizSchema = publishQuizContentSchema.extend(
 
 export type PublishQuizInput = z.infer<typeof publishQuizSchema>;
 
+export const discoverQuizzesQuerySchema = z.object({
+  search: z.string().trim().max(80).optional(),
+  category: quizCategorySchema.optional(),
+  difficulty: quizDifficultySchema.optional(),
+});
+
+export type DiscoverQuizzesQuery = z.infer<typeof discoverQuizzesQuerySchema>;
+
 export const generateQuizSchema = z.object({
   title: z.string().trim().min(3, "Title must be at least 3 characters").max(80),
 });

@@ -101,6 +101,25 @@ export interface QuizDetail {
   questions: QuizDetailQuestion[];
 }
 
+export interface DiscoverQuiz {
+  id: string;
+  title: string;
+  coverImage: string | null;
+  category: QuizCategory | null;
+  difficulty: QuizDifficulty | null;
+  tags: string[];
+  questionCount: number;
+  playCount: number;
+  ownerName: string | null;
+  ownerImage: string | null;
+}
+
+export interface DiscoverQuizzesParams {
+  search?: string;
+  category?: QuizCategory;
+  difficulty?: QuizDifficulty;
+}
+
 interface UpdateQuizDraftParams {
   id: string;
   payload: SaveQuizPayload;
@@ -176,6 +195,15 @@ export async function publishQuiz({
     `/api/quizzes/${id}/publish`,
     payload,
   );
+  return data;
+}
+
+export async function fetchDiscoverQuizzes(
+  params: DiscoverQuizzesParams,
+): Promise<DiscoverQuiz[]> {
+  const { data } = await api.get<DiscoverQuiz[]>("/api/quizzes/discover", {
+    params,
+  });
   return data;
 }
 

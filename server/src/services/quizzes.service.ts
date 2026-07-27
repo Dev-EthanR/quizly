@@ -1,6 +1,8 @@
 import { quizzesRepository } from "../repositories/quizzes.repository.js";
 import type {
   PublishQuizInput,
+  QuizCategory,
+  QuizDifficulty,
   QuizStatus,
   SaveQuizDraftInput,
 } from "shared";
@@ -8,6 +10,12 @@ import type {
 interface ListMyQuizzesParams {
   ownerId: string;
   status?: QuizStatus | undefined;
+}
+
+interface DiscoverQuizzesParams {
+  search?: string | undefined;
+  category?: QuizCategory | undefined;
+  difficulty?: QuizDifficulty | undefined;
 }
 
 interface DraftAnswerInput {
@@ -75,6 +83,27 @@ interface GetQuizForOwnerParams {
 export const quizzesService = {
   listMyQuizzes({ ownerId, status }: ListMyQuizzesParams) {
     return quizzesRepository.findManyByOwner({ ownerId, status });
+  },
+
+  async discoverQuizzes({ search, category, difficulty }: DiscoverQuizzesParams) {
+    const quizzes = await quizzesRepository.findPublished({
+      search,
+      category,
+      difficulty,
+    });
+
+    return quizzes.map((quiz) => ({
+      id: quiz.id,
+      title: quiz.title,
+      coverImage: quiz.coverImage,
+      category: quiz.category,
+      difficulty: quiz.difficulty,
+      tags: quiz.tags,
+      questionCount: quiz.questionCount,
+      playCount: quiz.playCount,
+      ownerName: quiz.owner.name,
+      ownerImage: quiz.owner.image,
+    }));
   },
 
   createQuiz({ ownerId, draft }: CreateQuizParams) {

@@ -6,6 +6,8 @@ const router = Router();
 
 router.get("/quizzes/categories", quizzesController.listCategories);
 
+router.get("/quizzes/discover", asyncHandler(quizzesController.discoverQuizzes));
+
 router.get(
   "/quizzes",
   requireAuth,

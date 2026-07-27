@@ -1,6 +1,7 @@
 import { getSession } from "@auth/express";
 import type { Request, Response } from "express";
 import {
+  discoverQuizzesQuerySchema,
   listQuizzesQuerySchema,
   publishQuizSchema,
   quizCategoryLabels,
@@ -17,6 +18,16 @@ export const quizzesController = {
       name: quizCategoryLabels[id],
     }));
     res.json(categories);
+  },
+
+  async discoverQuizzes(req: Request, res: Response) {
+    const parsed = discoverQuizzesQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      return res.status(400).json({ error: parsed.error.flatten() });
+    }
+
+    const quizzes = await quizzesService.discoverQuizzes(parsed.data);
+    res.json(quizzes);
   },
 
   async listMyQuizzes(req: Request, res: Response) {

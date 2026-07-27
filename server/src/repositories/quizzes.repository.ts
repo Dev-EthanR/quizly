@@ -59,6 +59,12 @@ interface PublishParams {
   coverImage?: string | undefined;
 }
 
+interface FindPublishedParams {
+  search?: string | undefined;
+  category?: QuizCategory | undefined;
+  difficulty?: QuizDifficulty | undefined;
+}
+
 const quizWithQuestionsInclude = {
   questions: {
     orderBy: { order: "asc" as const },
@@ -100,6 +106,22 @@ export const quizzesRepository = {
     return prisma.quiz.findUnique({
       where: { id },
       include: quizWithQuestionsInclude,
+    });
+  },
+
+  findPublished({ search, category, difficulty }: FindPublishedParams) {
+    return prisma.quiz.findMany({
+      where: {
+        status: "published",
+        visibility: "public",
+        ...(category ? { category } : {}),
+        ...(difficulty ? { difficulty } : {}),
+        ...(search
+          ? { title: { contains: search, mode: "insensitive" as const } }
+          : {}),
+      },
+      orderBy: { playCount: "desc" },
+      include: { owner: { select: { name: true, image: true } } },
     });
   },
 
