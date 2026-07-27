@@ -5,6 +5,7 @@ import { errorHandler, requireAuth } from "./middleware";
 import { authHandler } from "./routes/auth.route";
 import registerRouter from "./routes/register.route";
 import quizzesRouter from "./routes/quizzes.route";
+import usersRouter from "./routes/users.route";
 
 const app = express();
 const PORT = 3000;
@@ -22,6 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/auth", authHandler);
 app.use("/api", registerRouter);
 app.use("/api", quizzesRouter);
+app.use("/api", usersRouter);
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");
 });
