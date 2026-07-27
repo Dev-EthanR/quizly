@@ -28,9 +28,37 @@ const VISIBILITY_OPTIONS: VisibilityOption[] = [
 interface VisibilitySelectProps {
   value: QuizVisibility;
   onChange: (value: QuizVisibility) => void;
+  compact?: boolean;
 }
 
-function VisibilitySelect({ value, onChange }: VisibilitySelectProps) {
+function VisibilitySelect({ value, onChange, compact = false }: VisibilitySelectProps) {
+  if (compact) {
+    return (
+      <div className="flex gap-2">
+        {VISIBILITY_OPTIONS.map((option) => {
+          const isSelected = value === option.value;
+          const Icon = option.icon;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => onChange(option.value)}
+              className={clsx(
+                "flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-3 text-sm font-bold transition-colors",
+                isSelected
+                  ? "border-secondary bg-secondary/15 text-secondary"
+                  : "border-border text-muted hover:bg-surface",
+              )}
+            >
+              <Icon className="h-4 w-4" />
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-2">
       <span className="text-sm font-medium text-muted">Visibility</span>

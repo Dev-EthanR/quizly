@@ -41,6 +41,8 @@ export type QuizMinAggregateOutputType = {
   title: string | null
   coverImage: string | null
   category: $Enums.QuizCategory | null
+  difficulty: $Enums.QuizDifficulty | null
+  visibility: $Enums.QuizVisibility | null
   status: $Enums.QuizStatus | null
   questionCount: number | null
   playCount: number | null
@@ -54,6 +56,8 @@ export type QuizMaxAggregateOutputType = {
   title: string | null
   coverImage: string | null
   category: $Enums.QuizCategory | null
+  difficulty: $Enums.QuizDifficulty | null
+  visibility: $Enums.QuizVisibility | null
   status: $Enums.QuizStatus | null
   questionCount: number | null
   playCount: number | null
@@ -67,6 +71,9 @@ export type QuizCountAggregateOutputType = {
   title: number
   coverImage: number
   category: number
+  difficulty: number
+  tags: number
+  visibility: number
   status: number
   questionCount: number
   playCount: number
@@ -92,6 +99,8 @@ export type QuizMinAggregateInputType = {
   title?: true
   coverImage?: true
   category?: true
+  difficulty?: true
+  visibility?: true
   status?: true
   questionCount?: true
   playCount?: true
@@ -105,6 +114,8 @@ export type QuizMaxAggregateInputType = {
   title?: true
   coverImage?: true
   category?: true
+  difficulty?: true
+  visibility?: true
   status?: true
   questionCount?: true
   playCount?: true
@@ -118,6 +129,9 @@ export type QuizCountAggregateInputType = {
   title?: true
   coverImage?: true
   category?: true
+  difficulty?: true
+  tags?: true
+  visibility?: true
   status?: true
   questionCount?: true
   playCount?: true
@@ -218,6 +232,9 @@ export type QuizGroupByOutputType = {
   title: string
   coverImage: string | null
   category: $Enums.QuizCategory | null
+  difficulty: $Enums.QuizDifficulty | null
+  tags: string[]
+  visibility: $Enums.QuizVisibility | null
   status: $Enums.QuizStatus
   questionCount: number
   playCount: number
@@ -254,6 +271,9 @@ export type QuizWhereInput = {
   title?: Prisma.StringFilter<"Quiz"> | string
   coverImage?: Prisma.StringNullableFilter<"Quiz"> | string | null
   category?: Prisma.EnumQuizCategoryNullableFilter<"Quiz"> | $Enums.QuizCategory | null
+  difficulty?: Prisma.EnumQuizDifficultyNullableFilter<"Quiz"> | $Enums.QuizDifficulty | null
+  tags?: Prisma.StringNullableListFilter<"Quiz">
+  visibility?: Prisma.EnumQuizVisibilityNullableFilter<"Quiz"> | $Enums.QuizVisibility | null
   status?: Prisma.EnumQuizStatusFilter<"Quiz"> | $Enums.QuizStatus
   questionCount?: Prisma.IntFilter<"Quiz"> | number
   playCount?: Prisma.IntFilter<"Quiz"> | number
@@ -269,6 +289,9 @@ export type QuizOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   coverImage?: Prisma.SortOrderInput | Prisma.SortOrder
   category?: Prisma.SortOrderInput | Prisma.SortOrder
+  difficulty?: Prisma.SortOrderInput | Prisma.SortOrder
+  tags?: Prisma.SortOrder
+  visibility?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
   playCount?: Prisma.SortOrder
@@ -287,6 +310,9 @@ export type QuizWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"Quiz"> | string
   coverImage?: Prisma.StringNullableFilter<"Quiz"> | string | null
   category?: Prisma.EnumQuizCategoryNullableFilter<"Quiz"> | $Enums.QuizCategory | null
+  difficulty?: Prisma.EnumQuizDifficultyNullableFilter<"Quiz"> | $Enums.QuizDifficulty | null
+  tags?: Prisma.StringNullableListFilter<"Quiz">
+  visibility?: Prisma.EnumQuizVisibilityNullableFilter<"Quiz"> | $Enums.QuizVisibility | null
   status?: Prisma.EnumQuizStatusFilter<"Quiz"> | $Enums.QuizStatus
   questionCount?: Prisma.IntFilter<"Quiz"> | number
   playCount?: Prisma.IntFilter<"Quiz"> | number
@@ -302,6 +328,9 @@ export type QuizOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   coverImage?: Prisma.SortOrderInput | Prisma.SortOrder
   category?: Prisma.SortOrderInput | Prisma.SortOrder
+  difficulty?: Prisma.SortOrderInput | Prisma.SortOrder
+  tags?: Prisma.SortOrder
+  visibility?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
   playCount?: Prisma.SortOrder
@@ -323,6 +352,9 @@ export type QuizScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"Quiz"> | string
   coverImage?: Prisma.StringNullableWithAggregatesFilter<"Quiz"> | string | null
   category?: Prisma.EnumQuizCategoryNullableWithAggregatesFilter<"Quiz"> | $Enums.QuizCategory | null
+  difficulty?: Prisma.EnumQuizDifficultyNullableWithAggregatesFilter<"Quiz"> | $Enums.QuizDifficulty | null
+  tags?: Prisma.StringNullableListFilter<"Quiz">
+  visibility?: Prisma.EnumQuizVisibilityNullableWithAggregatesFilter<"Quiz"> | $Enums.QuizVisibility | null
   status?: Prisma.EnumQuizStatusWithAggregatesFilter<"Quiz"> | $Enums.QuizStatus
   questionCount?: Prisma.IntWithAggregatesFilter<"Quiz"> | number
   playCount?: Prisma.IntWithAggregatesFilter<"Quiz"> | number
@@ -336,6 +368,9 @@ export type QuizCreateInput = {
   title: string
   coverImage?: string | null
   category?: $Enums.QuizCategory | null
+  difficulty?: $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizCreatetagsInput | string[]
+  visibility?: $Enums.QuizVisibility | null
   status?: $Enums.QuizStatus
   questionCount?: number
   playCount?: number
@@ -350,6 +385,9 @@ export type QuizUncheckedCreateInput = {
   title: string
   coverImage?: string | null
   category?: $Enums.QuizCategory | null
+  difficulty?: $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizCreatetagsInput | string[]
+  visibility?: $Enums.QuizVisibility | null
   status?: $Enums.QuizStatus
   questionCount?: number
   playCount?: number
@@ -364,6 +402,9 @@ export type QuizUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
+  difficulty?: Prisma.NullableEnumQuizDifficultyFieldUpdateOperationsInput | $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizUpdatetagsInput | string[]
+  visibility?: Prisma.NullableEnumQuizVisibilityFieldUpdateOperationsInput | $Enums.QuizVisibility | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   playCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -378,6 +419,9 @@ export type QuizUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
+  difficulty?: Prisma.NullableEnumQuizDifficultyFieldUpdateOperationsInput | $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizUpdatetagsInput | string[]
+  visibility?: Prisma.NullableEnumQuizVisibilityFieldUpdateOperationsInput | $Enums.QuizVisibility | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   playCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -392,6 +436,9 @@ export type QuizCreateManyInput = {
   title: string
   coverImage?: string | null
   category?: $Enums.QuizCategory | null
+  difficulty?: $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizCreatetagsInput | string[]
+  visibility?: $Enums.QuizVisibility | null
   status?: $Enums.QuizStatus
   questionCount?: number
   playCount?: number
@@ -405,6 +452,9 @@ export type QuizUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
+  difficulty?: Prisma.NullableEnumQuizDifficultyFieldUpdateOperationsInput | $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizUpdatetagsInput | string[]
+  visibility?: Prisma.NullableEnumQuizVisibilityFieldUpdateOperationsInput | $Enums.QuizVisibility | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   playCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -417,6 +467,9 @@ export type QuizUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
+  difficulty?: Prisma.NullableEnumQuizDifficultyFieldUpdateOperationsInput | $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizUpdatetagsInput | string[]
+  visibility?: Prisma.NullableEnumQuizVisibilityFieldUpdateOperationsInput | $Enums.QuizVisibility | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   playCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -435,11 +488,22 @@ export type QuizOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
+}
+
 export type QuizCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
   coverImage?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  difficulty?: Prisma.SortOrder
+  tags?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   status?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
   playCount?: Prisma.SortOrder
@@ -458,6 +522,8 @@ export type QuizMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   coverImage?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  difficulty?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   status?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
   playCount?: Prisma.SortOrder
@@ -471,6 +537,8 @@ export type QuizMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   coverImage?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  difficulty?: Prisma.SortOrder
+  visibility?: Prisma.SortOrder
   status?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
   playCount?: Prisma.SortOrder
@@ -531,8 +599,25 @@ export type QuizUncheckedUpdateManyWithoutOwnerNestedInput = {
   deleteMany?: Prisma.QuizScalarWhereInput | Prisma.QuizScalarWhereInput[]
 }
 
+export type QuizCreatetagsInput = {
+  set: string[]
+}
+
 export type NullableEnumQuizCategoryFieldUpdateOperationsInput = {
   set?: $Enums.QuizCategory | null
+}
+
+export type NullableEnumQuizDifficultyFieldUpdateOperationsInput = {
+  set?: $Enums.QuizDifficulty | null
+}
+
+export type QuizUpdatetagsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type NullableEnumQuizVisibilityFieldUpdateOperationsInput = {
+  set?: $Enums.QuizVisibility | null
 }
 
 export type EnumQuizStatusFieldUpdateOperationsInput = {
@@ -566,6 +651,9 @@ export type QuizCreateWithoutOwnerInput = {
   title: string
   coverImage?: string | null
   category?: $Enums.QuizCategory | null
+  difficulty?: $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizCreatetagsInput | string[]
+  visibility?: $Enums.QuizVisibility | null
   status?: $Enums.QuizStatus
   questionCount?: number
   playCount?: number
@@ -579,6 +667,9 @@ export type QuizUncheckedCreateWithoutOwnerInput = {
   title: string
   coverImage?: string | null
   category?: $Enums.QuizCategory | null
+  difficulty?: $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizCreatetagsInput | string[]
+  visibility?: $Enums.QuizVisibility | null
   status?: $Enums.QuizStatus
   questionCount?: number
   playCount?: number
@@ -621,6 +712,9 @@ export type QuizScalarWhereInput = {
   title?: Prisma.StringFilter<"Quiz"> | string
   coverImage?: Prisma.StringNullableFilter<"Quiz"> | string | null
   category?: Prisma.EnumQuizCategoryNullableFilter<"Quiz"> | $Enums.QuizCategory | null
+  difficulty?: Prisma.EnumQuizDifficultyNullableFilter<"Quiz"> | $Enums.QuizDifficulty | null
+  tags?: Prisma.StringNullableListFilter<"Quiz">
+  visibility?: Prisma.EnumQuizVisibilityNullableFilter<"Quiz"> | $Enums.QuizVisibility | null
   status?: Prisma.EnumQuizStatusFilter<"Quiz"> | $Enums.QuizStatus
   questionCount?: Prisma.IntFilter<"Quiz"> | number
   playCount?: Prisma.IntFilter<"Quiz"> | number
@@ -634,6 +728,9 @@ export type QuizCreateWithoutQuestionsInput = {
   title: string
   coverImage?: string | null
   category?: $Enums.QuizCategory | null
+  difficulty?: $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizCreatetagsInput | string[]
+  visibility?: $Enums.QuizVisibility | null
   status?: $Enums.QuizStatus
   questionCount?: number
   playCount?: number
@@ -647,6 +744,9 @@ export type QuizUncheckedCreateWithoutQuestionsInput = {
   title: string
   coverImage?: string | null
   category?: $Enums.QuizCategory | null
+  difficulty?: $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizCreatetagsInput | string[]
+  visibility?: $Enums.QuizVisibility | null
   status?: $Enums.QuizStatus
   questionCount?: number
   playCount?: number
@@ -676,6 +776,9 @@ export type QuizUpdateWithoutQuestionsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
+  difficulty?: Prisma.NullableEnumQuizDifficultyFieldUpdateOperationsInput | $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizUpdatetagsInput | string[]
+  visibility?: Prisma.NullableEnumQuizVisibilityFieldUpdateOperationsInput | $Enums.QuizVisibility | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   playCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -689,6 +792,9 @@ export type QuizUncheckedUpdateWithoutQuestionsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
+  difficulty?: Prisma.NullableEnumQuizDifficultyFieldUpdateOperationsInput | $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizUpdatetagsInput | string[]
+  visibility?: Prisma.NullableEnumQuizVisibilityFieldUpdateOperationsInput | $Enums.QuizVisibility | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   playCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -702,6 +808,9 @@ export type QuizCreateManyOwnerInput = {
   title: string
   coverImage?: string | null
   category?: $Enums.QuizCategory | null
+  difficulty?: $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizCreatetagsInput | string[]
+  visibility?: $Enums.QuizVisibility | null
   status?: $Enums.QuizStatus
   questionCount?: number
   playCount?: number
@@ -714,6 +823,9 @@ export type QuizUpdateWithoutOwnerInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
+  difficulty?: Prisma.NullableEnumQuizDifficultyFieldUpdateOperationsInput | $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizUpdatetagsInput | string[]
+  visibility?: Prisma.NullableEnumQuizVisibilityFieldUpdateOperationsInput | $Enums.QuizVisibility | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   playCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -727,6 +839,9 @@ export type QuizUncheckedUpdateWithoutOwnerInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
+  difficulty?: Prisma.NullableEnumQuizDifficultyFieldUpdateOperationsInput | $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizUpdatetagsInput | string[]
+  visibility?: Prisma.NullableEnumQuizVisibilityFieldUpdateOperationsInput | $Enums.QuizVisibility | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   playCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -740,6 +855,9 @@ export type QuizUncheckedUpdateManyWithoutOwnerInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.NullableEnumQuizCategoryFieldUpdateOperationsInput | $Enums.QuizCategory | null
+  difficulty?: Prisma.NullableEnumQuizDifficultyFieldUpdateOperationsInput | $Enums.QuizDifficulty | null
+  tags?: Prisma.QuizUpdatetagsInput | string[]
+  visibility?: Prisma.NullableEnumQuizVisibilityFieldUpdateOperationsInput | $Enums.QuizVisibility | null
   status?: Prisma.EnumQuizStatusFieldUpdateOperationsInput | $Enums.QuizStatus
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   playCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -783,6 +901,9 @@ export type QuizSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   title?: boolean
   coverImage?: boolean
   category?: boolean
+  difficulty?: boolean
+  tags?: boolean
+  visibility?: boolean
   status?: boolean
   questionCount?: boolean
   playCount?: boolean
@@ -799,6 +920,9 @@ export type QuizSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   title?: boolean
   coverImage?: boolean
   category?: boolean
+  difficulty?: boolean
+  tags?: boolean
+  visibility?: boolean
   status?: boolean
   questionCount?: boolean
   playCount?: boolean
@@ -813,6 +937,9 @@ export type QuizSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   title?: boolean
   coverImage?: boolean
   category?: boolean
+  difficulty?: boolean
+  tags?: boolean
+  visibility?: boolean
   status?: boolean
   questionCount?: boolean
   playCount?: boolean
@@ -827,6 +954,9 @@ export type QuizSelectScalar = {
   title?: boolean
   coverImage?: boolean
   category?: boolean
+  difficulty?: boolean
+  tags?: boolean
+  visibility?: boolean
   status?: boolean
   questionCount?: boolean
   playCount?: boolean
@@ -835,7 +965,7 @@ export type QuizSelectScalar = {
   updatedAt?: boolean
 }
 
-export type QuizOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "coverImage" | "category" | "status" | "questionCount" | "playCount" | "ownerId" | "createdAt" | "updatedAt", ExtArgs["result"]["quiz"]>
+export type QuizOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "coverImage" | "category" | "difficulty" | "tags" | "visibility" | "status" | "questionCount" | "playCount" | "ownerId" | "createdAt" | "updatedAt", ExtArgs["result"]["quiz"]>
 export type QuizInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   owner?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   questions?: boolean | Prisma.Quiz$questionsArgs<ExtArgs>
@@ -859,6 +989,9 @@ export type $QuizPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     title: string
     coverImage: string | null
     category: $Enums.QuizCategory | null
+    difficulty: $Enums.QuizDifficulty | null
+    tags: string[]
+    visibility: $Enums.QuizVisibility | null
     status: $Enums.QuizStatus
     questionCount: number
     playCount: number
@@ -1294,6 +1427,9 @@ export interface QuizFieldRefs {
   readonly title: Prisma.FieldRef<"Quiz", 'String'>
   readonly coverImage: Prisma.FieldRef<"Quiz", 'String'>
   readonly category: Prisma.FieldRef<"Quiz", 'QuizCategory'>
+  readonly difficulty: Prisma.FieldRef<"Quiz", 'QuizDifficulty'>
+  readonly tags: Prisma.FieldRef<"Quiz", 'String[]'>
+  readonly visibility: Prisma.FieldRef<"Quiz", 'QuizVisibility'>
   readonly status: Prisma.FieldRef<"Quiz", 'QuizStatus'>
   readonly questionCount: Prisma.FieldRef<"Quiz", 'Int'>
   readonly playCount: Prisma.FieldRef<"Quiz", 'Int'>

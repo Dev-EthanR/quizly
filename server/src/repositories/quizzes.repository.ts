@@ -1,5 +1,10 @@
 import { prisma } from "../lib/prisma.js";
-import type { QuizCategory, QuizStatus } from "shared";
+import type {
+  QuizCategory,
+  QuizDifficulty,
+  QuizStatus,
+  QuizVisibility,
+} from "shared";
 
 interface FindManyByOwnerParams {
   ownerId: string;
@@ -32,6 +37,9 @@ interface CreatePublishedQuizParams {
   ownerId: string;
   title: string;
   category: QuizCategory;
+  difficulty: QuizDifficulty;
+  tags: string[];
+  visibility: QuizVisibility;
   coverImage?: string | undefined;
   questions: QuestionInput[];
 }
@@ -45,6 +53,9 @@ interface ReplaceQuestionsParams {
 interface PublishParams {
   id: string;
   category: QuizCategory;
+  difficulty: QuizDifficulty;
+  tags: string[];
+  visibility: QuizVisibility;
   coverImage?: string | undefined;
 }
 
@@ -110,6 +121,9 @@ export const quizzesRepository = {
     ownerId,
     title,
     category,
+    difficulty,
+    tags,
+    visibility,
     coverImage,
     questions,
   }: CreatePublishedQuizParams) {
@@ -119,6 +133,9 @@ export const quizzesRepository = {
         title,
         status: "published",
         category,
+        difficulty,
+        tags,
+        visibility,
         questionCount: questions.length,
         ...(coverImage !== undefined ? { coverImage } : {}),
         questions: {
@@ -147,12 +164,15 @@ export const quizzesRepository = {
     return quizzesRepository.findById(id);
   },
 
-  publish({ id, category, coverImage }: PublishParams) {
+  publish({ id, category, difficulty, tags, visibility, coverImage }: PublishParams) {
     return prisma.quiz.update({
       where: { id },
       data: {
         status: "published",
         category,
+        difficulty,
+        tags,
+        visibility,
         ...(coverImage !== undefined ? { coverImage } : {}),
       },
       include: quizWithQuestionsInclude,

@@ -2,21 +2,37 @@ import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { publishQuizContentSchema, publishQuizSchema, saveQuizDraftSchema } from "shared";
+import { FiPlay } from "react-icons/fi";
+import clsx from "clsx";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import QuestionList from "../components/quizzes/QuestionList";
 import QuestionPreviewPanel from "../components/quizzes/QuestionPreviewPanel";
-import PublishQuizModal from "../components/quizzes/PublishQuizModal";
+import PublishQuizModal, { MAX_TAGS } from "../components/quizzes/PublishQuizModal";
+import VisibilitySelect from "../components/quizzes/publish/VisibilitySelect";
+import CategorySelect from "../components/quizzes/publish/CategorySelect";
+import CoverImageDropzone from "../components/quizzes/publish/CoverImageDropzone";
+import DifficultySelect from "../components/quizzes/publish/DifficultySelect";
+import TagsInput from "../components/quizzes/publish/TagsInput";
 import { QuizBuilderProvider } from "../context/QuizBuilderContext";
 import { useQuizBuilder } from "../context/useQuizBuilder";
+import { usePublishMetadataForm } from "../hooks/usePublishMetadataForm";
 import { hydrateBuilderState } from "../lib/quizBuilderReducer";
+import {
+  getPublishMetadataErrors,
+  isPublishMetadataValid,
+  type PublishMetadataDraft,
+} from "../lib/publishValidation";
 import {
   createQuiz,
   fetchQuizById,
   publishQuiz,
   updateQuizDraft,
   type PublishQuizMetadata,
+  type QuizCategory,
+  type QuizDetail,
+  type QuizDifficulty,
   type SaveQuizPayload,
 } from "../lib/quizzes";
 
@@ -27,14 +43,51 @@ interface QuizBuilderRouteParams {
 
 interface QuizBuilderFormProps {
   quizId?: string;
+  quiz?: QuizDetail;
 }
 
-function QuizBuilderForm({ quizId }: QuizBuilderFormProps) {
+function QuizBuilderForm({ quizId, quiz }: QuizBuilderFormProps) {
   const { state, dispatch } = useQuizBuilder();
   const navigate = useNavigate();
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  const [hasAttemptedSaveChanges, setHasAttemptedSaveChanges] = useState(false);
+
+  const isPublished = quiz?.status === "published";
+
+  const {
+    category,
+    setCategory,
+    difficulty,
+    setDifficulty,
+    visibility,
+    setVisibility,
+    tagState,
+    coverImageState,
+  } = usePublishMetadataForm({
+    maxTags: MAX_TAGS,
+    initial: quiz
+      ? {
+          category: quiz.category ?? undefined,
+          difficulty: quiz.difficulty ?? undefined,
+          tags: quiz.tags,
+          visibility: quiz.visibility ?? undefined,
+          coverImage: quiz.coverImage ?? undefined,
+        }
+      : undefined,
+  });
+
+  const metadataDraft: PublishMetadataDraft = {
+    category,
+    difficulty,
+    tags: tagState.tags,
+    visibility,
+    coverImage: coverImageState.coverImage,
+  };
+  const metadataErrors = hasAttemptedSaveChanges
+    ? getPublishMetadataErrors(metadataDraft)
+    : null;
 
   const resolvedSelectedId = selectedQuestionId ?? state.questions[0]?.id ?? null;
   const previewIndex = state.questions.findIndex(
@@ -70,6 +123,35 @@ function QuizBuilderForm({ quizId }: QuizBuilderFormProps) {
     }
 
     setValidationErrors([]);
+    saveMutation.mutate(payload);
+  };
+
+  const handleSaveChanges = () => {
+    if (!isPublishMetadataValid(metadataDraft)) {
+      setHasAttemptedSaveChanges(true);
+      return;
+    }
+
+    const payload: SaveQuizPayload = {
+      ...state,
+      status: "published",
+      category: category as QuizCategory,
+      difficulty: difficulty as QuizDifficulty,
+      tags: tagState.tags,
+      visibility,
+      coverImage: coverImageState.coverImage,
+    };
+    const parsed = publishQuizSchema.safeParse(payload);
+
+    if (!parsed.success) {
+      setValidationErrors(
+        Array.from(new Set(parsed.error.issues.map((issue) => issue.message))),
+      );
+      return;
+    }
+
+    setValidationErrors([]);
+    setHasAttemptedSaveChanges(false);
     saveMutation.mutate(payload);
   };
 
@@ -125,6 +207,29 @@ function QuizBuilderForm({ quizId }: QuizBuilderFormProps) {
             className="w-full"
           />
 
+          {isPublished && (
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <CategorySelect
+                  value={category}
+                  onChange={setCategory}
+                  error={metadataErrors?.category}
+                />
+                <DifficultySelect
+                  value={difficulty}
+                  onChange={setDifficulty}
+                  error={metadataErrors?.difficulty}
+                />
+              </div>
+
+              <TagsInput
+                state={tagState}
+                maxTags={MAX_TAGS}
+                error={metadataErrors?.tags}
+              />
+            </div>
+          )}
+
           <QuestionList
             selectedQuestionId={resolvedSelectedId}
             onSelectQuestion={setSelectedQuestionId}
@@ -132,7 +237,10 @@ function QuizBuilderForm({ quizId }: QuizBuilderFormProps) {
           />
         </div>
 
-        <QuestionPreviewPanel question={previewQuestion} index={previewIndex} />
+        <div className="flex flex-col gap-6">
+          {isPublished && <CoverImageDropzone dropzone={coverImageState} />}
+          <QuestionPreviewPanel question={previewQuestion} index={previewIndex} />
+        </div>
       </div>
 
       {validationErrors.length > 0 && (
@@ -149,22 +257,46 @@ function QuizBuilderForm({ quizId }: QuizBuilderFormProps) {
         <p className="text-sm text-danger">Couldn't save quiz. Try again.</p>
       )}
 
-      <div className="sticky bottom-0 flex justify-end gap-3 border-t border-border bg-background py-4">
-        <Button
-          type="button"
-          variant="secondary"
-          disabled={saveMutation.isPending}
-          onClick={handleSaveDraft}
-        >
-          {saveMutation.isPending ? "Saving..." : "Save draft"}
-        </Button>
-        <Button
-          type="button"
-          disabled={saveMutation.isPending}
-          onClick={handleOpenPublishModal}
-        >
-          {saveMutation.isPending ? "Publishing..." : "Publish"}
-        </Button>
+      <div
+        className={clsx(
+          "sticky bottom-0 flex flex-wrap items-center gap-3 border-t border-border bg-background py-4",
+          isPublished ? "justify-between" : "justify-end",
+        )}
+      >
+        {isPublished && (
+          <VisibilitySelect value={visibility} onChange={setVisibility} compact />
+        )}
+
+        <div className="flex gap-3">
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={saveMutation.isPending}
+            onClick={isPublished ? handleSaveChanges : handleSaveDraft}
+          >
+            {saveMutation.isPending
+              ? "Saving..."
+              : isPublished
+                ? "Save changes"
+                : "Save draft"}
+          </Button>
+          {isPublished ? (
+            <Link to={`/host/${quizId}`}>
+              <Button type="button" className="flex items-center gap-2">
+                <FiPlay className="h-4 w-4" />
+                Host
+              </Button>
+            </Link>
+          ) : (
+            <Button
+              type="button"
+              disabled={saveMutation.isPending}
+              onClick={handleOpenPublishModal}
+            >
+              {saveMutation.isPending ? "Publishing..." : "Publish"}
+            </Button>
+          )}
+        </div>
       </div>
 
       {isPublishModalOpen && (
@@ -219,7 +351,7 @@ function QuizBuilderEditLoader({ quizId }: QuizBuilderEditLoaderProps) {
 
   return (
     <QuizBuilderProvider initialState={hydrateBuilderState(quiz)}>
-      <QuizBuilderForm quizId={quizId} />
+      <QuizBuilderForm quizId={quizId} quiz={quiz} />
     </QuizBuilderProvider>
   );
 }

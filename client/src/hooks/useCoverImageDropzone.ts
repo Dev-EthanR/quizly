@@ -19,9 +19,17 @@ export interface UseCoverImageDropzoneResult {
   handleRemove: (event: MouseEvent<HTMLButtonElement>) => void;
 }
 
-export function useCoverImageDropzone(): UseCoverImageDropzoneResult {
+interface UseCoverImageDropzoneOptions {
+  initialCoverImage?: string;
+}
+
+export function useCoverImageDropzone({
+  initialCoverImage,
+}: UseCoverImageDropzoneOptions = {}): UseCoverImageDropzoneResult {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [coverImage, setCoverImage] = useState<string | undefined>(undefined);
+  const [coverImage, setCoverImage] = useState<string | undefined>(
+    initialCoverImage,
+  );
   const [isDragOver, setIsDragOver] = useState(false);
 
   const readFile = (file: File | undefined) => {

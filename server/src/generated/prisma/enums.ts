@@ -31,3 +31,20 @@ export const QuizCategory = {
 } as const
 
 export type QuizCategory = (typeof QuizCategory)[keyof typeof QuizCategory]
+
+
+export const QuizDifficulty = {
+  easy: 'easy',
+  medium: 'medium',
+  hard: 'hard'
+} as const
+
+export type QuizDifficulty = (typeof QuizDifficulty)[keyof typeof QuizDifficulty]
+
+
+export const QuizVisibility = {
+  public: 'public',
+  private: 'private'
+} as const
+
+export type QuizVisibility = (typeof QuizVisibility)[keyof typeof QuizVisibility]

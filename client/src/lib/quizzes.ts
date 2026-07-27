@@ -15,6 +15,8 @@ export interface Quiz {
   coverImage: string | null;
   status: QuizStatus;
   category: QuizCategory | null;
+  difficulty: QuizDifficulty | null;
+  tags: string[];
   questionCount: number;
   playCount: number;
   updatedAt: string;
@@ -89,7 +91,13 @@ export interface QuizDetail {
   title: string;
   status: QuizStatus;
   category: QuizCategory | null;
+  difficulty: QuizDifficulty | null;
+  tags: string[];
+  visibility: QuizVisibility | null;
   coverImage: string | null;
+  questionCount: number;
+  playCount: number;
+  updatedAt: string;
   questions: QuizDetailQuestion[];
 }
 

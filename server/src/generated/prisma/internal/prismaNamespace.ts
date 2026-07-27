@@ -1025,6 +1025,9 @@ export const QuizScalarFieldEnum = {
   title: 'title',
   coverImage: 'coverImage',
   category: 'category',
+  difficulty: 'difficulty',
+  tags: 'tags',
+  visibility: 'visibility',
   status: 'status',
   questionCount: 'questionCount',
   playCount: 'playCount',
@@ -1146,6 +1149,34 @@ export type EnumQuizCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$Pri
  * Reference to a field of type 'QuizCategory[]'
  */
 export type ListEnumQuizCategoryFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuizCategory[]'>
+    
+
+
+/**
+ * Reference to a field of type 'QuizDifficulty'
+ */
+export type EnumQuizDifficultyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuizDifficulty'>
+    
+
+
+/**
+ * Reference to a field of type 'QuizDifficulty[]'
+ */
+export type ListEnumQuizDifficultyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuizDifficulty[]'>
+    
+
+
+/**
+ * Reference to a field of type 'QuizVisibility'
+ */
+export type EnumQuizVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuizVisibility'>
+    
+
+
+/**
+ * Reference to a field of type 'QuizVisibility[]'
+ */
+export type ListEnumQuizVisibilityFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QuizVisibility[]'>
     
 
 

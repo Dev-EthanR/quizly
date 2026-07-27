@@ -6,14 +6,8 @@ import CategorySelect from "./publish/CategorySelect";
 import CoverImageDropzone from "./publish/CoverImageDropzone";
 import DifficultySelect from "./publish/DifficultySelect";
 import TagsInput from "./publish/TagsInput";
-import { useCoverImageDropzone } from "../../hooks/useCoverImageDropzone";
-import { useTagInput } from "../../hooks/useTagInput";
-import type {
-  PublishQuizMetadata,
-  QuizCategory,
-  QuizDifficulty,
-  QuizVisibility,
-} from "../../lib/quizzes";
+import { usePublishMetadataForm } from "../../hooks/usePublishMetadataForm";
+import type { PublishQuizMetadata, QuizCategory, QuizDifficulty } from "../../lib/quizzes";
 import {
   getPublishMetadataErrors,
   isPublishMetadataValid,
@@ -26,16 +20,20 @@ interface PublishQuizModalProps {
   isSubmitting: boolean;
 }
 
-const MAX_TAGS = 10;
+export const MAX_TAGS = 10;
 
 function PublishQuizModal({ onClose, onConfirm, isSubmitting }: PublishQuizModalProps) {
-  const [category, setCategory] = useState<QuizCategory | "">("");
-  const [difficulty, setDifficulty] = useState<QuizDifficulty | null>(null);
-  const [visibility, setVisibility] = useState<QuizVisibility>("public");
+  const {
+    category,
+    setCategory,
+    difficulty,
+    setDifficulty,
+    visibility,
+    setVisibility,
+    tagState,
+    coverImageState,
+  } = usePublishMetadataForm({ maxTags: MAX_TAGS });
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
-
-  const tagState = useTagInput({ maxTags: MAX_TAGS });
-  const coverImageState = useCoverImageDropzone();
 
   const draft: PublishMetadataDraft = {
     category,

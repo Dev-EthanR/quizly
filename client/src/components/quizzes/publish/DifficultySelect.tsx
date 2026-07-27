@@ -29,7 +29,7 @@ function DifficultySelect({ value, onChange, error }: DifficultySelectProps) {
             type="button"
             onClick={() => onChange(option.value)}
             className={clsx(
-              "flex-1 cursor-pointer rounded-lg border px-4 py-2 text-sm font-bold transition-colors",
+              "flex-1 cursor-pointer rounded-lg border px-4 py-3 text-sm font-bold transition-colors",
               value === option.value
                 ? "border-primary/40 bg-primary/15 text-primary"
                 : "border-border text-muted hover:bg-background",

@@ -63,6 +63,12 @@ export const quizDifficultySchema = z.enum(["easy", "medium", "hard"]);
 
 export type QuizDifficulty = z.infer<typeof quizDifficultySchema>;
 
+export const quizDifficultyLabels: Record<QuizDifficulty, string> = {
+  easy: "Easy",
+  medium: "Medium",
+  hard: "Hard",
+};
+
 export const quizVisibilitySchema = z.enum(["public", "private"]);
 
 export type QuizVisibility = z.infer<typeof quizVisibilitySchema>;

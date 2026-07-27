@@ -84,14 +84,28 @@ enum QuizCategory {
   moviesTv
 }
 
+enum QuizDifficulty {
+  easy
+  medium
+  hard
+}
+
+enum QuizVisibility {
+  public
+  private
+}
+
 model Quiz {
-  id            String        @id @default(cuid())
+  id            String          @id @default(cuid())
   title         String
   coverImage    String?
   category      QuizCategory?
-  status        QuizStatus    @default(draft)
-  questionCount Int           @default(0)
-  playCount     Int           @default(0)
+  difficulty    QuizDifficulty?
+  tags          String[]        @default([])
+  visibility    QuizVisibility?
+  status        QuizStatus      @default(draft)
+  questionCount Int             @default(0)
+  playCount     Int             @default(0)
 
   ownerId   String
   owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)

@@ -90,6 +90,9 @@ export const quizzesService = {
       ownerId,
       title: input.title,
       category: input.category,
+      difficulty: input.difficulty,
+      tags: input.tags,
+      visibility: input.visibility,
       coverImage: input.coverImage,
       questions: toQuestionInputs(input.questions),
     });
@@ -160,6 +163,9 @@ export const quizzesService = {
     const quiz = await quizzesRepository.publish({
       id,
       category: input.category,
+      difficulty: input.difficulty,
+      tags: input.tags,
+      visibility: input.visibility,
       coverImage: input.coverImage,
     });
 

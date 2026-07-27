@@ -169,6 +169,20 @@ export type EnumQuizCategoryNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumQuizCategoryNullableFilter<$PrismaModel> | $Enums.QuizCategory | null
 }
 
+export type EnumQuizDifficultyNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.QuizDifficulty | Prisma.EnumQuizDifficultyFieldRefInput<$PrismaModel> | null
+  in?: $Enums.QuizDifficulty[] | Prisma.ListEnumQuizDifficultyFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.QuizDifficulty[] | Prisma.ListEnumQuizDifficultyFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumQuizDifficultyNullableFilter<$PrismaModel> | $Enums.QuizDifficulty | null
+}
+
+export type EnumQuizVisibilityNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.QuizVisibility | Prisma.EnumQuizVisibilityFieldRefInput<$PrismaModel> | null
+  in?: $Enums.QuizVisibility[] | Prisma.ListEnumQuizVisibilityFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.QuizVisibility[] | Prisma.ListEnumQuizVisibilityFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumQuizVisibilityNullableFilter<$PrismaModel> | $Enums.QuizVisibility | null
+}
+
 export type EnumQuizStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.QuizStatus | Prisma.EnumQuizStatusFieldRefInput<$PrismaModel>
   in?: $Enums.QuizStatus[] | Prisma.ListEnumQuizStatusFieldRefInput<$PrismaModel>
@@ -195,6 +209,26 @@ export type EnumQuizCategoryNullableWithAggregatesFilter<$PrismaModel = never> =
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumQuizCategoryNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumQuizCategoryNullableFilter<$PrismaModel>
+}
+
+export type EnumQuizDifficultyNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.QuizDifficulty | Prisma.EnumQuizDifficultyFieldRefInput<$PrismaModel> | null
+  in?: $Enums.QuizDifficulty[] | Prisma.ListEnumQuizDifficultyFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.QuizDifficulty[] | Prisma.ListEnumQuizDifficultyFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumQuizDifficultyNullableWithAggregatesFilter<$PrismaModel> | $Enums.QuizDifficulty | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumQuizDifficultyNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumQuizDifficultyNullableFilter<$PrismaModel>
+}
+
+export type EnumQuizVisibilityNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.QuizVisibility | Prisma.EnumQuizVisibilityFieldRefInput<$PrismaModel> | null
+  in?: $Enums.QuizVisibility[] | Prisma.ListEnumQuizVisibilityFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.QuizVisibility[] | Prisma.ListEnumQuizVisibilityFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumQuizVisibilityNullableWithAggregatesFilter<$PrismaModel> | $Enums.QuizVisibility | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumQuizVisibilityNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumQuizVisibilityNullableFilter<$PrismaModel>
 }
 
 export type EnumQuizStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -404,6 +438,20 @@ export type NestedEnumQuizCategoryNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumQuizCategoryNullableFilter<$PrismaModel> | $Enums.QuizCategory | null
 }
 
+export type NestedEnumQuizDifficultyNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.QuizDifficulty | Prisma.EnumQuizDifficultyFieldRefInput<$PrismaModel> | null
+  in?: $Enums.QuizDifficulty[] | Prisma.ListEnumQuizDifficultyFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.QuizDifficulty[] | Prisma.ListEnumQuizDifficultyFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumQuizDifficultyNullableFilter<$PrismaModel> | $Enums.QuizDifficulty | null
+}
+
+export type NestedEnumQuizVisibilityNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.QuizVisibility | Prisma.EnumQuizVisibilityFieldRefInput<$PrismaModel> | null
+  in?: $Enums.QuizVisibility[] | Prisma.ListEnumQuizVisibilityFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.QuizVisibility[] | Prisma.ListEnumQuizVisibilityFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumQuizVisibilityNullableFilter<$PrismaModel> | $Enums.QuizVisibility | null
+}
+
 export type NestedEnumQuizStatusFilter<$PrismaModel = never> = {
   equals?: $Enums.QuizStatus | Prisma.EnumQuizStatusFieldRefInput<$PrismaModel>
   in?: $Enums.QuizStatus[] | Prisma.ListEnumQuizStatusFieldRefInput<$PrismaModel>
@@ -419,6 +467,26 @@ export type NestedEnumQuizCategoryNullableWithAggregatesFilter<$PrismaModel = ne
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumQuizCategoryNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumQuizCategoryNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumQuizDifficultyNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.QuizDifficulty | Prisma.EnumQuizDifficultyFieldRefInput<$PrismaModel> | null
+  in?: $Enums.QuizDifficulty[] | Prisma.ListEnumQuizDifficultyFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.QuizDifficulty[] | Prisma.ListEnumQuizDifficultyFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumQuizDifficultyNullableWithAggregatesFilter<$PrismaModel> | $Enums.QuizDifficulty | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumQuizDifficultyNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumQuizDifficultyNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumQuizVisibilityNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.QuizVisibility | Prisma.EnumQuizVisibilityFieldRefInput<$PrismaModel> | null
+  in?: $Enums.QuizVisibility[] | Prisma.ListEnumQuizVisibilityFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.QuizVisibility[] | Prisma.ListEnumQuizVisibilityFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumQuizVisibilityNullableWithAggregatesFilter<$PrismaModel> | $Enums.QuizVisibility | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumQuizVisibilityNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumQuizVisibilityNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumQuizStatusWithAggregatesFilter<$PrismaModel = never> = {

@@ -2,6 +2,7 @@ import { useRef, useState, type KeyboardEvent, type RefObject } from "react";
 
 interface UseTagInputOptions {
   maxTags: number;
+  initialTags?: string[];
 }
 
 export interface UseTagInputResult {
@@ -14,9 +15,12 @@ export interface UseTagInputResult {
   focusInput: () => void;
 }
 
-export function useTagInput({ maxTags }: UseTagInputOptions): UseTagInputResult {
+export function useTagInput({
+  maxTags,
+  initialTags,
+}: UseTagInputOptions): UseTagInputResult {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>(initialTags ?? []);
   const [tagInput, setTagInput] = useState("");
 
   const addTag = () => {
