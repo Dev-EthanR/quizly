@@ -107,6 +107,7 @@ export const publishQuizMetadataSchema = z.object({
   tags: z.array(z.string().trim().min(1).max(24)).max(10).default([]),
   visibility: quizVisibilitySchema,
   coverImage: z.string().trim().optional(),
+  description: z.string().trim().max(500).optional(),
 });
 
 export type PublishQuizMetadataInput = z.infer<typeof publishQuizMetadataSchema>;

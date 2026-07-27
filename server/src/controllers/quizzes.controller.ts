@@ -30,6 +30,52 @@ export const quizzesController = {
     res.json(result);
   },
 
+  async getDiscoverQuizById(req: Request, res: Response) {
+    const session = await getSession(req, authConfig);
+    const result = await quizzesService.getPublicQuizById({
+      id: req.params.id as string,
+      userId: session?.user?.id,
+    });
+
+    if (result.status === "not_found") {
+      return res.status(404).json({ error: "Quiz not found" });
+    }
+
+    res.json(result.quiz);
+  },
+
+  async saveQuiz(req: Request, res: Response) {
+    const session = await getSession(req, authConfig);
+    if (!session?.user?.id) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const result = await quizzesService.saveQuiz({
+      id: req.params.id as string,
+      userId: session.user.id,
+    });
+
+    if (result.status === "not_found") {
+      return res.status(404).json({ error: "Quiz not found" });
+    }
+
+    res.status(204).send();
+  },
+
+  async unsaveQuiz(req: Request, res: Response) {
+    const session = await getSession(req, authConfig);
+    if (!session?.user?.id) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    await quizzesService.unsaveQuiz({
+      id: req.params.id as string,
+      userId: session.user.id,
+    });
+
+    res.status(204).send();
+  },
+
   async listMyQuizzes(req: Request, res: Response) {
     const parsed = listQuizzesQuerySchema.safeParse(req.query);
     if (!parsed.success) {

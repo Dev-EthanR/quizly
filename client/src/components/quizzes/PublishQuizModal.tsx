@@ -4,6 +4,7 @@ import Button from "../ui/Button";
 import VisibilitySelect from "./publish/VisibilitySelect";
 import CategorySelect from "./publish/CategorySelect";
 import CoverImageDropzone from "./publish/CoverImageDropzone";
+import DescriptionInput from "./publish/DescriptionInput";
 import DifficultySelect from "./publish/DifficultySelect";
 import TagsInput from "./publish/TagsInput";
 import { usePublishMetadataForm } from "../../hooks/usePublishMetadataForm";
@@ -30,6 +31,8 @@ function PublishQuizModal({ onClose, onConfirm, isSubmitting }: PublishQuizModal
     setDifficulty,
     visibility,
     setVisibility,
+    description,
+    setDescription,
     tagState,
     coverImageState,
   } = usePublishMetadataForm({ maxTags: MAX_TAGS });
@@ -41,6 +44,7 @@ function PublishQuizModal({ onClose, onConfirm, isSubmitting }: PublishQuizModal
     tags: tagState.tags,
     visibility,
     coverImage: coverImageState.coverImage,
+    description,
   };
   const errors = hasAttemptedSubmit ? getPublishMetadataErrors(draft) : null;
 
@@ -55,6 +59,7 @@ function PublishQuizModal({ onClose, onConfirm, isSubmitting }: PublishQuizModal
       tags: tagState.tags,
       visibility,
       coverImage: coverImageState.coverImage,
+      description: description || undefined,
     });
   };
 
@@ -94,6 +99,12 @@ function PublishQuizModal({ onClose, onConfirm, isSubmitting }: PublishQuizModal
             />
           </div>
         </div>
+
+        <DescriptionInput
+          value={description}
+          onChange={setDescription}
+          error={errors?.description}
+        />
 
         <TagsInput state={tagState} maxTags={MAX_TAGS} error={errors?.tags} />
       </div>

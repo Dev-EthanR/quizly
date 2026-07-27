@@ -389,6 +389,7 @@ export const ModelName = {
   Session: 'Session',
   VerificationToken: 'VerificationToken',
   Quiz: 'Quiz',
+  SavedQuiz: 'SavedQuiz',
   Question: 'Question',
   Answer: 'Answer'
 } as const
@@ -406,7 +407,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "account" | "session" | "verificationToken" | "quiz" | "question" | "answer"
+    modelProps: "user" | "account" | "session" | "verificationToken" | "quiz" | "savedQuiz" | "question" | "answer"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -780,6 +781,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    SavedQuiz: {
+      payload: Prisma.$SavedQuizPayload<ExtArgs>
+      fields: Prisma.SavedQuizFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SavedQuizFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedQuizPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SavedQuizFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedQuizPayload>
+        }
+        findFirst: {
+          args: Prisma.SavedQuizFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedQuizPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SavedQuizFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedQuizPayload>
+        }
+        findMany: {
+          args: Prisma.SavedQuizFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedQuizPayload>[]
+        }
+        create: {
+          args: Prisma.SavedQuizCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedQuizPayload>
+        }
+        createMany: {
+          args: Prisma.SavedQuizCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SavedQuizCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedQuizPayload>[]
+        }
+        delete: {
+          args: Prisma.SavedQuizDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedQuizPayload>
+        }
+        update: {
+          args: Prisma.SavedQuizUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedQuizPayload>
+        }
+        deleteMany: {
+          args: Prisma.SavedQuizDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SavedQuizUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SavedQuizUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedQuizPayload>[]
+        }
+        upsert: {
+          args: Prisma.SavedQuizUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SavedQuizPayload>
+        }
+        aggregate: {
+          args: Prisma.SavedQuizAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSavedQuiz>
+        }
+        groupBy: {
+          args: Prisma.SavedQuizGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SavedQuizGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SavedQuizCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SavedQuizCountAggregateOutputType> | number
+        }
+      }
+    }
     Question: {
       payload: Prisma.$QuestionPayload<ExtArgs>
       fields: Prisma.QuestionFieldRefs
@@ -1023,6 +1098,7 @@ export type VerificationTokenScalarFieldEnum = (typeof VerificationTokenScalarFi
 export const QuizScalarFieldEnum = {
   id: 'id',
   title: 'title',
+  description: 'description',
   coverImage: 'coverImage',
   category: 'category',
   difficulty: 'difficulty',
@@ -1037,6 +1113,16 @@ export const QuizScalarFieldEnum = {
 } as const
 
 export type QuizScalarFieldEnum = (typeof QuizScalarFieldEnum)[keyof typeof QuizScalarFieldEnum]
+
+
+export const SavedQuizScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  quizId: 'quizId',
+  createdAt: 'createdAt'
+} as const
+
+export type SavedQuizScalarFieldEnum = (typeof SavedQuizScalarFieldEnum)[keyof typeof SavedQuizScalarFieldEnum]
 
 
 export const QuestionScalarFieldEnum = {
@@ -1329,6 +1415,7 @@ export type GlobalOmitConfig = {
   session?: Prisma.SessionOmit
   verificationToken?: Prisma.VerificationTokenOmit
   quiz?: Prisma.QuizOmit
+  savedQuiz?: Prisma.SavedQuizOmit
   question?: Prisma.QuestionOmit
   answer?: Prisma.AnswerOmit
 }

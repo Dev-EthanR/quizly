@@ -12,6 +12,7 @@ export interface PublishMetadataFormInitial {
   tags?: string[];
   visibility?: QuizVisibility;
   coverImage?: string;
+  description?: string;
 }
 
 interface UsePublishMetadataFormOptions {
@@ -26,6 +27,8 @@ export interface UsePublishMetadataFormResult {
   setDifficulty: (value: QuizDifficulty) => void;
   visibility: QuizVisibility;
   setVisibility: (value: QuizVisibility) => void;
+  description: string;
+  setDescription: (value: string) => void;
   tagState: UseTagInputResult;
   coverImageState: UseCoverImageDropzoneResult;
 }
@@ -43,6 +46,7 @@ export function usePublishMetadataForm({
   const [visibility, setVisibility] = useState<QuizVisibility>(
     initial?.visibility ?? "public",
   );
+  const [description, setDescription] = useState(initial?.description ?? "");
 
   const tagState = useTagInput({ maxTags, initialTags: initial?.tags });
   const coverImageState = useCoverImageDropzone({
@@ -56,6 +60,8 @@ export function usePublishMetadataForm({
     setDifficulty,
     visibility,
     setVisibility,
+    description,
+    setDescription,
     tagState,
     coverImageState,
   };

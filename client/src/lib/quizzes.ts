@@ -56,6 +56,7 @@ export interface PublishQuizMetadata {
   tags: string[];
   visibility: QuizVisibility;
   coverImage?: string;
+  description?: string;
 }
 
 export interface SaveDraftPayload extends QuizDraft {
@@ -89,6 +90,7 @@ export interface QuizDetailQuestion {
 export interface QuizDetail {
   id: string;
   title: string;
+  description: string | null;
   status: QuizStatus;
   category: QuizCategory | null;
   difficulty: QuizDifficulty | null;
@@ -104,6 +106,7 @@ export interface QuizDetail {
 export interface DiscoverQuiz {
   id: string;
   title: string;
+  description: string | null;
   coverImage: string | null;
   category: QuizCategory | null;
   difficulty: QuizDifficulty | null;
@@ -126,6 +129,18 @@ export interface DiscoverQuizzesResult {
   page: number;
   totalPages: number;
   totalCount: number;
+}
+
+export interface DiscoverQuizPreviewQuestion {
+  id: string;
+  prompt: string;
+  timeLimitSeconds: number;
+  points: number;
+}
+
+export interface DiscoverQuizDetail extends DiscoverQuiz {
+  isSaved: boolean;
+  questions: DiscoverQuizPreviewQuestion[];
 }
 
 interface UpdateQuizDraftParams {
@@ -214,6 +229,23 @@ export async function fetchDiscoverQuizzes(
     { params },
   );
   return data;
+}
+
+export async function fetchDiscoverQuizById(
+  id: string,
+): Promise<DiscoverQuizDetail> {
+  const { data } = await api.get<DiscoverQuizDetail>(
+    `/api/quizzes/discover/${id}`,
+  );
+  return data;
+}
+
+export async function saveQuiz(id: string): Promise<void> {
+  await api.post(`/api/quizzes/${id}/save`);
+}
+
+export async function unsaveQuiz(id: string): Promise<void> {
+  await api.delete(`/api/quizzes/${id}/save`);
 }
 
 export async function fetchQuizCategories(): Promise<QuizCategoryOption[]> {

@@ -11,12 +11,14 @@ export interface PublishMetadataDraft {
   tags: string[];
   visibility: QuizVisibility;
   coverImage?: string;
+  description?: string;
 }
 
 export interface PublishMetadataErrors {
   category?: string;
   difficulty?: string;
   tags?: string;
+  description?: string;
 }
 
 export function getPublishMetadataErrors(
@@ -34,6 +36,8 @@ export function getPublishMetadataErrors(
       errors.difficulty = "Select a difficulty";
     } else if (field === "tags") {
       errors.tags = issue.message;
+    } else if (field === "description") {
+      errors.description = issue.message;
     }
   }
   return errors;

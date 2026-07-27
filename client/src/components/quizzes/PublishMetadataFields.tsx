@@ -1,4 +1,5 @@
 import CategorySelect from "./publish/CategorySelect";
+import DescriptionInput from "./publish/DescriptionInput";
 import DifficultySelect from "./publish/DifficultySelect";
 import TagsInput from "./publish/TagsInput";
 import { MAX_TAGS } from "./PublishQuizModal";
@@ -11,6 +12,8 @@ interface PublishMetadataFieldsProps {
   onCategoryChange: (value: QuizCategory | "") => void;
   difficulty: QuizDifficulty | null;
   onDifficultyChange: (value: QuizDifficulty) => void;
+  description: string;
+  onDescriptionChange: (value: string) => void;
   tagState: UseTagInputResult;
   errors: PublishMetadataErrors | null;
 }
@@ -20,6 +23,8 @@ function PublishMetadataFields({
   onCategoryChange,
   difficulty,
   onDifficultyChange,
+  description,
+  onDescriptionChange,
   tagState,
   errors,
 }: PublishMetadataFieldsProps) {
@@ -37,6 +42,12 @@ function PublishMetadataFields({
           error={errors?.difficulty}
         />
       </div>
+
+      <DescriptionInput
+        value={description}
+        onChange={onDescriptionChange}
+        error={errors?.description}
+      />
 
       <TagsInput state={tagState} maxTags={MAX_TAGS} error={errors?.tags} />
     </div>

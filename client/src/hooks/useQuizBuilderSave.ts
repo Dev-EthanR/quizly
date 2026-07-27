@@ -23,6 +23,7 @@ interface UseQuizBuilderSaveParams {
   tags: string[];
   visibility: QuizVisibility;
   coverImage?: string;
+  description?: string;
 }
 
 export interface UseQuizBuilderSaveResult {
@@ -46,6 +47,7 @@ export function useQuizBuilderSave({
   tags,
   visibility,
   coverImage,
+  description,
 }: UseQuizBuilderSaveParams): UseQuizBuilderSaveResult {
   const { state } = useQuizBuilder();
   const navigate = useNavigate();
@@ -94,6 +96,7 @@ export function useQuizBuilderSave({
       tags,
       visibility,
       coverImage,
+      description,
     };
     const parsed = publishQuizSchema.safeParse(payload);
 

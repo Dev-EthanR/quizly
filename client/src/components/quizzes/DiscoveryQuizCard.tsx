@@ -18,7 +18,10 @@ const DIFFICULTY_BADGE_CLASS: Record<QuizDifficulty, string> = {
 function DiscoveryQuizCard({ quiz }: DiscoveryQuizCardProps) {
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-colors hover:border-primary">
-      <div className="relative flex h-36 items-center justify-center bg-chat">
+      <Link
+        to={`/discovery/${quiz.id}`}
+        className="relative flex h-36 items-center justify-center bg-chat"
+      >
         {quiz.coverImage ? (
           <img
             src={quiz.coverImage}
@@ -47,10 +50,14 @@ function DiscoveryQuizCard({ quiz }: DiscoveryQuizCardProps) {
             {quizDifficultyLabels[quiz.difficulty]}
           </span>
         )}
-      </div>
+      </Link>
 
       <div className="flex flex-1 flex-col gap-3 p-4">
-        <h3 className="font-semibold text-foreground">{quiz.title}</h3>
+        <Link to={`/discovery/${quiz.id}`}>
+          <h3 className="font-semibold text-foreground hover:text-primary">
+            {quiz.title}
+          </h3>
+        </Link>
 
         <div className="flex items-center gap-2 text-sm text-muted">
           {quiz.ownerImage ? (

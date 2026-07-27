@@ -82,6 +82,16 @@ interface GetQuizForOwnerParams {
   ownerId: string;
 }
 
+interface GetPublicQuizByIdParams {
+  id: string;
+  userId?: string | undefined;
+}
+
+interface SaveQuizParams {
+  id: string;
+  userId: string;
+}
+
 export const quizzesService = {
   listMyQuizzes({ ownerId, status }: ListMyQuizzesParams) {
     return quizzesRepository.findManyByOwner({ ownerId, status });
@@ -99,6 +109,7 @@ export const quizzesService = {
       quizzes: quizzes.map((quiz) => ({
         id: quiz.id,
         title: quiz.title,
+        description: quiz.description,
         coverImage: quiz.coverImage,
         category: quiz.category,
         difficulty: quiz.difficulty,
@@ -112,6 +123,56 @@ export const quizzesService = {
       totalPages: Math.max(1, Math.ceil(totalCount / DISCOVER_QUIZZES_PAGE_SIZE)),
       totalCount,
     };
+  },
+
+  async getPublicQuizById({ id, userId }: GetPublicQuizByIdParams) {
+    const quiz = await quizzesRepository.findPublishedById(id);
+    if (!quiz) {
+      return { status: "not_found" as const };
+    }
+
+    const isSaved = userId
+      ? Boolean(await quizzesRepository.findSavedQuiz({ userId, quizId: id }))
+      : false;
+
+    return {
+      status: "ok" as const,
+      quiz: {
+        id: quiz.id,
+        title: quiz.title,
+        description: quiz.description,
+        coverImage: quiz.coverImage,
+        category: quiz.category,
+        difficulty: quiz.difficulty,
+        tags: quiz.tags,
+        questionCount: quiz.questionCount,
+        playCount: quiz.playCount,
+        ownerName: quiz.owner.name,
+        ownerImage: quiz.owner.image,
+        isSaved,
+        questions: quiz.questions.map((question) => ({
+          id: question.id,
+          prompt: question.prompt,
+          timeLimitSeconds: question.timeLimitSeconds,
+          points: question.points,
+        })),
+      },
+    };
+  },
+
+  async saveQuiz({ id, userId }: SaveQuizParams) {
+    const quiz = await quizzesRepository.findPublishedById(id);
+    if (!quiz) {
+      return { status: "not_found" as const };
+    }
+
+    await quizzesRepository.saveQuiz({ userId, quizId: id });
+    return { status: "ok" as const };
+  },
+
+  async unsaveQuiz({ id, userId }: SaveQuizParams) {
+    await quizzesRepository.unsaveQuiz({ userId, quizId: id });
+    return { status: "ok" as const };
   },
 
   createQuiz({ ownerId, draft }: CreateQuizParams) {
@@ -131,6 +192,7 @@ export const quizzesService = {
       tags: input.tags,
       visibility: input.visibility,
       coverImage: input.coverImage,
+      description: input.description,
       questions: toQuestionInputs(input.questions),
     });
   },
@@ -204,6 +266,7 @@ export const quizzesService = {
       tags: input.tags,
       visibility: input.visibility,
       coverImage: input.coverImage,
+      description: input.description,
     });
 
     return { status: "ok", quiz };

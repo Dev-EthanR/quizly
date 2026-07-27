@@ -5,6 +5,7 @@ import Lobby from "./pages/Lobby";
 import Removed from "./pages/Removed";
 import SignIn from "./pages/SignIn";
 import Discovery from "./pages/Discovery";
+import QuizDetails from "./pages/QuizDetails";
 import MyQuizzes from "./pages/MyQuizzes";
 import QuizBuilder from "./pages/QuizBuilder";
 import Settings from "./pages/Settings";
@@ -21,6 +22,7 @@ function App() {
         <Route path="/host" element={<Host />} />
         <Route path="/host/:quizId" element={<Host />} />
         <Route path="/discovery" element={<Discovery />} />
+        <Route path="/discovery/:quizId" element={<QuizDetails />} />
         <Route path="/my-quizzes" element={<MyQuizzes />} />
         <Route path="/quizzes/new" element={<QuizBuilder />} />
         <Route path="/quizzes/:quizId/edit" element={<QuizBuilder />} />

@@ -9,6 +9,11 @@ router.get("/quizzes/categories", quizzesController.listCategories);
 router.get("/quizzes/discover", asyncHandler(quizzesController.discoverQuizzes));
 
 router.get(
+  "/quizzes/discover/:id",
+  asyncHandler(quizzesController.getDiscoverQuizById),
+);
+
+router.get(
   "/quizzes",
   requireAuth,
   asyncHandler(quizzesController.listMyQuizzes),
@@ -36,6 +41,18 @@ router.post(
   "/quizzes/:id/publish",
   requireAuth,
   asyncHandler(quizzesController.publishQuiz),
+);
+
+router.post(
+  "/quizzes/:id/save",
+  requireAuth,
+  asyncHandler(quizzesController.saveQuiz),
+);
+
+router.delete(
+  "/quizzes/:id/save",
+  requireAuth,
+  asyncHandler(quizzesController.unsaveQuiz),
 );
 
 export default router;

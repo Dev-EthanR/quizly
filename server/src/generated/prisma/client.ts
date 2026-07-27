@@ -67,6 +67,11 @@ export type VerificationToken = Prisma.VerificationTokenModel
  */
 export type Quiz = Prisma.QuizModel
 /**
+ * Model SavedQuiz
+ * 
+ */
+export type SavedQuiz = Prisma.SavedQuizModel
+/**
  * Model Question
  * 
  */

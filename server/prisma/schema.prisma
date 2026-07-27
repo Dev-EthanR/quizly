@@ -22,6 +22,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   quizzes       Quiz[]
+  savedQuizzes  SavedQuiz[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -98,6 +99,7 @@ enum QuizVisibility {
 model Quiz {
   id            String          @id @default(cuid())
   title         String
+  description   String?
   coverImage    String?
   category      QuizCategory?
   difficulty    QuizDifficulty?
@@ -108,13 +110,28 @@ model Quiz {
   playCount     Int             @default(0)
 
   ownerId   String
-  owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  owner     User        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   questions Question[]
+  savedBy   SavedQuiz[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([ownerId, status])
+}
+
+model SavedQuiz {
+  id String @id @default(cuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quizId String
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, quizId])
+  @@index([quizId])
 }
 
 model Question {

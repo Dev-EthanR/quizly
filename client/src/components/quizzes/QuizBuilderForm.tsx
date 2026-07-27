@@ -32,6 +32,8 @@ function QuizBuilderForm({ quizId, quiz }: QuizBuilderFormProps) {
     setDifficulty,
     visibility,
     setVisibility,
+    description,
+    setDescription,
     tagState,
     coverImageState,
   } = usePublishMetadataForm({
@@ -43,6 +45,7 @@ function QuizBuilderForm({ quizId, quiz }: QuizBuilderFormProps) {
           tags: quiz.tags,
           visibility: quiz.visibility ?? undefined,
           coverImage: quiz.coverImage ?? undefined,
+          description: quiz.description ?? undefined,
         }
       : undefined,
   });
@@ -53,6 +56,7 @@ function QuizBuilderForm({ quizId, quiz }: QuizBuilderFormProps) {
     tags: tagState.tags,
     visibility,
     coverImage: coverImageState.coverImage,
+    description,
   };
 
   const {
@@ -82,6 +86,7 @@ function QuizBuilderForm({ quizId, quiz }: QuizBuilderFormProps) {
     tags: tagState.tags,
     visibility,
     coverImage: coverImageState.coverImage,
+    description,
   });
 
   const metadataErrors = hasAttemptedSaveChanges
@@ -115,6 +120,8 @@ function QuizBuilderForm({ quizId, quiz }: QuizBuilderFormProps) {
               onCategoryChange={setCategory}
               difficulty={difficulty}
               onDifficultyChange={setDifficulty}
+              description={description}
+              onDescriptionChange={setDescription}
               tagState={tagState}
               errors={metadataErrors}
             />

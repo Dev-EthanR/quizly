@@ -42,6 +42,7 @@ interface CreatePublishedQuizParams {
   tags: string[];
   visibility: QuizVisibility;
   coverImage?: string | undefined;
+  description?: string | undefined;
   questions: QuestionInput[];
 }
 
@@ -58,6 +59,12 @@ interface PublishParams {
   tags: string[];
   visibility: QuizVisibility;
   coverImage?: string | undefined;
+  description?: string | undefined;
+}
+
+interface SavedQuizParams {
+  userId: string;
+  quizId: string;
 }
 
 interface FindPublishedParams {
@@ -144,6 +151,18 @@ export const quizzesRepository = {
     return { quizzes, totalCount };
   },
 
+  findPublishedById(id: string) {
+    return prisma.quiz.findFirst({
+      where: { id, status: "published", visibility: "public" },
+      include: {
+        owner: { select: { name: true, image: true } },
+        questions: {
+          orderBy: { order: "asc" as const },
+        },
+      },
+    });
+  },
+
   create({ ownerId, title, questions }: CreateQuizParams) {
     return prisma.quiz.create({
       data: {
@@ -166,6 +185,7 @@ export const quizzesRepository = {
     tags,
     visibility,
     coverImage,
+    description,
     questions,
   }: CreatePublishedQuizParams) {
     return prisma.quiz.create({
@@ -179,6 +199,7 @@ export const quizzesRepository = {
         visibility,
         questionCount: questions.length,
         ...(coverImage !== undefined ? { coverImage } : {}),
+        ...(description !== undefined ? { description } : {}),
         questions: {
           create: toQuestionCreateInputs(questions),
         },
@@ -205,7 +226,15 @@ export const quizzesRepository = {
     return quizzesRepository.findById(id);
   },
 
-  publish({ id, category, difficulty, tags, visibility, coverImage }: PublishParams) {
+  publish({
+    id,
+    category,
+    difficulty,
+    tags,
+    visibility,
+    coverImage,
+    description,
+  }: PublishParams) {
     return prisma.quiz.update({
       where: { id },
       data: {
@@ -215,8 +244,29 @@ export const quizzesRepository = {
         tags,
         visibility,
         ...(coverImage !== undefined ? { coverImage } : {}),
+        ...(description !== undefined ? { description } : {}),
       },
       include: quizWithQuestionsInclude,
+    });
+  },
+
+  findSavedQuiz({ userId, quizId }: SavedQuizParams) {
+    return prisma.savedQuiz.findUnique({
+      where: { userId_quizId: { userId, quizId } },
+    });
+  },
+
+  saveQuiz({ userId, quizId }: SavedQuizParams) {
+    return prisma.savedQuiz.upsert({
+      where: { userId_quizId: { userId, quizId } },
+      create: { userId, quizId },
+      update: {},
+    });
+  },
+
+  unsaveQuiz({ userId, quizId }: SavedQuizParams) {
+    return prisma.savedQuiz.deleteMany({
+      where: { userId, quizId },
     });
   },
 };
