@@ -1,12 +1,15 @@
+import { useEffect, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
+import { ROOM_CODE_REGEX } from "shared";
 import Avatar from "../components/ui/Avatar";
 import RoomNotFound from "../components/lobby/RoomNotFound";
 import ReconnectingOverlay from "../components/lobby/ReconnectingOverlay";
 import HostLobbyPanel from "../components/lobby/HostLobbyPanel";
 import { AVATAR_COLORS } from "../lib/avatarColors";
 import { getInitials } from "../lib/initials";
-import { ROOM_CODE_REGEX } from "../lib/schemas/joinRoom";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
+import { useSocket } from "../context/useSocket";
+import type { LobbyPlayer, LobbyPlayersPayload } from "../context/socket-context";
 
 interface LobbyLocation {
   state?: {
@@ -19,6 +22,10 @@ interface LobbyLocation {
 function Lobby() {
   const { roomCode } = useParams();
   const { state } = useLocation() as LobbyLocation;
+  const { socket, status } = useSocket();
+  const [players, setPlayers] = useState<LobbyPlayer[]>([]);
+  const hasJoinedRef = useRef(false);
+
   const selectedColor =
     AVATAR_COLORS.find((color) => color.id === state?.color) ??
     AVATAR_COLORS[0];
@@ -26,6 +33,44 @@ function Lobby() {
   const isValidRoomCode =
     !!roomCode && ROOM_CODE_REGEX.test(roomCode.toUpperCase());
   const isOnline = useOnlineStatus();
+
+  useEffect(() => {
+    if (!state?.isHost || !isValidRoomCode) {
+      return;
+    }
+
+    function handleLobbyPlayers(payload: LobbyPlayersPayload) {
+      setPlayers(payload.players);
+    }
+
+    socket.on("lobby_players", handleLobbyPlayers);
+    return () => {
+      socket.off("lobby_players", handleLobbyPlayers);
+    };
+  }, [state?.isHost, isValidRoomCode, socket]);
+
+  useEffect(() => {
+    if (state?.isHost || !isValidRoomCode || !roomCode || !state?.name) {
+      return;
+    }
+
+    if (status === "connected" && !hasJoinedRef.current) {
+      socket.emit("join_room", {
+        roomCode,
+        name: state.name,
+        color: state.color,
+      });
+      hasJoinedRef.current = true;
+    }
+  }, [
+    state?.isHost,
+    state?.name,
+    state?.color,
+    isValidRoomCode,
+    roomCode,
+    status,
+    socket,
+  ]);
 
   if (!isValidRoomCode) {
     return <RoomNotFound roomCode={roomCode} />;
@@ -35,7 +80,7 @@ function Lobby() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-2 px-4">
         {!isOnline && <ReconnectingOverlay />}
-        <HostLobbyPanel roomCode={roomCode} />
+        <HostLobbyPanel roomCode={roomCode} players={players} />
       </div>
     );
   }

@@ -51,7 +51,7 @@ app.use(errorHandler);
 io.on("connection", (socket) => {
   console.log("a user connected: ", socket.id);
 
-  registerGameHandlers(socket);
+  registerGameHandlers(io, socket);
 
   socket.on("send_message", (data) => {
     // Broadcast the payload to all other connected clients

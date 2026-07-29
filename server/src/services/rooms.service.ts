@@ -8,6 +8,13 @@ interface HostGameParams {
   quizId: string;
 }
 
+interface JoinRoomParams {
+  socketId: string;
+  roomCode: string;
+  name: string;
+  color?: string | undefined;
+}
+
 function generateRoomCode(): string {
   let code = "";
   for (let i = 0; i < ROOM_CODE_LENGTH; i++) {
@@ -31,8 +38,22 @@ export const roomsService = {
       hostSocketId,
       quizId,
       createdAt: Date.now(),
+      players: [],
     };
     roomsRepository.save(room);
     return room;
+  },
+
+  joinRoom({
+    socketId,
+    roomCode,
+    name,
+    color,
+  }: JoinRoomParams): RoomRecord | undefined {
+    return roomsRepository.addPlayer(roomCode, { socketId, name, color });
+  },
+
+  leaveRoom(socketId: string): RoomRecord | undefined {
+    return roomsRepository.removePlayerBySocketId(socketId);
   },
 };
