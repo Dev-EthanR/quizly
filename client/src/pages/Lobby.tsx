@@ -2,6 +2,7 @@ import { useLocation, useParams } from "react-router-dom";
 import Avatar from "../components/ui/Avatar";
 import RoomNotFound from "../components/lobby/RoomNotFound";
 import ReconnectingOverlay from "../components/lobby/ReconnectingOverlay";
+import HostLobbyPanel from "../components/lobby/HostLobbyPanel";
 import { AVATAR_COLORS } from "../lib/avatarColors";
 import { getInitials } from "../lib/initials";
 import { ROOM_CODE_REGEX } from "../lib/schemas/joinRoom";
@@ -11,6 +12,7 @@ interface LobbyLocation {
   state?: {
     name?: string;
     color?: string;
+    isHost?: boolean;
   };
 }
 
@@ -27,6 +29,15 @@ function Lobby() {
 
   if (!isValidRoomCode) {
     return <RoomNotFound roomCode={roomCode} />;
+  }
+
+  if (state?.isHost) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-2 px-4">
+        {!isOnline && <ReconnectingOverlay />}
+        <HostLobbyPanel roomCode={roomCode} />
+      </div>
+    );
   }
 
   return (

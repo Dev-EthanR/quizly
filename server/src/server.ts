@@ -8,6 +8,7 @@ import quizzesRouter from "./routes/quizzes.route";
 import usersRouter from "./routes/users.route";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
+import { registerGameHandlers } from "./sockets/game.socket.js";
 
 const app = express();
 const PORT = 3000;
@@ -49,6 +50,8 @@ app.use(errorHandler);
 
 io.on("connection", (socket) => {
   console.log("a user connected: ", socket.id);
+
+  registerGameHandlers(socket);
 
   socket.on("send_message", (data) => {
     // Broadcast the payload to all other connected clients

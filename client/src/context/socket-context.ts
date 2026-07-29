@@ -1,10 +1,20 @@
 import { createContext } from "react";
 import type { Socket } from "socket.io-client";
+import type { HostGameInput } from "shared";
+
+export interface RoomCreatedPayload {
+  roomCode: string;
+}
 
 // Filled in as the server defines real events — never emit/listen for
 // something that isn't a key here (keeps client + server event names in sync).
-export type ServerToClientEvents = Record<string, never>;
-export type ClientToServerEvents = Record<string, never>;
+export interface ServerToClientEvents {
+  room_created: (payload: RoomCreatedPayload) => void;
+}
+
+export interface ClientToServerEvents {
+  host_game: (payload: HostGameInput) => void;
+}
 
 export type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
 
