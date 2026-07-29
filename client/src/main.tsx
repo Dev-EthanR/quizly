@@ -6,14 +6,17 @@ import "./index.css";
 import App from "./App.tsx";
 import { queryClient } from "./lib/queryClient";
 import { AuthProvider } from "./context/AuthContext";
+import { SocketProvider } from "./context/SocketProvider";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
+        <SocketProvider>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </SocketProvider>
       </AuthProvider>
     </QueryClientProvider>
   </StrictMode>,

@@ -6,9 +6,18 @@ import { authHandler } from "./routes/auth.route";
 import registerRouter from "./routes/register.route";
 import quizzesRouter from "./routes/quizzes.route";
 import usersRouter from "./routes/users.route";
+import { Server } from "socket.io";
+import { createServer } from "node:http";
 
 const app = express();
 const PORT = 3000;
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.PUBLIC_FRONTEND_URL ?? "http://localhost:5173",
+    credentials: true,
+  },
+});
 
 app.set("trust proxy", true);
 app.use(
@@ -38,6 +47,19 @@ app.get("/api/profile", requireAuth, (req: Request, res: Response) => {
 });
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+io.on("connection", (socket) => {
+  console.log("a user connected: ", socket.id);
+
+  socket.on("send_message", (data) => {
+    // Broadcast the payload to all other connected clients
+    socket.broadcast.emit("receive_message", data);
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`User Disconnected: ${socket.id}`);
+  });
+});
+
+server.listen(PORT, () => {
   console.log(`Server is running at http://localhost:${PORT}`);
 });
