@@ -4,6 +4,7 @@ import {
   type GameQuestion,
   type GameState,
 } from "../repositories/rooms.repository.js";
+import type { QuizCategory } from "shared";
 
 const MIN_SCORE_FACTOR = 0.5;
 
@@ -29,6 +30,7 @@ export interface PublicQuestion {
   prompt: string;
   timeLimitSeconds: number;
   points: number;
+  category: QuizCategory | null;
   answers: { id: string; text: string }[];
 }
 
@@ -56,12 +58,16 @@ function toGameQuestions(quiz: QuizWithQuestions): GameQuestion[] {
   }));
 }
 
-export function toPublicQuestion(question: GameQuestion): PublicQuestion {
+export function toPublicQuestion(
+  question: GameQuestion,
+  category: QuizCategory | null,
+): PublicQuestion {
   return {
     id: question.id,
     prompt: question.prompt,
     timeLimitSeconds: question.timeLimitSeconds,
     points: question.points,
+    category,
     answers: question.answers.map(({ id, text }) => ({ id, text })),
   };
 }
@@ -105,6 +111,7 @@ export const gameService = {
       questionStartedAt: Date.now(),
       answers: [],
       scores: {},
+      category: quiz.category,
     };
 
     roomsRepository.setGame(roomCode, game);
@@ -115,6 +122,7 @@ export const gameService = {
       questionIndex: 0,
       totalQuestions: game.questions.length,
       startedAt: game.questionStartedAt,
+      category: game.category,
     };
   },
 
@@ -234,6 +242,7 @@ export const gameService = {
       questionIndex: nextIndex,
       totalQuestions: game.questions.length,
       startedAt: game.questionStartedAt,
+      category: game.category,
     };
   },
 };

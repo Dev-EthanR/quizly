@@ -90,7 +90,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       roomCode: parsed.data.roomCode,
       questionIndex: started.questionIndex,
       totalQuestions: started.totalQuestions,
-      question: toPublicQuestion(started.question),
+      question: toPublicQuestion(started.question, started.category),
       startedAt: started.startedAt,
     });
 
@@ -149,7 +149,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
     io.to(parsed.data.roomCode).emit("question_started", {
       questionIndex: next.questionIndex,
       totalQuestions: next.totalQuestions,
-      question: toPublicQuestion(next.question),
+      question: toPublicQuestion(next.question, next.category),
       startedAt: next.startedAt,
     });
 

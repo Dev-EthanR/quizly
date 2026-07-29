@@ -1,3 +1,5 @@
+import type { QuizCategory } from "shared";
+
 export interface PlayerRecord {
   socketId: string;
   name: string;
@@ -33,6 +35,7 @@ export interface GameState {
   questionStartedAt: number;
   answers: QuestionAnswer[];
   scores: Record<string, number>;
+  category: QuizCategory | null;
 }
 
 export interface RoomRecord {

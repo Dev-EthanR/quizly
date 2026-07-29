@@ -3,6 +3,7 @@ import type { Socket } from "socket.io-client";
 import type {
   HostGameInput,
   JoinRoomInput,
+  QuizCategory,
   SendChatMessageInput,
   StartGameInput,
   SubmitAnswerInput,
@@ -22,6 +23,7 @@ export interface PublicQuestion {
   prompt: string;
   timeLimitSeconds: number;
   points: number;
+  category: QuizCategory | null;
   answers: PublicAnswer[];
 }
 
