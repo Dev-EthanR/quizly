@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ROOM_CODE_REGEX } from "shared";
 import RoomNotFound from "../components/lobby/RoomNotFound";
+import HostDisconnected from "../components/lobby/HostDisconnected";
 import ReconnectingOverlay from "../components/lobby/ReconnectingOverlay";
 import HostLobbyPanel from "../components/lobby/HostLobbyPanel";
 import ParticipantLobbyPanel from "../components/lobby/ParticipantLobbyPanel";
@@ -29,6 +30,7 @@ function Lobby() {
   const { socket, status } = useSocket();
   const [players, setPlayers] = useState<LobbyPlayer[]>([]);
   const [roomNotFound, setRoomNotFound] = useState(false);
+  const [hostDisconnected, setHostDisconnected] = useState(false);
   const hasJoinedRef = useRef(false);
 
   const isValidRoomCode =
@@ -48,13 +50,21 @@ function Lobby() {
       setRoomNotFound(true);
     }
 
+    function handleHostDisconnected() {
+      if (!state?.isHost) {
+        setHostDisconnected(true);
+      }
+    }
+
     socket.on("lobby_players", handleLobbyPlayers);
     socket.on("room_not_found", handleRoomNotFound);
+    socket.on("host_disconnected", handleHostDisconnected);
     return () => {
       socket.off("lobby_players", handleLobbyPlayers);
       socket.off("room_not_found", handleRoomNotFound);
+      socket.off("host_disconnected", handleHostDisconnected);
     };
-  }, [isValidRoomCode, socket]);
+  }, [isValidRoomCode, socket, state?.isHost]);
 
   useEffect(() => {
     if (state?.isHost || !isValidRoomCode || !roomCode || !state?.name) {
@@ -114,6 +124,10 @@ function Lobby() {
     return <RoomNotFound roomCode={roomCode} />;
   }
 
+  if (hostDisconnected) {
+    return <HostDisconnected />;
+  }
+
   return (
     <div className="min-h-screen px-4 py-10">
       {!isOnline && <ReconnectingOverlay />}
@@ -141,7 +155,7 @@ function Lobby() {
           )}
         </div>
 
-        <div className="h-[420px] min-h-0 lg:h-auto">
+        <div className="h-[520px] lg:sticky lg:top-10">
           <LobbyChat roomCode={roomCode} />
         </div>
       </div>

@@ -7,15 +7,18 @@ import App from "./App.tsx";
 import { queryClient } from "./lib/queryClient";
 import { AuthProvider } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketProvider";
+import { ChatProvider } from "./context/ChatProvider";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <SocketProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
+          <ChatProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </ChatProvider>
         </SocketProvider>
       </AuthProvider>
     </QueryClientProvider>

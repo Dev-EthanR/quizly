@@ -19,6 +19,11 @@ interface JoinRoomParams {
   color?: string | undefined;
 }
 
+interface IsHostParams {
+  socketId: string;
+  roomCode: string;
+}
+
 function generateRoomCode(): string {
   let code = "";
   for (let i = 0; i < ROOM_CODE_LENGTH; i++) {
@@ -59,6 +64,15 @@ export const roomsService = {
 
   leaveRoom(socketId: string): RoomRecord | undefined {
     return roomsRepository.removePlayerBySocketId(socketId);
+  },
+
+  endRoomIfHost(socketId: string): RoomRecord | undefined {
+    return roomsRepository.deleteByHostSocketId(socketId);
+  },
+
+  isHost({ socketId, roomCode }: IsHostParams): boolean {
+    const room = roomsRepository.findByCode(roomCode);
+    return !!room && room.hostSocketId === socketId;
   },
 
   findParticipant(socketId: string): RoomParticipant | undefined {

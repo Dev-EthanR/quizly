@@ -17,6 +17,10 @@ export interface RoomNotFoundPayload {
   roomCode: string;
 }
 
+export interface HostDisconnectedPayload {
+  roomCode: string;
+}
+
 export interface PublicAnswer {
   id: string;
   text: string;
@@ -102,12 +106,14 @@ export interface ChatMessage {
 export interface ServerToClientEvents {
   room_created: (payload: RoomCreatedPayload) => void;
   room_not_found: (payload: RoomNotFoundPayload) => void;
+  host_disconnected: (payload: HostDisconnectedPayload) => void;
   lobby_players: (payload: LobbyPlayersPayload) => void;
   receive_message: (payload: ChatMessage) => void;
   game_started: (payload: GameStartedPayload) => void;
   question_started: (payload: QuestionStartedPayload) => void;
   answer_progress: (payload: AnswerProgressPayload) => void;
   question_reveal: (payload: QuestionRevealPayload) => void;
+  leaderboard_shown: () => void;
   game_over: (payload: GameOverPayload) => void;
 }
 
@@ -117,6 +123,7 @@ export interface ClientToServerEvents {
   send_message: (payload: SendChatMessageInput) => void;
   start_game: (payload: StartGameInput) => void;
   submit_answer: (payload: SubmitAnswerInput) => void;
+  show_leaderboard: (payload: StartGameInput) => void;
   next_question: (payload: StartGameInput) => void;
 }
 

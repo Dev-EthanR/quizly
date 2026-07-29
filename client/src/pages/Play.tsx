@@ -1,20 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { FiUsers } from "react-icons/fi";
+import clsx from "clsx";
 import { quizCategoryLabels } from "shared";
 import Button from "../components/ui/Button";
 import AnswerButton from "../components/play/AnswerButton";
+import AnswerResultButton from "../components/play/AnswerResultButton";
 import Leaderboard, {
   type LeaderboardRankChange,
   type LeaderboardRowEntry,
 } from "../components/play/Leaderboard";
 import GameCountdown from "../components/play/GameCountdown";
 import QuestionTimer from "../components/play/QuestionTimer";
-import FeedbackScreen from "../components/play/FeedbackScreen";
-import HostAnswerBreakdown from "../components/play/HostAnswerBreakdown";
 import PodiumScreen from "../components/play/PodiumScreen";
 import PlayerResultScreen from "../components/play/PlayerResultScreen";
 import LobbyChat from "../components/lobby/LobbyChat";
+import HostDisconnected from "../components/lobby/HostDisconnected";
 import { useSocket } from "../context/useSocket";
 import type {
   AnswerProgressPayload,
@@ -25,7 +26,6 @@ import type {
 } from "../context/socket-context";
 
 const ANSWER_OPTION_LABELS = ["A", "B", "C", "D"];
-const LEADERBOARD_DELAY_MS = 4000;
 
 interface PlayLocation {
   state?: {
@@ -37,7 +37,7 @@ interface PlayLocation {
   };
 }
 
-type GamePhase = "question" | "feedback" | "host-reveal" | "leaderboard" | "ended";
+type GamePhase = "question" | "result" | "leaderboard" | "ended";
 
 function Play() {
   const { roomCode } = useParams();
@@ -65,6 +65,7 @@ function Play() {
     (state?.questionIndex ?? 0) === 0,
   );
   const [correctCount, setCorrectCount] = useState(0);
+  const [hostDisconnected, setHostDisconnected] = useState(false);
 
   useEffect(() => {
     function handleQuestionStarted(payload: QuestionStartedPayload) {
@@ -90,7 +91,11 @@ function Play() {
       if (ownResult?.correct) {
         setCorrectCount((prev) => prev + 1);
       }
-      setPhase(state?.isHost ? "host-reveal" : "feedback");
+      setPhase("result");
+    }
+
+    function handleLeaderboardShown() {
+      setPhase("leaderboard");
     }
 
     function handleGameOver(payload: GameOverPayload) {
@@ -98,18 +103,28 @@ function Play() {
       setPhase("ended");
     }
 
+    function handleHostDisconnected() {
+      if (!state?.isHost && phase !== "ended") {
+        setHostDisconnected(true);
+      }
+    }
+
     socket.on("question_started", handleQuestionStarted);
     socket.on("answer_progress", handleAnswerProgress);
     socket.on("question_reveal", handleQuestionReveal);
+    socket.on("leaderboard_shown", handleLeaderboardShown);
     socket.on("game_over", handleGameOver);
+    socket.on("host_disconnected", handleHostDisconnected);
 
     return () => {
       socket.off("question_started", handleQuestionStarted);
       socket.off("answer_progress", handleAnswerProgress);
       socket.off("question_reveal", handleQuestionReveal);
+      socket.off("leaderboard_shown", handleLeaderboardShown);
       socket.off("game_over", handleGameOver);
+      socket.off("host_disconnected", handleHostDisconnected);
     };
-  }, [socket, state?.isHost]);
+  }, [socket, state?.isHost, phase]);
 
   useEffect(() => {
     if (!question || phase !== "question" || showStartCountdown) {
@@ -127,15 +142,6 @@ function Play() {
     const interval = setInterval(update, 250);
     return () => clearInterval(interval);
   }, [question, startedAt, phase, showStartCountdown]);
-
-  useEffect(() => {
-    if (phase !== "feedback" && phase !== "host-reveal") {
-      return;
-    }
-
-    const timeout = setTimeout(() => setPhase("leaderboard"), LEADERBOARD_DELAY_MS);
-    return () => clearTimeout(timeout);
-  }, [phase]);
 
   const leaderboardEntries = useMemo<LeaderboardRowEntry[]>(() => {
     if (!reveal) {
@@ -178,6 +184,10 @@ function Play() {
     return null;
   }
 
+  if (hostDisconnected) {
+    return <HostDisconnected />;
+  }
+
   const submitAnswer = (answerId: string) => {
     if (
       state?.isHost ||
@@ -189,6 +199,10 @@ function Play() {
     }
     setSelectedAnswerId(answerId);
     socket.emit("submit_answer", { roomCode, questionIndex, answerId });
+  };
+
+  const showLeaderboard = () => {
+    socket.emit("show_leaderboard", { roomCode });
   };
 
   const nextQuestion = () => {
@@ -238,6 +252,7 @@ function Play() {
   }
 
   const ownResult = reveal?.results.find((result) => result.playerId === socket.id);
+  const correctAnswersCount = reveal?.results.filter((result) => result.correct).length ?? 0;
   const categoryLabel = question.category
     ? quizCategoryLabels[question.category]
     : "Quiz";
@@ -260,72 +275,96 @@ function Play() {
             )}
           </div>
 
+          {(phase === "question" || phase === "result") && (
+            <div className="flex flex-col items-center gap-2 text-center">
+              <span className="text-sm font-semibold text-primary">
+                {categoryLabel} &middot; {question.points} pts
+              </span>
+              <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+                {question.prompt}
+              </h1>
+            </div>
+          )}
+
           {phase === "question" && (
+            <div className="flex items-center justify-center gap-2 text-sm text-muted">
+              <FiUsers className="h-4 w-4" />
+              <span>
+                {answerProgress
+                  ? `${answerProgress.answered}/${answerProgress.total}`
+                  : "0"}{" "}
+                answered
+              </span>
+            </div>
+          )}
+
+          {phase === "result" && reveal && (
+            <p
+              className={clsx(
+                "text-center text-lg font-bold",
+                state?.isHost
+                  ? "text-muted"
+                  : ownResult?.correct
+                    ? "text-secondary"
+                    : "text-danger",
+              )}
+            >
+              {state?.isHost
+                ? `${correctAnswersCount} of ${reveal.results.length} answered correctly`
+                : ownResult?.correct
+                  ? `Correct! +${ownResult.pointsAwarded} points`
+                  : "Incorrect — +0 points"}
+            </p>
+          )}
+
+          {phase === "question" && (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {question.answers.map((answer, index) => (
+                <AnswerButton
+                  key={answer.id}
+                  text={answer.text}
+                  optionLabel={
+                    ANSWER_OPTION_LABELS[index % ANSWER_OPTION_LABELS.length]!
+                  }
+                  disabled={!!state?.isHost || !!selectedAnswerId}
+                  isSelected={selectedAnswerId === answer.id}
+                  onClick={() => submitAnswer(answer.id)}
+                />
+              ))}
+            </div>
+          )}
+
+          {phase === "result" && reveal && (
             <>
-              <div className="flex flex-col items-center gap-2 text-center">
-                <span className="text-sm font-semibold text-primary">
-                  {categoryLabel} &middot; {question.points} pts
-                </span>
-                <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
-                  {question.prompt}
-                </h1>
-              </div>
-
-              <div className="flex items-center justify-center gap-2 text-sm text-muted">
-                <FiUsers className="h-4 w-4" />
-                <span>
-                  {answerProgress
-                    ? `${answerProgress.answered}/${answerProgress.total}`
-                    : "0"}{" "}
-                  answered
-                </span>
-              </div>
-
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {question.answers.map((answer, index) => (
-                  <AnswerButton
+                {question.answers.map((answer) => (
+                  <AnswerResultButton
                     key={answer.id}
                     text={answer.text}
-                    optionLabel={
-                      ANSWER_OPTION_LABELS[index % ANSWER_OPTION_LABELS.length]!
+                    isCorrect={reveal.correctAnswerIds.includes(answer.id)}
+                    isOwnAnswer={selectedAnswerId === answer.id}
+                    count={
+                      reveal.results.filter(
+                        (result) => result.answerId === answer.id,
+                      ).length
                     }
-                    disabled={!!state?.isHost || !!selectedAnswerId}
-                    isSelected={selectedAnswerId === answer.id}
-                    onClick={() => submitAnswer(answer.id)}
+                    totalResponses={reveal.results.length}
                   />
                 ))}
               </div>
+
+              {state?.isHost ? (
+                <div className="flex justify-center">
+                  <Button type="button" onClick={showLeaderboard}>
+                    Show Leaderboard
+                  </Button>
+                </div>
+              ) : (
+                <p className="text-center text-sm text-muted">
+                  Waiting for host...
+                </p>
+              )}
             </>
-          )}
-
-          {phase === "feedback" && reveal && (
-            <FeedbackScreen
-              correct={!!ownResult?.correct}
-              pointsAwarded={ownResult?.pointsAwarded ?? 0}
-              totalScore={ownResult?.totalScore ?? 0}
-              correctAnswerText={
-                question.answers.find((answer) =>
-                  reveal.correctAnswerIds.includes(answer.id),
-                )?.text
-              }
-            />
-          )}
-
-          {phase === "host-reveal" && reveal && (
-            <div className="flex flex-1 flex-col items-center justify-center gap-6 py-6">
-              <h2 className="text-2xl font-bold text-foreground">Results</h2>
-              <HostAnswerBreakdown
-                options={question.answers.map((answer) => ({
-                  id: answer.id,
-                  text: answer.text,
-                  isCorrect: reveal.correctAnswerIds.includes(answer.id),
-                  count: reveal.results.filter(
-                    (result) => result.answerId === answer.id,
-                  ).length,
-                }))}
-                totalResponses={reveal.results.length}
-              />
-            </div>
           )}
 
           {phase === "leaderboard" && reveal && (

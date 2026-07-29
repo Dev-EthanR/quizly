@@ -92,6 +92,16 @@ export const roomsRepository = {
     return undefined;
   },
 
+  deleteByHostSocketId(hostSocketId: string): RoomRecord | undefined {
+    for (const room of rooms.values()) {
+      if (room.hostSocketId === hostSocketId) {
+        rooms.delete(room.code);
+        return room;
+      }
+    }
+    return undefined;
+  },
+
   setGame(code: string, game: GameState): void {
     const room = rooms.get(code);
     if (room) {

@@ -125,6 +125,20 @@ export function registerGameHandlers(io: Server, socket: Socket) {
     }
   });
 
+  socket.on("show_leaderboard", (payload) => {
+    const parsed = startGameSchema.safeParse(payload);
+    if (!parsed.success) {
+      console.warn("Invalid show_leaderboard payload", parsed.error.flatten());
+      return;
+    }
+
+    if (!roomsService.isHost({ socketId: socket.id, roomCode: parsed.data.roomCode })) {
+      return;
+    }
+
+    io.to(parsed.data.roomCode).emit("leaderboard_shown");
+  });
+
   socket.on("next_question", (payload) => {
     const parsed = startGameSchema.safeParse(payload);
     if (!parsed.success) {
@@ -158,6 +172,12 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   });
 
   socket.on("disconnect", () => {
+    const hostRoom = roomsService.endRoomIfHost(socket.id);
+    if (hostRoom) {
+      io.to(hostRoom.code).emit("host_disconnected", { roomCode: hostRoom.code });
+      return;
+    }
+
     const room = roomsService.leaveRoom(socket.id);
     if (room) {
       broadcastLobbyPlayers(io, room);

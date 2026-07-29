@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { FiSend } from "react-icons/fi";
 import { CHAT_MESSAGE_MAX_LENGTH } from "shared";
 import { useSocket } from "../../context/useSocket";
-import type { ChatMessage } from "../../context/socket-context";
+import { useChat } from "../../context/useChat";
 
 interface LobbyChatProps {
   roomCode: string;
@@ -11,33 +11,26 @@ interface LobbyChatProps {
 
 function LobbyChat({ roomCode }: LobbyChatProps) {
   const { socket, status } = useSocket();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const { messages, sendMessage, enterRoom } = useChat();
   const [draft, setDraft] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleReceiveMessage(message: ChatMessage) {
-      setMessages((prev) => [...prev, message]);
-    }
-
-    socket.on("receive_message", handleReceiveMessage);
-    return () => {
-      socket.off("receive_message", handleReceiveMessage);
-    };
-  }, [socket]);
+    enterRoom(roomCode);
+  }, [roomCode, enterRoom]);
 
   useEffect(() => {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
   }, [messages]);
 
-  const sendMessage = (event: FormEvent) => {
+  const handleSendMessage = (event: FormEvent) => {
     event.preventDefault();
     const trimmed = draft.trim();
     if (!trimmed || status !== "connected") {
       return;
     }
 
-    socket.emit("send_message", { roomCode, message: trimmed });
+    sendMessage(roomCode, trimmed);
     setDraft("");
   };
 
@@ -86,7 +79,7 @@ function LobbyChat({ roomCode }: LobbyChatProps) {
       </div>
 
       <form
-        onSubmit={sendMessage}
+        onSubmit={handleSendMessage}
         className="flex items-center gap-2 border-t border-border p-3"
       >
         <input
