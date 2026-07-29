@@ -283,7 +283,7 @@ export const gameService = {
     return true;
   },
 
-  nextQuestion({ socketId, roomCode }: StartGameParams) {
+  async nextQuestion({ socketId, roomCode }: StartGameParams) {
     const room = roomsRepository.findByCode(roomCode);
     const game = room?.game;
     if (
@@ -298,6 +298,7 @@ export const gameService = {
     const nextIndex = game.currentQuestionIndex + 1;
     if (nextIndex >= game.questions.length) {
       game.phase = "ended";
+      await quizzesRepository.incrementPlayCount(room.quizId);
       return {
         ended: true as const,
         leaderboard: buildLeaderboard(room, game),

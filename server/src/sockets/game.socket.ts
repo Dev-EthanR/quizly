@@ -210,14 +210,14 @@ export function registerGameHandlers(io: Server, socket: Socket) {
     io.to(parsed.data.roomCode).emit("leaderboard_shown");
   });
 
-  socket.on("next_question", (payload) => {
+  socket.on("next_question", async (payload) => {
     const parsed = startGameSchema.safeParse(payload);
     if (!parsed.success) {
       console.warn("Invalid next_question payload", parsed.error.flatten());
       return;
     }
 
-    const next = gameService.nextQuestion({
+    const next = await gameService.nextQuestion({
       socketId: socket.id,
       roomCode: parsed.data.roomCode,
     });

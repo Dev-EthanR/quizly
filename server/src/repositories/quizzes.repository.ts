@@ -134,6 +134,13 @@ export const quizzesRepository = {
     });
   },
 
+  incrementPlayCount(id: string) {
+    return prisma.quiz.update({
+      where: { id },
+      data: { playCount: { increment: 1 } },
+    });
+  },
+
   async findPublished({ search, category, difficulty, page }: FindPublishedParams) {
     const where = buildPublishedWhere({ search, category, difficulty });
 
