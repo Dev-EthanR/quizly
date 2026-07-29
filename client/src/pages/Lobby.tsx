@@ -78,7 +78,16 @@ function Lobby() {
     }
 
     function handleGameStarted(payload: GameStartedPayload) {
-      navigate(`/play/${payload.roomCode}`, { state, replace: true });
+      navigate(`/play/${payload.roomCode}`, {
+        replace: true,
+        state: {
+          ...state,
+          questionIndex: payload.questionIndex,
+          totalQuestions: payload.totalQuestions,
+          question: payload.question,
+          startedAt: payload.startedAt,
+        },
+      });
     }
 
     socket.on("game_started", handleGameStarted);

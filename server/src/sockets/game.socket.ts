@@ -1,6 +1,12 @@
 import type { Server, Socket } from "socket.io";
-import { hostGameSchema, joinRoomSchema, startGameSchema } from "shared";
+import {
+  hostGameSchema,
+  joinRoomSchema,
+  startGameSchema,
+  submitAnswerSchema,
+} from "shared";
 import { roomsService } from "../services/rooms.service.js";
+import { gameService, toPublicQuestion } from "../services/game.service.js";
 import type { RoomRecord } from "../repositories/rooms.repository.js";
 
 function broadcastLobbyPlayers(io: Server, room: RoomRecord) {
@@ -11,6 +17,19 @@ function broadcastLobbyPlayers(io: Server, room: RoomRecord) {
       color,
     })),
   });
+}
+
+function broadcastReveal(io: Server, roomCode: string) {
+  const reveal = gameService.revealQuestion(roomCode);
+  if (!reveal) {
+    return;
+  }
+
+  io.to(roomCode).emit("question_reveal", reveal);
+}
+
+function scheduleReveal(io: Server, roomCode: string, timeLimitSeconds: number) {
+  setTimeout(() => broadcastReveal(io, roomCode), timeLimitSeconds * 1000);
 }
 
 export function registerGameHandlers(io: Server, socket: Socket) {
@@ -52,25 +71,89 @@ export function registerGameHandlers(io: Server, socket: Socket) {
     broadcastLobbyPlayers(io, room);
   });
 
-  socket.on("start_game", (payload) => {
+  socket.on("start_game", async (payload) => {
     const parsed = startGameSchema.safeParse(payload);
     if (!parsed.success) {
       console.warn("Invalid start_game payload", parsed.error.flatten());
       return;
     }
 
-    const participant = roomsService.findParticipant(socket.id);
-    if (
-      !participant ||
-      !participant.isHost ||
-      participant.roomCode !== parsed.data.roomCode
-    ) {
+    const started = await gameService.startGame({
+      socketId: socket.id,
+      roomCode: parsed.data.roomCode,
+    });
+    if (!started) {
       return;
     }
 
     io.to(parsed.data.roomCode).emit("game_started", {
       roomCode: parsed.data.roomCode,
+      questionIndex: started.questionIndex,
+      totalQuestions: started.totalQuestions,
+      question: toPublicQuestion(started.question),
+      startedAt: started.startedAt,
     });
+
+    scheduleReveal(io, parsed.data.roomCode, started.question.timeLimitSeconds);
+  });
+
+  socket.on("submit_answer", (payload) => {
+    const parsed = submitAnswerSchema.safeParse(payload);
+    if (!parsed.success) {
+      console.warn("Invalid submit_answer payload", parsed.error.flatten());
+      return;
+    }
+
+    const result = gameService.submitAnswer({
+      socketId: socket.id,
+      roomCode: parsed.data.roomCode,
+      questionIndex: parsed.data.questionIndex,
+      answerId: parsed.data.answerId,
+    });
+    if (!result) {
+      return;
+    }
+
+    io.to(parsed.data.roomCode).emit("answer_progress", {
+      answered: result.answeredCount,
+      total: result.totalPlayers,
+    });
+
+    if (result.allAnswered) {
+      broadcastReveal(io, parsed.data.roomCode);
+    }
+  });
+
+  socket.on("next_question", (payload) => {
+    const parsed = startGameSchema.safeParse(payload);
+    if (!parsed.success) {
+      console.warn("Invalid next_question payload", parsed.error.flatten());
+      return;
+    }
+
+    const next = gameService.nextQuestion({
+      socketId: socket.id,
+      roomCode: parsed.data.roomCode,
+    });
+    if (!next) {
+      return;
+    }
+
+    if (next.ended) {
+      io.to(parsed.data.roomCode).emit("game_over", {
+        leaderboard: next.leaderboard,
+      });
+      return;
+    }
+
+    io.to(parsed.data.roomCode).emit("question_started", {
+      questionIndex: next.questionIndex,
+      totalQuestions: next.totalQuestions,
+      question: toPublicQuestion(next.question),
+      startedAt: next.startedAt,
+    });
+
+    scheduleReveal(io, parsed.data.roomCode, next.question.timeLimitSeconds);
   });
 
   socket.on("disconnect", () => {

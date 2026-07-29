@@ -43,3 +43,11 @@ export const startGameSchema = z.object({
 });
 
 export type StartGameInput = z.infer<typeof startGameSchema>;
+
+export const submitAnswerSchema = z.object({
+  roomCode: roomCodeSchema,
+  questionIndex: z.number().int().min(0),
+  answerId: z.string().min(1),
+});
+
+export type SubmitAnswerInput = z.infer<typeof submitAnswerSchema>;

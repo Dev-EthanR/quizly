@@ -4,12 +4,44 @@ export interface PlayerRecord {
   color?: string | undefined;
 }
 
+export interface GameAnswerOption {
+  id: string;
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface GameQuestion {
+  id: string;
+  prompt: string;
+  timeLimitSeconds: number;
+  points: number;
+  answers: GameAnswerOption[];
+}
+
+export interface QuestionAnswer {
+  socketId: string;
+  answerId: string;
+  answeredAt: number;
+}
+
+export type GamePhase = "question" | "reveal" | "ended";
+
+export interface GameState {
+  questions: GameQuestion[];
+  currentQuestionIndex: number;
+  phase: GamePhase;
+  questionStartedAt: number;
+  answers: QuestionAnswer[];
+  scores: Record<string, number>;
+}
+
 export interface RoomRecord {
   code: string;
   hostSocketId: string;
   quizId: string;
   createdAt: number;
   players: PlayerRecord[];
+  game?: GameState | undefined;
 }
 
 export interface RoomParticipant {
@@ -55,6 +87,13 @@ export const roomsRepository = {
       }
     }
     return undefined;
+  },
+
+  setGame(code: string, game: GameState): void {
+    const room = rooms.get(code);
+    if (room) {
+      room.game = game;
+    }
   },
 
   findParticipantBySocketId(socketId: string): RoomParticipant | undefined {
