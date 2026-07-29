@@ -18,7 +18,7 @@ export function registerChatHandlers(io: Server, socket: Socket) {
 
     io.to(participant.roomCode).emit("receive_message", {
       id: randomUUID(),
-      senderId: socket.id,
+      senderId: participant.token,
       senderName: participant.name,
       senderColor: participant.color,
       isHost: participant.isHost,

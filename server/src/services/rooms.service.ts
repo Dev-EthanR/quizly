@@ -7,9 +7,12 @@ import {
 const ROOM_CODE_LENGTH = 6;
 const ROOM_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
+export const RECONNECT_GRACE_MS = 30_000;
+
 interface HostGameParams {
   hostSocketId: string;
   quizId: string;
+  token: string;
 }
 
 interface JoinRoomParams {
@@ -17,6 +20,13 @@ interface JoinRoomParams {
   roomCode: string;
   name: string;
   color?: string | undefined;
+  token: string;
+}
+
+interface RejoinParams {
+  socketId: string;
+  roomCode: string;
+  token: string;
 }
 
 interface IsHostParams {
@@ -41,10 +51,12 @@ function generateUniqueRoomCode(): string {
 }
 
 export const roomsService = {
-  hostGame({ hostSocketId, quizId }: HostGameParams): RoomRecord {
+  hostGame({ hostSocketId, quizId, token }: HostGameParams): RoomRecord {
     const room: RoomRecord = {
       code: generateUniqueRoomCode(),
+      hostToken: token,
       hostSocketId,
+      hostConnected: true,
       quizId,
       createdAt: Date.now(),
       players: [],
@@ -53,21 +65,64 @@ export const roomsService = {
     return room;
   },
 
+  rejoinAsHost({ socketId, roomCode, token }: RejoinParams): RoomRecord | undefined {
+    const room = roomsRepository.findByCode(roomCode);
+    if (!room || room.hostToken !== token) {
+      return undefined;
+    }
+    return roomsRepository.markHostConnected(roomCode, socketId);
+  },
+
   joinRoom({
     socketId,
     roomCode,
     name,
     color,
+    token,
   }: JoinRoomParams): RoomRecord | undefined {
-    return roomsRepository.addPlayer(roomCode, { socketId, name, color });
+    return roomsRepository.addPlayer(roomCode, {
+      token,
+      socketId,
+      connected: true,
+      name,
+      color,
+    });
   },
 
-  leaveRoom(socketId: string): RoomRecord | undefined {
-    return roomsRepository.removePlayerBySocketId(socketId);
+  rejoinAsPlayer({ socketId, roomCode, token }: RejoinParams): RoomRecord | undefined {
+    const player = roomsRepository.findPlayerByToken(roomCode, token);
+    if (!player) {
+      return undefined;
+    }
+    return roomsRepository.markPlayerConnected(roomCode, token, socketId);
   },
 
-  endRoomIfHost(socketId: string): RoomRecord | undefined {
-    return roomsRepository.deleteByHostSocketId(socketId);
+  markHostDisconnected(socketId: string): RoomRecord | undefined {
+    return roomsRepository.markHostDisconnectedBySocketId(socketId);
+  },
+
+  isHostStillDisconnected(roomCode: string): boolean {
+    const room = roomsRepository.findByCode(roomCode);
+    return !!room && !room.hostConnected;
+  },
+
+  deleteRoom(roomCode: string): RoomRecord | undefined {
+    return roomsRepository.deleteByCode(roomCode);
+  },
+
+  markPlayerDisconnected(
+    socketId: string,
+  ): { room: RoomRecord; token: string } | undefined {
+    return roomsRepository.markPlayerDisconnectedBySocketId(socketId);
+  },
+
+  isPlayerStillDisconnected(roomCode: string, token: string): boolean {
+    const player = roomsRepository.findPlayerByToken(roomCode, token);
+    return !!player && !player.connected;
+  },
+
+  removePlayer(roomCode: string, token: string): RoomRecord | undefined {
+    return roomsRepository.removePlayerByToken(roomCode, token);
   },
 
   isHost({ socketId, roomCode }: IsHostParams): boolean {

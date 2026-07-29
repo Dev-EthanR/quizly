@@ -1,13 +1,19 @@
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
-import { joinRoomSchema, type JoinRoomInput } from "shared";
+import { joinRoomSchema } from "shared";
+import type { z } from "zod";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import AvatarColorField from "../components/ui/AvatarColorField";
 import { getRandomUsername } from "../lib/usernames";
 import { getInitials } from "../lib/initials";
 import { AVATAR_COLORS } from "../lib/avatarColors";
+import { createSessionToken } from "../lib/session";
+
+const homeJoinFormSchema = joinRoomSchema.omit({ token: true });
+
+type HomeJoinFormValues = z.infer<typeof homeJoinFormSchema>;
 
 function Home() {
   const navigate = useNavigate();
@@ -16,17 +22,21 @@ function Home() {
     handleSubmit,
     control,
     formState: { errors, isSubmitting },
-  } = useForm<JoinRoomInput>({
-    resolver: zodResolver(joinRoomSchema),
+  } = useForm<HomeJoinFormValues>({
+    resolver: zodResolver(homeJoinFormSchema),
     defaultValues: { name: "", color: AVATAR_COLORS[0].id, roomCode: "" },
   });
 
   const name = useWatch({ control, name: "name" });
 
-  const onSubmit = (values: JoinRoomInput) => {
+  const onSubmit = (values: HomeJoinFormValues) => {
     const resolvedName = values.name || getRandomUsername();
     navigate(`/lobby/${values.roomCode}`, {
-      state: { name: resolvedName, color: values.color },
+      state: {
+        name: resolvedName,
+        color: values.color,
+        token: createSessionToken(),
+      },
     });
   };
 

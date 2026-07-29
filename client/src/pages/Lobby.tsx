@@ -9,16 +9,19 @@ import ParticipantLobbyPanel from "../components/lobby/ParticipantLobbyPanel";
 import LobbyChat from "../components/lobby/LobbyChat";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { useSocket } from "../context/useSocket";
+import { clearSession, loadSession, saveSession, type RoomSession } from "../lib/session";
 import type {
   GameStartedPayload,
   LobbyPlayer,
   LobbyPlayersPayload,
+  RoomStatePayload,
 } from "../context/socket-context";
 
 interface LobbyLocation {
   state?: {
     name?: string;
     color?: string;
+    token?: string;
     isHost?: boolean;
   };
 }
@@ -29,9 +32,34 @@ function Lobby() {
   const navigate = useNavigate();
   const { socket, status } = useSocket();
   const [players, setPlayers] = useState<LobbyPlayer[]>([]);
+  const hadExistingSessionRef = useRef<boolean>(
+    !!(roomCode && loadSession(roomCode)),
+  );
+  const [session, setSession] = useState<RoomSession | null>(() => {
+    if (!roomCode) {
+      return null;
+    }
+    const existing = loadSession(roomCode);
+    if (existing) {
+      return existing;
+    }
+    if (!state?.isHost && state?.name && state?.token) {
+      const fresh: RoomSession = {
+        roomCode,
+        token: state.token,
+        isHost: false,
+        name: state.name,
+        color: state.color,
+      };
+      saveSession(fresh);
+      return fresh;
+    }
+    return null;
+  });
   const [roomNotFound, setRoomNotFound] = useState(false);
   const [hostDisconnected, setHostDisconnected] = useState(false);
-  const hasJoinedRef = useRef(false);
+  const [hostReconnecting, setHostReconnecting] = useState(false);
+  const attemptRef = useRef<"rejoin" | "join" | null>(null);
 
   const isValidRoomCode =
     !!roomCode && ROOM_CODE_REGEX.test(roomCode.toUpperCase());
@@ -47,7 +75,46 @@ function Lobby() {
     }
 
     function handleRoomNotFound() {
+      const canFallbackToFreshJoin =
+        attemptRef.current === "rejoin" &&
+        !state?.isHost &&
+        !!state?.name &&
+        !!state?.token;
+
+      if (attemptRef.current === "rejoin" && roomCode) {
+        clearSession(roomCode);
+      }
+
+      if (canFallbackToFreshJoin && roomCode && state?.name && state?.token) {
+        const fresh: RoomSession = {
+          roomCode,
+          token: state.token,
+          isHost: false,
+          name: state.name,
+          color: state.color,
+        };
+        saveSession(fresh);
+        hadExistingSessionRef.current = false;
+        attemptRef.current = null;
+        setSession(fresh);
+        return;
+      }
+
       setRoomNotFound(true);
+    }
+
+    function handleRoomState(payload: RoomStatePayload) {
+      if (payload.phase !== "lobby" && roomCode) {
+        navigate(`/play/${roomCode}`, { replace: true });
+      }
+    }
+
+    function handleHostReconnecting() {
+      setHostReconnecting(true);
+    }
+
+    function handleHostReconnected() {
+      setHostReconnecting(false);
     }
 
     function handleHostDisconnected() {
@@ -58,36 +125,60 @@ function Lobby() {
 
     socket.on("lobby_players", handleLobbyPlayers);
     socket.on("room_not_found", handleRoomNotFound);
+    socket.on("room_state", handleRoomState);
+    socket.on("host_reconnecting", handleHostReconnecting);
+    socket.on("host_reconnected", handleHostReconnected);
     socket.on("host_disconnected", handleHostDisconnected);
     return () => {
       socket.off("lobby_players", handleLobbyPlayers);
       socket.off("room_not_found", handleRoomNotFound);
+      socket.off("room_state", handleRoomState);
+      socket.off("host_reconnecting", handleHostReconnecting);
+      socket.off("host_reconnected", handleHostReconnected);
       socket.off("host_disconnected", handleHostDisconnected);
     };
-  }, [isValidRoomCode, socket, state?.isHost]);
+  }, [
+    isValidRoomCode,
+    socket,
+    state?.isHost,
+    state?.name,
+    state?.token,
+    state?.color,
+    roomCode,
+    navigate,
+  ]);
 
   useEffect(() => {
-    if (state?.isHost || !isValidRoomCode || !roomCode || !state?.name) {
+    if (status === "disconnected") {
+      attemptRef.current = null;
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (
+      !isValidRoomCode ||
+      !roomCode ||
+      status !== "connected" ||
+      attemptRef.current ||
+      !session
+    ) {
       return;
     }
 
-    if (status === "connected" && !hasJoinedRef.current) {
-      socket.emit("join_room", {
-        roomCode,
-        name: state.name,
-        color: state.color,
-      });
-      hasJoinedRef.current = true;
+    if (hadExistingSessionRef.current) {
+      attemptRef.current = "rejoin";
+      socket.emit("rejoin_room", { roomCode, token: session.token });
+      return;
     }
-  }, [
-    state?.isHost,
-    state?.name,
-    state?.color,
-    isValidRoomCode,
-    roomCode,
-    status,
-    socket,
-  ]);
+
+    attemptRef.current = "join";
+    socket.emit("join_room", {
+      roomCode,
+      name: session.name ?? "Guest",
+      color: session.color,
+      token: session.token,
+    });
+  }, [isValidRoomCode, roomCode, status, session, socket]);
 
   useEffect(() => {
     if (!isValidRoomCode) {
@@ -120,13 +211,17 @@ function Lobby() {
     socket.emit("start_game", { roomCode });
   };
 
-  if (!isValidRoomCode || roomNotFound) {
+  if (!isValidRoomCode || roomNotFound || !session) {
     return <RoomNotFound roomCode={roomCode} />;
   }
 
   if (hostDisconnected) {
     return <HostDisconnected />;
   }
+
+  const isHost = state?.isHost ?? session?.isHost ?? false;
+  const displayName = state?.name ?? session?.name ?? "Guest";
+  const displayColor = state?.color ?? session?.color;
 
   return (
     <div className="min-h-screen px-4 py-10">
@@ -136,9 +231,15 @@ function Lobby() {
         Quiz<span className="text-primary">zly</span>
       </h1>
 
+      {hostReconnecting && !isHost && (
+        <p className="mx-auto mb-6 w-fit rounded-full border border-warning/30 bg-warning/10 px-4 py-2 text-center text-sm font-medium text-warning">
+          Host disconnected — waiting for them to reconnect...
+        </p>
+      )}
+
       <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[1fr_320px]">
         <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-surface/40 px-6 py-10">
-          {state?.isHost ? (
+          {isHost ? (
             <HostLobbyPanel
               roomCode={roomCode}
               players={players}
@@ -147,10 +248,10 @@ function Lobby() {
           ) : (
             <ParticipantLobbyPanel
               roomCode={roomCode}
-              name={state?.name ?? "Guest"}
-              color={state?.color}
+              name={displayName}
+              color={displayColor}
               players={players}
-              currentPlayerId={socket.id}
+              currentPlayerId={session?.token}
             />
           )}
         </div>

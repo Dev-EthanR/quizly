@@ -3,6 +3,7 @@ import {
   roomsRepository,
   type GameQuestion,
   type GameState,
+  type RoomRecord,
 } from "../repositories/rooms.repository.js";
 import type { QuizCategory } from "shared";
 
@@ -20,6 +21,11 @@ interface SubmitAnswerParams {
   answerId: string;
 }
 
+interface MarkLeaderboardShownParams {
+  socketId: string;
+  roomCode: string;
+}
+
 interface QuestionOutcome {
   correct: boolean;
   pointsAwarded: number;
@@ -33,6 +39,49 @@ export interface PublicQuestion {
   category: QuizCategory | null;
   answers: { id: string; text: string }[];
 }
+
+export interface LeaderboardEntry {
+  playerId: string;
+  name: string;
+  score: number;
+  correctCount: number;
+  connected: boolean;
+}
+
+export interface QuestionResult {
+  playerId: string;
+  name: string;
+  answerId: string | null;
+  correct: boolean;
+  pointsAwarded: number;
+  totalScore: number;
+}
+
+export interface QuestionRevealPayload {
+  questionIndex: number;
+  correctAnswerIds: string[];
+  results: QuestionResult[];
+  leaderboard: LeaderboardEntry[];
+}
+
+export type RoomState =
+  | { phase: "lobby" }
+  | {
+      phase: "question";
+      questionIndex: number;
+      totalQuestions: number;
+      question: PublicQuestion;
+      startedAt: number;
+    }
+  | {
+      phase: "result" | "leaderboard";
+      questionIndex: number;
+      totalQuestions: number;
+      question: PublicQuestion;
+      startedAt: number;
+      reveal: QuestionRevealPayload;
+    }
+  | { phase: "ended"; leaderboard: LeaderboardEntry[]; totalQuestions: number };
 
 interface QuizWithQuestions {
   questions: {
@@ -92,10 +141,49 @@ export function scoreAnswer(
   return { correct: true, pointsAwarded: Math.round(question.points * factor) };
 }
 
+function buildLeaderboard(room: RoomRecord, game: GameState): LeaderboardEntry[] {
+  return room.players
+    .map((player) => ({
+      playerId: player.token,
+      name: player.name,
+      score: game.scores[player.token] ?? 0,
+      correctCount: game.correctCounts[player.token] ?? 0,
+      connected: player.connected,
+    }))
+    .sort((a, b) => b.score - a.score);
+}
+
+function buildRevealPayload(room: RoomRecord, game: GameState): QuestionRevealPayload {
+  const question = game.questions[game.currentQuestionIndex]!;
+
+  const results = room.players.map((player) => {
+    const answer = game.answers.find((a) => a.token === player.token);
+    const outcome = answer
+      ? scoreAnswer(question, answer.answerId, answer.answeredAt - game.questionStartedAt)
+      : { correct: false, pointsAwarded: 0 };
+
+    return {
+      playerId: player.token,
+      name: player.name,
+      answerId: answer?.answerId ?? null,
+      correct: outcome.correct,
+      pointsAwarded: outcome.pointsAwarded,
+      totalScore: game.scores[player.token] ?? 0,
+    };
+  });
+
+  return {
+    questionIndex: game.currentQuestionIndex,
+    correctAnswerIds: question.answers.filter((a) => a.isCorrect).map((a) => a.id),
+    results,
+    leaderboard: buildLeaderboard(room, game),
+  };
+}
+
 export const gameService = {
   async startGame({ socketId, roomCode }: StartGameParams) {
     const room = roomsRepository.findByCode(roomCode);
-    if (!room || room.hostSocketId !== socketId) {
+    if (!room || room.hostSocketId !== socketId || room.game) {
       return undefined;
     }
 
@@ -111,7 +199,9 @@ export const gameService = {
       questionStartedAt: Date.now(),
       answers: [],
       scores: {},
+      correctCounts: {},
       category: quiz.category,
+      leaderboardShown: false,
     };
 
     roomsRepository.setGame(roomCode, game);
@@ -138,30 +228,38 @@ export const gameService = {
       return undefined;
     }
 
-    const isPlayer = room.players.some((p) => p.socketId === socketId);
-    if (!isPlayer || game.answers.some((a) => a.socketId === socketId)) {
+    const player = room.players.find((p) => p.socketId === socketId);
+    if (!player || game.answers.some((a) => a.token === player.token)) {
       return undefined;
     }
 
     const question = game.questions[questionIndex]!;
     const answeredAt = Date.now();
-    game.answers.push({ socketId, answerId, answeredAt });
+    game.answers.push({ token: player.token, answerId, answeredAt });
 
-    const { pointsAwarded } = scoreAnswer(
+    const { correct, pointsAwarded } = scoreAnswer(
       question,
       answerId,
       answeredAt - game.questionStartedAt,
     );
-    game.scores[socketId] = (game.scores[socketId] ?? 0) + pointsAwarded;
+    game.scores[player.token] = (game.scores[player.token] ?? 0) + pointsAwarded;
+    if (correct) {
+      game.correctCounts[player.token] = (game.correctCounts[player.token] ?? 0) + 1;
+    }
+
+    const connectedPlayers = room.players.filter((p) => p.connected);
+    const answeredConnectedCount = game.answers.filter((a) =>
+      connectedPlayers.some((p) => p.token === a.token),
+    ).length;
 
     return {
-      answeredCount: game.answers.length,
-      totalPlayers: room.players.length,
-      allAnswered: game.answers.length >= room.players.length,
+      answeredCount: answeredConnectedCount,
+      totalPlayers: connectedPlayers.length,
+      allAnswered: answeredConnectedCount >= connectedPlayers.length,
     };
   },
 
-  revealQuestion(roomCode: string) {
+  revealQuestion(roomCode: string): QuestionRevealPayload | undefined {
     const room = roomsRepository.findByCode(roomCode);
     const game = room?.game;
     if (!room || !game || game.phase !== "question") {
@@ -169,40 +267,20 @@ export const gameService = {
     }
 
     game.phase = "reveal";
-    const question = game.questions[game.currentQuestionIndex]!;
+    game.leaderboardShown = false;
 
-    const results = room.players.map((player) => {
-      const answer = game.answers.find((a) => a.socketId === player.socketId);
-      const outcome = answer
-        ? scoreAnswer(question, answer.answerId, answer.answeredAt - game.questionStartedAt)
-        : { correct: false, pointsAwarded: 0 };
+    return buildRevealPayload(room, game);
+  },
 
-      return {
-        playerId: player.socketId,
-        name: player.name,
-        answerId: answer?.answerId ?? null,
-        correct: outcome.correct,
-        pointsAwarded: outcome.pointsAwarded,
-        totalScore: game.scores[player.socketId] ?? 0,
-      };
-    });
+  markLeaderboardShown({ socketId, roomCode }: MarkLeaderboardShownParams): boolean {
+    const room = roomsRepository.findByCode(roomCode);
+    const game = room?.game;
+    if (!room || !game || room.hostSocketId !== socketId || game.phase !== "reveal") {
+      return false;
+    }
 
-    const leaderboard = room.players
-      .map((player) => ({
-        playerId: player.socketId,
-        name: player.name,
-        score: game.scores[player.socketId] ?? 0,
-      }))
-      .sort((a, b) => b.score - a.score);
-
-    return {
-      questionIndex: game.currentQuestionIndex,
-      correctAnswerIds: question.answers
-        .filter((a) => a.isCorrect)
-        .map((a) => a.id),
-      results,
-      leaderboard,
-    };
+    game.leaderboardShown = true;
+    return true;
   },
 
   nextQuestion({ socketId, roomCode }: StartGameParams) {
@@ -220,21 +298,18 @@ export const gameService = {
     const nextIndex = game.currentQuestionIndex + 1;
     if (nextIndex >= game.questions.length) {
       game.phase = "ended";
-      const leaderboard = room.players
-        .map((player) => ({
-          playerId: player.socketId,
-          name: player.name,
-          score: game.scores[player.socketId] ?? 0,
-        }))
-        .sort((a, b) => b.score - a.score);
-
-      return { ended: true as const, leaderboard };
+      return {
+        ended: true as const,
+        leaderboard: buildLeaderboard(room, game),
+        totalQuestions: game.questions.length,
+      };
     }
 
     game.currentQuestionIndex = nextIndex;
     game.phase = "question";
     game.questionStartedAt = Date.now();
     game.answers = [];
+    game.leaderboardShown = false;
 
     return {
       ended: false as const,
@@ -243,6 +318,48 @@ export const gameService = {
       totalQuestions: game.questions.length,
       startedAt: game.questionStartedAt,
       category: game.category,
+    };
+  },
+
+  getRoomState(roomCode: string): RoomState | undefined {
+    const room = roomsRepository.findByCode(roomCode);
+    if (!room) {
+      return undefined;
+    }
+
+    const game = room.game;
+    if (!game) {
+      return { phase: "lobby" };
+    }
+
+    if (game.phase === "ended") {
+      return {
+        phase: "ended",
+        leaderboard: buildLeaderboard(room, game),
+        totalQuestions: game.questions.length,
+      };
+    }
+
+    const question = game.questions[game.currentQuestionIndex]!;
+    const publicQuestion = toPublicQuestion(question, game.category);
+
+    if (game.phase === "question") {
+      return {
+        phase: "question",
+        questionIndex: game.currentQuestionIndex,
+        totalQuestions: game.questions.length,
+        question: publicQuestion,
+        startedAt: game.questionStartedAt,
+      };
+    }
+
+    return {
+      phase: game.leaderboardShown ? "leaderboard" : "result",
+      questionIndex: game.currentQuestionIndex,
+      totalQuestions: game.questions.length,
+      question: publicQuestion,
+      startedAt: game.questionStartedAt,
+      reveal: buildRevealPayload(room, game),
     };
   },
 };

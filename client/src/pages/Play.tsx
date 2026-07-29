@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { FiUsers } from "react-icons/fi";
 import clsx from "clsx";
 import { quizCategoryLabels } from "shared";
@@ -18,12 +18,14 @@ import LobbyChat from "../components/lobby/LobbyChat";
 import HostDisconnected from "../components/lobby/HostDisconnected";
 import RoomNotFound from "../components/lobby/RoomNotFound";
 import { useSocket } from "../context/useSocket";
+import { clearSession, loadSession, type RoomSession } from "../lib/session";
 import type {
   AnswerProgressPayload,
   GameOverPayload,
   PublicQuestion,
   QuestionRevealPayload,
   QuestionStartedPayload,
+  RoomStatePayload,
 } from "../context/socket-context";
 
 const ANSWER_OPTION_LABELS = ["A", "B", "C", "D"];
@@ -43,8 +45,12 @@ type GamePhase = "question" | "result" | "leaderboard" | "ended";
 function Play() {
   const { roomCode } = useParams();
   const { state } = useLocation() as PlayLocation;
-  const { socket } = useSocket();
+  const navigate = useNavigate();
+  const { socket, status } = useSocket();
 
+  const [session] = useState<RoomSession | null>(() =>
+    roomCode ? loadSession(roomCode) : null,
+  );
   const [phase, setPhase] = useState<GamePhase>("question");
   const [question, setQuestion] = useState<PublicQuestion | null>(
     state?.question ?? null,
@@ -63,10 +69,14 @@ function Play() {
     question?.timeLimitSeconds ?? 0,
   );
   const [showStartCountdown, setShowStartCountdown] = useState(
-    (state?.questionIndex ?? 0) === 0,
+    !!state?.question && (state?.questionIndex ?? 0) === 0,
   );
-  const [correctCount, setCorrectCount] = useState(0);
   const [hostDisconnected, setHostDisconnected] = useState(false);
+  const [hostReconnecting, setHostReconnecting] = useState(false);
+  const [roomNotFound, setRoomNotFound] = useState(false);
+  const attemptRef = useRef<"rejoin" | null>(null);
+
+  const isHost = state?.isHost ?? session?.isHost ?? false;
 
   useEffect(() => {
     function handleQuestionStarted(payload: QuestionStartedPayload) {
@@ -77,6 +87,7 @@ function Play() {
       setSelectedAnswerId(null);
       setAnswerProgress(null);
       setReveal(null);
+      setShowStartCountdown(false);
       setPhase("question");
     }
 
@@ -86,12 +97,6 @@ function Play() {
 
     function handleQuestionReveal(payload: QuestionRevealPayload) {
       setReveal(payload);
-      const ownResult = payload.results.find(
-        (result) => result.playerId === socket.id,
-      );
-      if (ownResult?.correct) {
-        setCorrectCount((prev) => prev + 1);
-      }
       setPhase("result");
     }
 
@@ -101,13 +106,66 @@ function Play() {
 
     function handleGameOver(payload: GameOverPayload) {
       setGameOver(payload);
+      setTotalQuestions(payload.totalQuestions);
       setPhase("ended");
     }
 
+    function handleHostReconnecting() {
+      setHostReconnecting(true);
+    }
+
+    function handleHostReconnected() {
+      setHostReconnecting(false);
+    }
+
     function handleHostDisconnected() {
-      if (!state?.isHost && phase !== "ended") {
+      if (!isHost) {
         setHostDisconnected(true);
       }
+    }
+
+    function handleRoomNotFound() {
+      if (roomCode) {
+        clearSession(roomCode);
+      }
+      setRoomNotFound(true);
+    }
+
+    function handleRoomState(payload: RoomStatePayload) {
+      if (payload.phase === "lobby") {
+        if (roomCode) {
+          navigate(`/lobby/${roomCode}`, { replace: true });
+        }
+        return;
+      }
+
+      if (payload.phase === "ended") {
+        setGameOver({ leaderboard: payload.leaderboard, totalQuestions: payload.totalQuestions });
+        setTotalQuestions(payload.totalQuestions);
+        setPhase("ended");
+        return;
+      }
+
+      setQuestion(payload.question);
+      setQuestionIndex(payload.questionIndex);
+      setTotalQuestions(payload.totalQuestions);
+      setStartedAt(payload.startedAt);
+      setShowStartCountdown(false);
+
+      if (payload.phase === "question") {
+        setSelectedAnswerId(null);
+        setAnswerProgress(null);
+        setReveal(null);
+        setPhase("question");
+        return;
+      }
+
+      setReveal(payload.reveal);
+      const ownResult = payload.reveal.results.find(
+        (result) => result.playerId === session?.token,
+      );
+      setSelectedAnswerId(ownResult?.answerId ?? null);
+      setPhase(payload.phase);
     }
 
     socket.on("question_started", handleQuestionStarted);
@@ -115,7 +173,11 @@ function Play() {
     socket.on("question_reveal", handleQuestionReveal);
     socket.on("leaderboard_shown", handleLeaderboardShown);
     socket.on("game_over", handleGameOver);
+    socket.on("host_reconnecting", handleHostReconnecting);
+    socket.on("host_reconnected", handleHostReconnected);
     socket.on("host_disconnected", handleHostDisconnected);
+    socket.on("room_not_found", handleRoomNotFound);
+    socket.on("room_state", handleRoomState);
 
     return () => {
       socket.off("question_started", handleQuestionStarted);
@@ -123,9 +185,28 @@ function Play() {
       socket.off("question_reveal", handleQuestionReveal);
       socket.off("leaderboard_shown", handleLeaderboardShown);
       socket.off("game_over", handleGameOver);
+      socket.off("host_reconnecting", handleHostReconnecting);
+      socket.off("host_reconnected", handleHostReconnected);
       socket.off("host_disconnected", handleHostDisconnected);
+      socket.off("room_not_found", handleRoomNotFound);
+      socket.off("room_state", handleRoomState);
     };
-  }, [socket, state?.isHost, phase]);
+  }, [socket, isHost, roomCode, navigate, session?.token]);
+
+  useEffect(() => {
+    if (status === "disconnected") {
+      attemptRef.current = null;
+    }
+  }, [status]);
+
+  useEffect(() => {
+    if (!roomCode || !session || status !== "connected" || attemptRef.current) {
+      return;
+    }
+
+    attemptRef.current = "rejoin";
+    socket.emit("rejoin_room", { roomCode, token: session.token });
+  }, [roomCode, session, status, socket]);
 
   useEffect(() => {
     if (!question || phase !== "question" || showStartCountdown) {
@@ -185,13 +266,17 @@ function Play() {
     return null;
   }
 
+  if (roomNotFound || !session) {
+    return <RoomNotFound roomCode={roomCode} />;
+  }
+
   if (hostDisconnected) {
     return <HostDisconnected />;
   }
 
   const submitAnswer = (answerId: string) => {
     if (
-      state?.isHost ||
+      isHost ||
       selectedAnswerId ||
       phase !== "question" ||
       showStartCountdown
@@ -219,20 +304,19 @@ function Play() {
       );
     }
 
-    if (state?.isHost) {
+    if (isHost) {
       return <PodiumScreen leaderboard={gameOver.leaderboard} />;
     }
 
     const ownRank = gameOver.leaderboard.findIndex(
-      (entry) => entry.playerId === socket.id,
+      (entry) => entry.playerId === session?.token,
     );
-    const ownScore =
-      ownRank === -1 ? 0 : gameOver.leaderboard[ownRank]!.score;
+    const ownEntry = ownRank === -1 ? undefined : gameOver.leaderboard[ownRank];
 
     return (
       <PlayerResultScreen
-        score={ownScore}
-        correctCount={correctCount}
+        score={ownEntry?.score ?? 0}
+        correctCount={ownEntry?.correctCount ?? 0}
         totalQuestions={totalQuestions}
         rank={ownRank === -1 ? gameOver.leaderboard.length : ownRank + 1}
         totalPlayers={gameOver.leaderboard.length}
@@ -241,14 +325,18 @@ function Play() {
   }
 
   if (!question) {
-    return <RoomNotFound roomCode={roomCode} />;
+    return (
+      <div className="flex min-h-screen items-center justify-center px-4 text-center">
+        <p className="text-muted">Reconnecting to the game...</p>
+      </div>
+    );
   }
 
   if (showStartCountdown) {
     return <GameCountdown onComplete={() => setShowStartCountdown(false)} />;
   }
 
-  const ownResult = reveal?.results.find((result) => result.playerId === socket.id);
+  const ownResult = reveal?.results.find((result) => result.playerId === session?.token);
   const correctAnswersCount = reveal?.results.filter((result) => result.correct).length ?? 0;
   const categoryLabel = question.category
     ? quizCategoryLabels[question.category]
@@ -256,6 +344,12 @@ function Play() {
 
   return (
     <div className="min-h-screen px-4 py-10">
+      {hostReconnecting && !isHost && (
+        <p className="mx-auto mb-6 w-fit rounded-full border border-warning/30 bg-warning/10 px-4 py-2 text-center text-sm font-medium text-warning">
+          Host disconnected — waiting for them to reconnect...
+        </p>
+      )}
+
       <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[1fr_320px]">
         <div className="flex min-h-0 flex-col gap-6">
           <div className="flex items-center justify-between">
@@ -299,14 +393,14 @@ function Play() {
             <p
               className={clsx(
                 "text-center text-lg font-bold",
-                state?.isHost
+                isHost
                   ? "text-muted"
                   : ownResult?.correct
                     ? "text-secondary"
                     : "text-danger",
               )}
             >
-              {state?.isHost
+              {isHost
                 ? `${correctAnswersCount} of ${reveal.results.length} answered correctly`
                 : ownResult?.correct
                   ? `Correct! +${ownResult.pointsAwarded} points`
@@ -323,7 +417,7 @@ function Play() {
                   optionLabel={
                     ANSWER_OPTION_LABELS[index % ANSWER_OPTION_LABELS.length]!
                   }
-                  disabled={!!state?.isHost || !!selectedAnswerId}
+                  disabled={isHost || !!selectedAnswerId}
                   isSelected={selectedAnswerId === answer.id}
                   onClick={() => submitAnswer(answer.id)}
                 />
@@ -350,7 +444,7 @@ function Play() {
                 ))}
               </div>
 
-              {state?.isHost ? (
+              {isHost ? (
                 <div className="flex justify-center">
                   <Button type="button" onClick={showLeaderboard}>
                     Show Leaderboard
@@ -367,8 +461,8 @@ function Play() {
           {phase === "leaderboard" && reveal && (
             <div className="flex flex-1 flex-col items-center justify-center gap-4 py-6">
               <h2 className="text-2xl font-bold text-foreground">Leaderboard</h2>
-              <Leaderboard entries={leaderboardEntries} currentPlayerId={socket.id} />
-              {state?.isHost && (
+              <Leaderboard entries={leaderboardEntries} currentPlayerId={session?.token} />
+              {isHost && (
                 <Button type="button" onClick={nextQuestion}>
                   {questionIndex + 1 >= totalQuestions ? "Finish game" : "Next question"}
                 </Button>

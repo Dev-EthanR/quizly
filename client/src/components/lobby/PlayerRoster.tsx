@@ -29,7 +29,25 @@ function PlayerRoster({
 
         return (
           <div key={player.id} className="flex w-20 flex-col items-center gap-2">
-            <Avatar initials={getInitials(player.name)} bgClass={color.bgClass} />
+            <div className="relative">
+              <Avatar
+                initials={getInitials(player.name)}
+                bgClass={color.bgClass}
+              />
+              {!player.connected && (
+                <span
+                  className="absolute inset-0 rounded-full bg-background/60"
+                  aria-hidden="true"
+                />
+              )}
+              <span
+                className={clsx(
+                  "absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-surface",
+                  player.connected ? "bg-secondary" : "bg-muted",
+                )}
+                aria-hidden="true"
+              />
+            </div>
             <p
               className={clsx(
                 "w-full truncate text-sm",
@@ -39,6 +57,9 @@ function PlayerRoster({
               {player.name}
               {isYou && " (You)"}
             </p>
+            {!player.connected && (
+              <p className="text-xs text-muted">Reconnecting...</p>
+            )}
           </div>
         );
       })}

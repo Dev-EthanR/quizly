@@ -2,19 +2,45 @@ import type { Server, Socket } from "socket.io";
 import {
   hostGameSchema,
   joinRoomSchema,
+  rejoinRoomSchema,
   startGameSchema,
   submitAnswerSchema,
 } from "shared";
-import { roomsService } from "../services/rooms.service.js";
+import { roomsService, RECONNECT_GRACE_MS } from "../services/rooms.service.js";
 import { gameService, toPublicQuestion } from "../services/game.service.js";
 import type { RoomRecord } from "../repositories/rooms.repository.js";
 
+const hostDisconnectTimers = new Map<string, NodeJS.Timeout>();
+const playerDisconnectTimers = new Map<string, NodeJS.Timeout>();
+
+function playerTimerKey(roomCode: string, token: string): string {
+  return `${roomCode}:${token}`;
+}
+
+function clearHostDisconnectTimer(roomCode: string): void {
+  const timer = hostDisconnectTimers.get(roomCode);
+  if (timer) {
+    clearTimeout(timer);
+    hostDisconnectTimers.delete(roomCode);
+  }
+}
+
+function clearPlayerDisconnectTimer(roomCode: string, token: string): void {
+  const key = playerTimerKey(roomCode, token);
+  const timer = playerDisconnectTimers.get(key);
+  if (timer) {
+    clearTimeout(timer);
+    playerDisconnectTimers.delete(key);
+  }
+}
+
 function broadcastLobbyPlayers(io: Server, room: RoomRecord) {
   io.to(room.code).emit("lobby_players", {
-    players: room.players.map(({ socketId, name, color }) => ({
-      id: socketId,
+    players: room.players.map(({ token, name, color, connected }) => ({
+      id: token,
       name,
       color,
+      connected,
     })),
   });
 }
@@ -32,6 +58,13 @@ function scheduleReveal(io: Server, roomCode: string, timeLimitSeconds: number) 
   setTimeout(() => broadcastReveal(io, roomCode), timeLimitSeconds * 1000);
 }
 
+function sendRoomState(socket: Socket, roomCode: string) {
+  const roomState = gameService.getRoomState(roomCode);
+  if (roomState) {
+    socket.emit("room_state", roomState);
+  }
+}
+
 export function registerGameHandlers(io: Server, socket: Socket) {
   socket.on("host_game", (payload) => {
     const parsed = hostGameSchema.safeParse(payload);
@@ -43,6 +76,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
     const room = roomsService.hostGame({
       hostSocketId: socket.id,
       quizId: parsed.data.quizId,
+      token: parsed.data.token,
     });
 
     socket.join(room.code);
@@ -61,6 +95,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       roomCode: parsed.data.roomCode,
       name: parsed.data.name,
       color: parsed.data.color,
+      token: parsed.data.token,
     });
 
     if (!room) {
@@ -70,6 +105,38 @@ export function registerGameHandlers(io: Server, socket: Socket) {
 
     socket.join(room.code);
     broadcastLobbyPlayers(io, room);
+    sendRoomState(socket, room.code);
+  });
+
+  socket.on("rejoin_room", (payload) => {
+    const parsed = rejoinRoomSchema.safeParse(payload);
+    if (!parsed.success) {
+      console.warn("Invalid rejoin_room payload", parsed.error.flatten());
+      return;
+    }
+
+    const { roomCode, token } = parsed.data;
+
+    const hostRoom = roomsService.rejoinAsHost({ socketId: socket.id, roomCode, token });
+    if (hostRoom) {
+      clearHostDisconnectTimer(roomCode);
+      socket.join(roomCode);
+      broadcastLobbyPlayers(io, hostRoom);
+      io.to(roomCode).emit("host_reconnected", { roomCode });
+      sendRoomState(socket, roomCode);
+      return;
+    }
+
+    const playerRoom = roomsService.rejoinAsPlayer({ socketId: socket.id, roomCode, token });
+    if (playerRoom) {
+      clearPlayerDisconnectTimer(roomCode, token);
+      socket.join(roomCode);
+      broadcastLobbyPlayers(io, playerRoom);
+      sendRoomState(socket, roomCode);
+      return;
+    }
+
+    socket.emit("room_not_found", { roomCode });
   });
 
   socket.on("start_game", async (payload) => {
@@ -132,7 +199,11 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       return;
     }
 
-    if (!roomsService.isHost({ socketId: socket.id, roomCode: parsed.data.roomCode })) {
+    const shown = gameService.markLeaderboardShown({
+      socketId: socket.id,
+      roomCode: parsed.data.roomCode,
+    });
+    if (!shown) {
       return;
     }
 
@@ -157,6 +228,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
     if (next.ended) {
       io.to(parsed.data.roomCode).emit("game_over", {
         leaderboard: next.leaderboard,
+        totalQuestions: next.totalQuestions,
       });
       return;
     }
@@ -172,15 +244,42 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   });
 
   socket.on("disconnect", () => {
-    const hostRoom = roomsService.endRoomIfHost(socket.id);
+    const hostRoom = roomsService.markHostDisconnected(socket.id);
     if (hostRoom) {
-      io.to(hostRoom.code).emit("host_disconnected", { roomCode: hostRoom.code });
+      io.to(hostRoom.code).emit("host_reconnecting", { roomCode: hostRoom.code });
+
+      const timer = setTimeout(() => {
+        hostDisconnectTimers.delete(hostRoom.code);
+        if (!roomsService.isHostStillDisconnected(hostRoom.code)) {
+          return;
+        }
+        const deletedRoom = roomsService.deleteRoom(hostRoom.code);
+        if (deletedRoom) {
+          io.to(hostRoom.code).emit("host_disconnected", { roomCode: hostRoom.code });
+        }
+      }, RECONNECT_GRACE_MS);
+
+      hostDisconnectTimers.set(hostRoom.code, timer);
       return;
     }
 
-    const room = roomsService.leaveRoom(socket.id);
-    if (room) {
+    const disconnectedPlayer = roomsService.markPlayerDisconnected(socket.id);
+    if (disconnectedPlayer) {
+      const { room, token } = disconnectedPlayer;
       broadcastLobbyPlayers(io, room);
+
+      const timer = setTimeout(() => {
+        playerDisconnectTimers.delete(playerTimerKey(room.code, token));
+        if (!roomsService.isPlayerStillDisconnected(room.code, token)) {
+          return;
+        }
+        const updatedRoom = roomsService.removePlayer(room.code, token);
+        if (updatedRoom) {
+          broadcastLobbyPlayers(io, updatedRoom);
+        }
+      }, RECONNECT_GRACE_MS);
+
+      playerDisconnectTimers.set(playerTimerKey(room.code, token), timer);
     }
   });
 }

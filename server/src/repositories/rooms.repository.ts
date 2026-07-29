@@ -1,7 +1,9 @@
 import type { QuizCategory } from "shared";
 
 export interface PlayerRecord {
-  socketId: string;
+  token: string;
+  socketId: string | null;
+  connected: boolean;
   name: string;
   color?: string | undefined;
 }
@@ -21,7 +23,7 @@ export interface GameQuestion {
 }
 
 export interface QuestionAnswer {
-  socketId: string;
+  token: string;
   answerId: string;
   answeredAt: number;
 }
@@ -35,12 +37,16 @@ export interface GameState {
   questionStartedAt: number;
   answers: QuestionAnswer[];
   scores: Record<string, number>;
+  correctCounts: Record<string, number>;
   category: QuizCategory | null;
+  leaderboardShown: boolean;
 }
 
 export interface RoomRecord {
   code: string;
-  hostSocketId: string;
+  hostToken: string;
+  hostSocketId: string | null;
+  hostConnected: boolean;
   quizId: string;
   createdAt: number;
   players: PlayerRecord[];
@@ -49,6 +55,7 @@ export interface RoomRecord {
 
 export interface RoomParticipant {
   roomCode: string;
+  token: string;
   name: string;
   color?: string | undefined;
   isHost: boolean;
@@ -69,37 +76,107 @@ export const roomsRepository = {
     return rooms.get(code);
   },
 
+  deleteByCode(code: string): RoomRecord | undefined {
+    const room = rooms.get(code);
+    if (room) {
+      rooms.delete(code);
+    }
+    return room;
+  },
+
+  findRoomByHostToken(token: string): RoomRecord | undefined {
+    for (const room of rooms.values()) {
+      if (room.hostToken === token) {
+        return room;
+      }
+    }
+    return undefined;
+  },
+
+  findRoomByHostSocketId(socketId: string): RoomRecord | undefined {
+    for (const room of rooms.values()) {
+      if (room.hostSocketId === socketId) {
+        return room;
+      }
+    }
+    return undefined;
+  },
+
+  markHostConnected(code: string, socketId: string): RoomRecord | undefined {
+    const room = rooms.get(code);
+    if (!room) {
+      return undefined;
+    }
+    room.hostSocketId = socketId;
+    room.hostConnected = true;
+    return room;
+  },
+
+  markHostDisconnectedBySocketId(socketId: string): RoomRecord | undefined {
+    const room = roomsRepository.findRoomByHostSocketId(socketId);
+    if (!room) {
+      return undefined;
+    }
+    room.hostConnected = false;
+    room.hostSocketId = null;
+    return room;
+  },
+
+  findPlayerByToken(code: string, token: string): PlayerRecord | undefined {
+    return rooms.get(code)?.players.find((p) => p.token === token);
+  },
+
   addPlayer(code: string, player: PlayerRecord): RoomRecord | undefined {
     const room = rooms.get(code);
     if (!room) {
       return undefined;
     }
     room.players = [
-      ...room.players.filter((p) => p.socketId !== player.socketId),
+      ...room.players.filter((p) => p.token !== player.token),
       player,
     ];
     return room;
   },
 
-  removePlayerBySocketId(socketId: string): RoomRecord | undefined {
+  markPlayerConnected(
+    code: string,
+    token: string,
+    socketId: string,
+  ): RoomRecord | undefined {
+    const room = rooms.get(code);
+    const player = room?.players.find((p) => p.token === token);
+    if (!room || !player) {
+      return undefined;
+    }
+    player.socketId = socketId;
+    player.connected = true;
+    return room;
+  },
+
+  markPlayerDisconnectedBySocketId(
+    socketId: string,
+  ): { room: RoomRecord; token: string } | undefined {
     for (const room of rooms.values()) {
-      const index = room.players.findIndex((p) => p.socketId === socketId);
-      if (index !== -1) {
-        room.players.splice(index, 1);
-        return room;
+      const player = room.players.find((p) => p.socketId === socketId);
+      if (player) {
+        player.connected = false;
+        player.socketId = null;
+        return { room, token: player.token };
       }
     }
     return undefined;
   },
 
-  deleteByHostSocketId(hostSocketId: string): RoomRecord | undefined {
-    for (const room of rooms.values()) {
-      if (room.hostSocketId === hostSocketId) {
-        rooms.delete(room.code);
-        return room;
-      }
+  removePlayerByToken(code: string, token: string): RoomRecord | undefined {
+    const room = rooms.get(code);
+    if (!room) {
+      return undefined;
     }
-    return undefined;
+    const index = room.players.findIndex((p) => p.token === token);
+    if (index !== -1) {
+      room.players.splice(index, 1);
+    }
+    return room;
   },
 
   setGame(code: string, game: GameState): void {
@@ -112,12 +189,18 @@ export const roomsRepository = {
   findParticipantBySocketId(socketId: string): RoomParticipant | undefined {
     for (const room of rooms.values()) {
       if (room.hostSocketId === socketId) {
-        return { roomCode: room.code, name: "Host", isHost: true };
+        return {
+          roomCode: room.code,
+          token: room.hostToken,
+          name: "Host",
+          isHost: true,
+        };
       }
       const player = room.players.find((p) => p.socketId === socketId);
       if (player) {
         return {
           roomCode: room.code,
+          token: player.token,
           name: player.name,
           color: player.color,
           isHost: false,

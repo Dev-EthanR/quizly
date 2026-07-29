@@ -9,6 +9,7 @@ export interface LeaderboardRowEntry {
   score: number;
   pointsGained?: number;
   rankChange?: LeaderboardRankChange;
+  connected?: boolean;
 }
 
 interface LeaderboardProps {
@@ -45,6 +46,9 @@ function Leaderboard({ entries, currentPlayerId }: LeaderboardProps) {
             <span className="text-sm font-bold text-muted">#{index + 1}</span>
             {entry.rankChange && <RankChangeIcon change={entry.rankChange} />}
             <span className="font-medium text-foreground">{entry.name}</span>
+            {entry.connected === false && (
+              <span className="text-xs text-muted">(reconnecting)</span>
+            )}
           </span>
           <span className="flex items-center gap-3">
             {typeof entry.pointsGained === "number" && (

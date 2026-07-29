@@ -4,6 +4,7 @@ import type {
   HostGameInput,
   JoinRoomInput,
   QuizCategory,
+  RejoinRoomInput,
   SendChatMessageInput,
   StartGameInput,
   SubmitAnswerInput,
@@ -18,6 +19,14 @@ export interface RoomNotFoundPayload {
 }
 
 export interface HostDisconnectedPayload {
+  roomCode: string;
+}
+
+export interface HostReconnectingPayload {
+  roomCode: string;
+}
+
+export interface HostReconnectedPayload {
   roomCode: string;
 }
 
@@ -68,6 +77,8 @@ export interface LeaderboardEntry {
   playerId: string;
   name: string;
   score: number;
+  correctCount: number;
+  connected: boolean;
 }
 
 export interface QuestionRevealPayload {
@@ -79,12 +90,33 @@ export interface QuestionRevealPayload {
 
 export interface GameOverPayload {
   leaderboard: LeaderboardEntry[];
+  totalQuestions: number;
 }
+
+export type RoomStatePayload =
+  | { phase: "lobby" }
+  | {
+      phase: "question";
+      questionIndex: number;
+      totalQuestions: number;
+      question: PublicQuestion;
+      startedAt: number;
+    }
+  | {
+      phase: "result" | "leaderboard";
+      questionIndex: number;
+      totalQuestions: number;
+      question: PublicQuestion;
+      startedAt: number;
+      reveal: QuestionRevealPayload;
+    }
+  | { phase: "ended"; leaderboard: LeaderboardEntry[]; totalQuestions: number };
 
 export interface LobbyPlayer {
   id: string;
   name: string;
   color?: string;
+  connected: boolean;
 }
 
 export interface LobbyPlayersPayload {
@@ -107,6 +139,9 @@ export interface ServerToClientEvents {
   room_created: (payload: RoomCreatedPayload) => void;
   room_not_found: (payload: RoomNotFoundPayload) => void;
   host_disconnected: (payload: HostDisconnectedPayload) => void;
+  host_reconnecting: (payload: HostReconnectingPayload) => void;
+  host_reconnected: (payload: HostReconnectedPayload) => void;
+  room_state: (payload: RoomStatePayload) => void;
   lobby_players: (payload: LobbyPlayersPayload) => void;
   receive_message: (payload: ChatMessage) => void;
   game_started: (payload: GameStartedPayload) => void;
@@ -120,6 +155,7 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   host_game: (payload: HostGameInput) => void;
   join_room: (payload: JoinRoomInput) => void;
+  rejoin_room: (payload: RejoinRoomInput) => void;
   send_message: (payload: SendChatMessageInput) => void;
   start_game: (payload: StartGameInput) => void;
   submit_answer: (payload: SubmitAnswerInput) => void;

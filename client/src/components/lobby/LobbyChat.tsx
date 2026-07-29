@@ -4,16 +4,18 @@ import { FiSend } from "react-icons/fi";
 import { CHAT_MESSAGE_MAX_LENGTH } from "shared";
 import { useSocket } from "../../context/useSocket";
 import { useChat } from "../../context/useChat";
+import { loadSession } from "../../lib/session";
 
 interface LobbyChatProps {
   roomCode: string;
 }
 
 function LobbyChat({ roomCode }: LobbyChatProps) {
-  const { socket, status } = useSocket();
+  const { status } = useSocket();
   const { messages, sendMessage, enterRoom } = useChat();
   const [draft, setDraft] = useState("");
   const listRef = useRef<HTMLDivElement>(null);
+  const ownToken = loadSession(roomCode)?.token;
 
   useEffect(() => {
     enterRoom(roomCode);
@@ -48,7 +50,7 @@ function LobbyChat({ roomCode }: LobbyChatProps) {
           <p className="text-sm text-muted">No messages yet. Say hi!</p>
         ) : (
           messages.map((message, index) => {
-            const isSelf = message.senderId === socket.id;
+            const isSelf = message.senderId === ownToken;
             const label = isSelf ? "You" : message.isHost ? "Host" : message.senderName;
             const isGroupedWithPrevious =
               messages[index - 1]?.senderId === message.senderId;

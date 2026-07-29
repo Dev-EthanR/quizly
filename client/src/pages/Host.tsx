@@ -4,6 +4,7 @@ import { FiAlertTriangle } from "react-icons/fi";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/ui/Button";
 import { useSocket } from "../context/useSocket";
+import { createSessionToken, saveSession } from "../lib/session";
 import type { RoomCreatedPayload } from "../context/socket-context";
 
 function Host() {
@@ -11,6 +12,7 @@ function Host() {
   const { socket, status } = useSocket();
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const hasHostedRef = useRef(false);
+  const tokenRef = useRef<string>(createSessionToken());
 
   useEffect(() => {
     if (!quizId) {
@@ -18,13 +20,18 @@ function Host() {
     }
 
     function handleRoomCreated(payload: RoomCreatedPayload) {
+      saveSession({
+        roomCode: payload.roomCode,
+        token: tokenRef.current,
+        isHost: true,
+      });
       setRoomCode(payload.roomCode);
     }
 
     socket.on("room_created", handleRoomCreated);
 
     if (status === "connected" && !hasHostedRef.current) {
-      socket.emit("host_game", { quizId });
+      socket.emit("host_game", { quizId, token: tokenRef.current });
       hasHostedRef.current = true;
     }
 

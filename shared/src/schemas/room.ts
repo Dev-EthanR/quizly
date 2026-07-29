@@ -1,11 +1,5 @@
 import { z } from "zod";
 
-export const hostGameSchema = z.object({
-  quizId: z.string().min(1, "Quiz is required"),
-});
-
-export type HostGameInput = z.infer<typeof hostGameSchema>;
-
 export const ROOM_CODE_REGEX = /^[A-Z0-9]{6}$/;
 
 const roomCodeSchema = z
@@ -14,13 +8,37 @@ const roomCodeSchema = z
   .toUpperCase()
   .regex(ROOM_CODE_REGEX, "Invalid room code.");
 
+const sessionTokenSchema = z.string().min(1, "Token is required");
+
+export const hostGameSchema = z.object({
+  quizId: z.string().min(1, "Quiz is required"),
+  token: sessionTokenSchema,
+});
+
+export type HostGameInput = z.infer<typeof hostGameSchema>;
+
+export const rejoinAsHostSchema = z.object({
+  roomCode: roomCodeSchema,
+  token: sessionTokenSchema,
+});
+
+export type RejoinAsHostInput = z.infer<typeof rejoinAsHostSchema>;
+
 export const joinRoomSchema = z.object({
   name: z.string().trim().max(20, "Username must be 20 characters or less"),
   color: z.string().optional(),
   roomCode: roomCodeSchema,
+  token: sessionTokenSchema,
 });
 
 export type JoinRoomInput = z.infer<typeof joinRoomSchema>;
+
+export const rejoinRoomSchema = z.object({
+  roomCode: roomCodeSchema,
+  token: sessionTokenSchema,
+});
+
+export type RejoinRoomInput = z.infer<typeof rejoinRoomSchema>;
 
 export const CHAT_MESSAGE_MAX_LENGTH = 300;
 
