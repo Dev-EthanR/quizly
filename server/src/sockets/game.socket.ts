@@ -64,6 +64,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
     });
 
     if (!room) {
+      socket.emit("room_not_found", { roomCode: parsed.data.roomCode });
       return;
     }
 

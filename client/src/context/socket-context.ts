@@ -13,6 +13,10 @@ export interface RoomCreatedPayload {
   roomCode: string;
 }
 
+export interface RoomNotFoundPayload {
+  roomCode: string;
+}
+
 export interface PublicAnswer {
   id: string;
   text: string;
@@ -97,6 +101,7 @@ export interface ChatMessage {
 // something that isn't a key here (keeps client + server event names in sync).
 export interface ServerToClientEvents {
   room_created: (payload: RoomCreatedPayload) => void;
+  room_not_found: (payload: RoomNotFoundPayload) => void;
   lobby_players: (payload: LobbyPlayersPayload) => void;
   receive_message: (payload: ChatMessage) => void;
   game_started: (payload: GameStartedPayload) => void;

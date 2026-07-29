@@ -28,6 +28,7 @@ function Lobby() {
   const navigate = useNavigate();
   const { socket, status } = useSocket();
   const [players, setPlayers] = useState<LobbyPlayer[]>([]);
+  const [roomNotFound, setRoomNotFound] = useState(false);
   const hasJoinedRef = useRef(false);
 
   const isValidRoomCode =
@@ -43,9 +44,15 @@ function Lobby() {
       setPlayers(payload.players);
     }
 
+    function handleRoomNotFound() {
+      setRoomNotFound(true);
+    }
+
     socket.on("lobby_players", handleLobbyPlayers);
+    socket.on("room_not_found", handleRoomNotFound);
     return () => {
       socket.off("lobby_players", handleLobbyPlayers);
+      socket.off("room_not_found", handleRoomNotFound);
     };
   }, [isValidRoomCode, socket]);
 
@@ -103,7 +110,7 @@ function Lobby() {
     socket.emit("start_game", { roomCode });
   };
 
-  if (!isValidRoomCode) {
+  if (!isValidRoomCode || roomNotFound) {
     return <RoomNotFound roomCode={roomCode} />;
   }
 

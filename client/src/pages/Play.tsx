@@ -1,14 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { FiUsers } from "react-icons/fi";
 import { quizCategoryLabels } from "shared";
 import Button from "../components/ui/Button";
 import AnswerButton from "../components/play/AnswerButton";
-import Leaderboard from "../components/play/Leaderboard";
+import Leaderboard, {
+  type LeaderboardRankChange,
+  type LeaderboardRowEntry,
+} from "../components/play/Leaderboard";
 import GameCountdown from "../components/play/GameCountdown";
 import QuestionTimer from "../components/play/QuestionTimer";
 import FeedbackScreen from "../components/play/FeedbackScreen";
 import HostAnswerBreakdown from "../components/play/HostAnswerBreakdown";
+import PodiumScreen from "../components/play/PodiumScreen";
+import PlayerResultScreen from "../components/play/PlayerResultScreen";
 import LobbyChat from "../components/lobby/LobbyChat";
 import { useSocket } from "../context/useSocket";
 import type {
@@ -59,6 +64,7 @@ function Play() {
   const [showStartCountdown, setShowStartCountdown] = useState(
     (state?.questionIndex ?? 0) === 0,
   );
+  const [correctCount, setCorrectCount] = useState(0);
 
   useEffect(() => {
     function handleQuestionStarted(payload: QuestionStartedPayload) {
@@ -78,6 +84,12 @@ function Play() {
 
     function handleQuestionReveal(payload: QuestionRevealPayload) {
       setReveal(payload);
+      const ownResult = payload.results.find(
+        (result) => result.playerId === socket.id,
+      );
+      if (ownResult?.correct) {
+        setCorrectCount((prev) => prev + 1);
+      }
       setPhase(state?.isHost ? "host-reveal" : "feedback");
     }
 
@@ -125,6 +137,43 @@ function Play() {
     return () => clearTimeout(timeout);
   }, [phase]);
 
+  const leaderboardEntries = useMemo<LeaderboardRowEntry[]>(() => {
+    if (!reveal) {
+      return [];
+    }
+
+    const previousScoreByPlayer = new Map<string, number>();
+    reveal.results.forEach((result) => {
+      previousScoreByPlayer.set(result.playerId, result.totalScore - result.pointsAwarded);
+    });
+
+    const previousRankByPlayer = new Map<string, number>();
+    if (questionIndex > 0) {
+      [...reveal.leaderboard]
+        .sort(
+          (a, b) =>
+            (previousScoreByPlayer.get(b.playerId) ?? 0) -
+            (previousScoreByPlayer.get(a.playerId) ?? 0),
+        )
+        .forEach((entry, index) => previousRankByPlayer.set(entry.playerId, index));
+    }
+
+    return reveal.leaderboard.map((entry, index) => {
+      const pointsGained = reveal.results.find(
+        (result) => result.playerId === entry.playerId,
+      )?.pointsAwarded ?? 0;
+
+      let rankChange: LeaderboardRankChange = "same";
+      const previousRank = previousRankByPlayer.get(entry.playerId);
+      if (previousRank !== undefined) {
+        if (index < previousRank) rankChange = "up";
+        else if (index > previousRank) rankChange = "down";
+      }
+
+      return { ...entry, pointsGained, rankChange };
+    });
+  }, [reveal, questionIndex]);
+
   if (!roomCode) {
     return null;
   }
@@ -147,13 +196,32 @@ function Play() {
   };
 
   if (phase === "ended") {
+    if (!gameOver) {
+      return (
+        <div className="flex min-h-screen items-center justify-center px-4 text-center">
+          <p className="text-muted">Tallying final results...</p>
+        </div>
+      );
+    }
+
+    if (state?.isHost) {
+      return <PodiumScreen leaderboard={gameOver.leaderboard} />;
+    }
+
+    const ownRank = gameOver.leaderboard.findIndex(
+      (entry) => entry.playerId === socket.id,
+    );
+    const ownScore =
+      ownRank === -1 ? 0 : gameOver.leaderboard[ownRank]!.score;
+
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-16 text-center">
-        <h1 className="text-3xl font-bold text-foreground">Game over!</h1>
-        {gameOver && (
-          <Leaderboard entries={gameOver.leaderboard} currentPlayerId={socket.id} />
-        )}
-      </div>
+      <PlayerResultScreen
+        score={ownScore}
+        correctCount={correctCount}
+        totalQuestions={totalQuestions}
+        rank={ownRank === -1 ? gameOver.leaderboard.length : ownRank + 1}
+        totalPlayers={gameOver.leaderboard.length}
+      />
     );
   }
 
@@ -263,7 +331,7 @@ function Play() {
           {phase === "leaderboard" && reveal && (
             <div className="flex flex-1 flex-col items-center justify-center gap-4 py-6">
               <h2 className="text-2xl font-bold text-foreground">Leaderboard</h2>
-              <Leaderboard entries={reveal.leaderboard} currentPlayerId={socket.id} />
+              <Leaderboard entries={leaderboardEntries} currentPlayerId={socket.id} />
               {state?.isHost && (
                 <Button type="button" onClick={nextQuestion}>
                   {questionIndex + 1 >= totalQuestions ? "Finish game" : "Next question"}
@@ -273,7 +341,7 @@ function Play() {
           )}
         </div>
 
-        <div className="h-[420px] min-h-0 lg:h-auto">
+        <div className="h-[520px] lg:sticky lg:top-10">
           <LobbyChat roomCode={roomCode} />
         </div>
       </div>
