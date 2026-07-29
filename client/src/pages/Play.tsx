@@ -16,6 +16,7 @@ import PodiumScreen from "../components/play/PodiumScreen";
 import PlayerResultScreen from "../components/play/PlayerResultScreen";
 import LobbyChat from "../components/lobby/LobbyChat";
 import HostDisconnected from "../components/lobby/HostDisconnected";
+import RoomNotFound from "../components/lobby/RoomNotFound";
 import { useSocket } from "../context/useSocket";
 import type {
   AnswerProgressPayload,
@@ -240,11 +241,7 @@ function Play() {
   }
 
   if (!question) {
-    return (
-      <div className="flex min-h-screen items-center justify-center px-4 text-center">
-        <p className="text-muted">Waiting for the next question...</p>
-      </div>
-    );
+    return <RoomNotFound roomCode={roomCode} />;
   }
 
   if (showStartCountdown) {
