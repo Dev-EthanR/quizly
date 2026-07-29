@@ -19,3 +19,23 @@ export const joinRoomSchema = z.object({
 });
 
 export type JoinRoomInput = z.infer<typeof joinRoomSchema>;
+
+export const CHAT_MESSAGE_MAX_LENGTH = 300;
+
+export const sendChatMessageSchema = z.object({
+  roomCode: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(ROOM_CODE_REGEX, "Invalid room code."),
+  message: z
+    .string()
+    .trim()
+    .min(1, "Message is required")
+    .max(
+      CHAT_MESSAGE_MAX_LENGTH,
+      `Message must be ${CHAT_MESSAGE_MAX_LENGTH} characters or less`,
+    ),
+});
+
+export type SendChatMessageInput = z.infer<typeof sendChatMessageSchema>;

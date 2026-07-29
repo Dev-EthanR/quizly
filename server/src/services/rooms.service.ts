@@ -1,4 +1,8 @@
-import { roomsRepository, type RoomRecord } from "../repositories/rooms.repository.js";
+import {
+  roomsRepository,
+  type RoomParticipant,
+  type RoomRecord,
+} from "../repositories/rooms.repository.js";
 
 const ROOM_CODE_LENGTH = 6;
 const ROOM_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -55,5 +59,9 @@ export const roomsService = {
 
   leaveRoom(socketId: string): RoomRecord | undefined {
     return roomsRepository.removePlayerBySocketId(socketId);
+  },
+
+  findParticipant(socketId: string): RoomParticipant | undefined {
+    return roomsRepository.findParticipantBySocketId(socketId);
   },
 };

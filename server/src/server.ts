@@ -9,6 +9,7 @@ import usersRouter from "./routes/users.route";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
 import { registerGameHandlers } from "./sockets/game.socket.js";
+import { registerChatHandlers } from "./sockets/chat.socket.js";
 
 const app = express();
 const PORT = 3000;
@@ -52,11 +53,7 @@ io.on("connection", (socket) => {
   console.log("a user connected: ", socket.id);
 
   registerGameHandlers(io, socket);
-
-  socket.on("send_message", (data) => {
-    // Broadcast the payload to all other connected clients
-    socket.broadcast.emit("receive_message", data);
-  });
+  registerChatHandlers(io, socket);
 
   socket.on("disconnect", () => {
     console.log(`User Disconnected: ${socket.id}`);

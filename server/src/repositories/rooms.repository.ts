@@ -12,6 +12,13 @@ export interface RoomRecord {
   players: PlayerRecord[];
 }
 
+export interface RoomParticipant {
+  roomCode: string;
+  name: string;
+  color?: string | undefined;
+  isHost: boolean;
+}
+
 const rooms = new Map<string, RoomRecord>();
 
 export const roomsRepository = {
@@ -45,6 +52,24 @@ export const roomsRepository = {
       if (index !== -1) {
         room.players.splice(index, 1);
         return room;
+      }
+    }
+    return undefined;
+  },
+
+  findParticipantBySocketId(socketId: string): RoomParticipant | undefined {
+    for (const room of rooms.values()) {
+      if (room.hostSocketId === socketId) {
+        return { roomCode: room.code, name: "Host", isHost: true };
+      }
+      const player = room.players.find((p) => p.socketId === socketId);
+      if (player) {
+        return {
+          roomCode: room.code,
+          name: player.name,
+          color: player.color,
+          isHost: false,
+        };
       }
     }
     return undefined;
