@@ -8,14 +8,16 @@ export type HostGameInput = z.infer<typeof hostGameSchema>;
 
 export const ROOM_CODE_REGEX = /^[A-Z0-9]{6}$/;
 
+const roomCodeSchema = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .regex(ROOM_CODE_REGEX, "Invalid room code.");
+
 export const joinRoomSchema = z.object({
   name: z.string().trim().max(20, "Username must be 20 characters or less"),
   color: z.string().optional(),
-  roomCode: z
-    .string()
-    .trim()
-    .toUpperCase()
-    .regex(ROOM_CODE_REGEX, "Invalid room code."),
+  roomCode: roomCodeSchema,
 });
 
 export type JoinRoomInput = z.infer<typeof joinRoomSchema>;
@@ -23,11 +25,7 @@ export type JoinRoomInput = z.infer<typeof joinRoomSchema>;
 export const CHAT_MESSAGE_MAX_LENGTH = 300;
 
 export const sendChatMessageSchema = z.object({
-  roomCode: z
-    .string()
-    .trim()
-    .toUpperCase()
-    .regex(ROOM_CODE_REGEX, "Invalid room code."),
+  roomCode: roomCodeSchema,
   message: z
     .string()
     .trim()
@@ -39,3 +37,9 @@ export const sendChatMessageSchema = z.object({
 });
 
 export type SendChatMessageInput = z.infer<typeof sendChatMessageSchema>;
+
+export const startGameSchema = z.object({
+  roomCode: roomCodeSchema,
+});
+
+export type StartGameInput = z.infer<typeof startGameSchema>;

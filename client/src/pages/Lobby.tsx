@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ROOM_CODE_REGEX } from "shared";
 import RoomNotFound from "../components/lobby/RoomNotFound";
 import ReconnectingOverlay from "../components/lobby/ReconnectingOverlay";
@@ -9,6 +9,7 @@ import LobbyChat from "../components/lobby/LobbyChat";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { useSocket } from "../context/useSocket";
 import type {
+  GameStartedPayload,
   LobbyPlayer,
   LobbyPlayersPayload,
 } from "../context/socket-context";
@@ -24,6 +25,7 @@ interface LobbyLocation {
 function Lobby() {
   const { roomCode } = useParams();
   const { state } = useLocation() as LobbyLocation;
+  const navigate = useNavigate();
   const { socket, status } = useSocket();
   const [players, setPlayers] = useState<LobbyPlayer[]>([]);
   const hasJoinedRef = useRef(false);
@@ -70,6 +72,28 @@ function Lobby() {
     socket,
   ]);
 
+  useEffect(() => {
+    if (!isValidRoomCode) {
+      return;
+    }
+
+    function handleGameStarted(payload: GameStartedPayload) {
+      navigate(`/play/${payload.roomCode}`, { state, replace: true });
+    }
+
+    socket.on("game_started", handleGameStarted);
+    return () => {
+      socket.off("game_started", handleGameStarted);
+    };
+  }, [isValidRoomCode, socket, navigate, state]);
+
+  const handleStartGame = () => {
+    if (!roomCode) {
+      return;
+    }
+    socket.emit("start_game", { roomCode });
+  };
+
   if (!isValidRoomCode) {
     return <RoomNotFound roomCode={roomCode} />;
   }
@@ -85,7 +109,11 @@ function Lobby() {
       <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[1fr_320px]">
         <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-surface/40 px-6 py-10">
           {state?.isHost ? (
-            <HostLobbyPanel roomCode={roomCode} players={players} />
+            <HostLobbyPanel
+              roomCode={roomCode}
+              players={players}
+              onStartGame={handleStartGame}
+            />
           ) : (
             <ParticipantLobbyPanel
               roomCode={roomCode}

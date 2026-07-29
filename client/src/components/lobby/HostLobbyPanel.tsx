@@ -1,16 +1,18 @@
 import { useState } from "react";
-import { FiCheck, FiCopy, FiUsers } from "react-icons/fi";
+import { FiCheck, FiCopy, FiPlay, FiUsers } from "react-icons/fi";
 import PlayerRoster from "./PlayerRoster";
+import Button from "../ui/Button";
 import type { LobbyPlayer } from "../../context/socket-context";
 
 interface HostLobbyPanelProps {
   roomCode: string;
   players: LobbyPlayer[];
+  onStartGame: () => void;
 }
 
 const COPIED_RESET_MS = 2000;
 
-function HostLobbyPanel({ roomCode, players }: HostLobbyPanelProps) {
+function HostLobbyPanel({ roomCode, players, onStartGame }: HostLobbyPanelProps) {
   const [copied, setCopied] = useState(false);
 
   const copyRoomCode = async () => {
@@ -53,6 +55,11 @@ function HostLobbyPanel({ roomCode, players }: HostLobbyPanelProps) {
       </div>
 
       <PlayerRoster players={players} />
+
+      <Button type="button" onClick={onStartGame} className="flex items-center gap-2">
+        <FiPlay className="h-4 w-4" />
+        Start game
+      </Button>
     </div>
   );
 }

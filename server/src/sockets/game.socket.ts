@@ -1,5 +1,5 @@
 import type { Server, Socket } from "socket.io";
-import { hostGameSchema, joinRoomSchema } from "shared";
+import { hostGameSchema, joinRoomSchema, startGameSchema } from "shared";
 import { roomsService } from "../services/rooms.service.js";
 import type { RoomRecord } from "../repositories/rooms.repository.js";
 
@@ -50,6 +50,27 @@ export function registerGameHandlers(io: Server, socket: Socket) {
 
     socket.join(room.code);
     broadcastLobbyPlayers(io, room);
+  });
+
+  socket.on("start_game", (payload) => {
+    const parsed = startGameSchema.safeParse(payload);
+    if (!parsed.success) {
+      console.warn("Invalid start_game payload", parsed.error.flatten());
+      return;
+    }
+
+    const participant = roomsService.findParticipant(socket.id);
+    if (
+      !participant ||
+      !participant.isHost ||
+      participant.roomCode !== parsed.data.roomCode
+    ) {
+      return;
+    }
+
+    io.to(parsed.data.roomCode).emit("game_started", {
+      roomCode: parsed.data.roomCode,
+    });
   });
 
   socket.on("disconnect", () => {

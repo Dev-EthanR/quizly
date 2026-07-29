@@ -4,9 +4,14 @@ import type {
   HostGameInput,
   JoinRoomInput,
   SendChatMessageInput,
+  StartGameInput,
 } from "shared";
 
 export interface RoomCreatedPayload {
+  roomCode: string;
+}
+
+export interface GameStartedPayload {
   roomCode: string;
 }
 
@@ -36,12 +41,14 @@ export interface ServerToClientEvents {
   room_created: (payload: RoomCreatedPayload) => void;
   lobby_players: (payload: LobbyPlayersPayload) => void;
   receive_message: (payload: ChatMessage) => void;
+  game_started: (payload: GameStartedPayload) => void;
 }
 
 export interface ClientToServerEvents {
   host_game: (payload: HostGameInput) => void;
   join_room: (payload: JoinRoomInput) => void;
   send_message: (payload: SendChatMessageInput) => void;
+  start_game: (payload: StartGameInput) => void;
 }
 
 export type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;

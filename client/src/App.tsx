@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Host from "./pages/Host";
 import Lobby from "./pages/Lobby";
+import Play from "./pages/Play";
 import Removed from "./pages/Removed";
 import SignIn from "./pages/SignIn";
 import Discovery from "./pages/Discovery";
@@ -17,6 +18,7 @@ function App() {
       <Route path="/" element={<Home />} />
       <Route path="/signin" element={<SignIn />} />
       <Route path="/lobby/:roomCode" element={<Lobby />} />
+      <Route path="/play/:roomCode" element={<Play />} />
       <Route path="/removed" element={<Removed />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/host" element={<Host />} />
