@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import AuthModeTabs, { type AuthMode } from "../components/auth/AuthModeTabs";
 import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 import SignInForm from "../components/auth/SignInForm";
@@ -7,9 +7,16 @@ import SignUpForm from "../components/auth/SignUpForm";
 
 const HOST_PATH = "/host";
 
+interface SignInLocation {
+  state?: {
+    mode?: AuthMode;
+  };
+}
+
 function SignIn() {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<AuthMode>("signin");
+  const { state } = useLocation() as SignInLocation;
+  const [mode, setMode] = useState<AuthMode>(state?.mode ?? "signin");
   const [formError, setFormError] = useState<string | null>(null);
 
   const callbackUrl = `${window.location.origin}${HOST_PATH}`;

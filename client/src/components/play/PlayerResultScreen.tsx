@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import clsx from "clsx";
-import { FiAward, FiCheckCircle, FiStar, FiTarget } from "react-icons/fi";
+import { Link } from "react-router-dom";
+import { FiAward, FiCheckCircle, FiGrid, FiStar, FiTarget } from "react-icons/fi";
+import Button from "../ui/Button";
+import { useAuth } from "../../context/useAuth";
 
 interface PlayerResultScreenProps {
   score: number;
@@ -35,6 +38,7 @@ function PlayerResultScreen({
   rank,
   totalPlayers,
 }: PlayerResultScreenProps) {
+  const { status } = useAuth();
   const accuracy =
     totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
   const isTopThree = totalPlayers > 0 && rank <= 3;
@@ -87,6 +91,34 @@ function PlayerResultScreen({
                 label="Accuracy"
               />
             </>
+          )}
+        </div>
+
+        <div className="h-px w-full bg-border" />
+
+        <div className="flex w-full flex-col items-center gap-3">
+          <Link to="/" className="w-full">
+            <Button type="button" className="flex w-full items-center justify-center gap-2">
+              <FiGrid className="h-4 w-4" />
+              Join Another Game
+            </Button>
+          </Link>
+
+          {status === "authenticated" ? (
+            <Link
+              to="/host"
+              className="text-sm font-semibold text-primary hover:underline"
+            >
+              Go to Dashboard
+            </Link>
+          ) : (
+            <Link
+              to="/signin"
+              state={{ mode: "signup" }}
+              className="text-sm font-semibold text-primary hover:underline"
+            >
+              Sign up to save your scores
+            </Link>
           )}
         </div>
       </div>

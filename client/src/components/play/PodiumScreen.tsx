@@ -1,5 +1,7 @@
 import clsx from "clsx";
-import { FiAward } from "react-icons/fi";
+import { Link } from "react-router-dom";
+import { FiAward, FiHome } from "react-icons/fi";
+import Button from "../ui/Button";
 import type { LeaderboardEntry } from "../../context/socket-context";
 
 interface PodiumScreenProps {
@@ -79,6 +81,13 @@ function PodiumScreen({ leaderboard }: PodiumScreenProps) {
           ))}
         </ol>
       )}
+
+      <Link to="/host">
+        <Button type="button" className="flex items-center gap-2">
+          <FiHome className="h-4 w-4" />
+          Back to Dashboard
+        </Button>
+      </Link>
     </div>
   );
 }
