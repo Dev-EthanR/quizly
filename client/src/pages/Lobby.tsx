@@ -7,7 +7,7 @@ import HostDisconnected from "../components/lobby/HostDisconnected";
 import ReconnectingOverlay from "../components/lobby/ReconnectingOverlay";
 import HostLobbyPanel from "../components/lobby/HostLobbyPanel";
 import ParticipantLobbyPanel from "../components/lobby/ParticipantLobbyPanel";
-import LobbyChat from "../components/lobby/LobbyChat";
+import ChatPanel from "../components/lobby/ChatPanel";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { useAuth } from "../context/useAuth";
 import { useSocket } from "../context/useSocket";
@@ -332,13 +332,11 @@ function Lobby() {
         </div>
 
         {!chatDisabled && (
-          <div className="h-[520px] lg:sticky lg:top-10">
-            <LobbyChat
-              roomCode={roomCode}
-              disabled={isMuted}
-              disabledReason={isMuted ? "You have been muted by the host." : undefined}
-            />
-          </div>
+          <ChatPanel
+            roomCode={roomCode}
+            disabled={isMuted}
+            disabledReason={isMuted ? "You have been muted by the host." : undefined}
+          />
         )}
       </div>
     </div>

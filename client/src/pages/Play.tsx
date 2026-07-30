@@ -17,7 +17,7 @@ import QuestionTimer from "../components/play/QuestionTimer";
 import PodiumScreen from "../components/play/PodiumScreen";
 import HostSummaryScreen from "../components/play/HostSummaryScreen";
 import PlayerResultScreen from "../components/play/PlayerResultScreen";
-import LobbyChat from "../components/lobby/LobbyChat";
+import ChatPanel from "../components/lobby/ChatPanel";
 import PlayerRoster from "../components/lobby/PlayerRoster";
 import HostDisconnected from "../components/lobby/HostDisconnected";
 import RoomNotFound from "../components/lobby/RoomNotFound";
@@ -578,13 +578,11 @@ function Play() {
         </div>
 
         {!chatDisabled && (
-          <div className="h-[520px] lg:sticky lg:top-10">
-            <LobbyChat
-              roomCode={roomCode}
-              disabled={isMuted}
-              disabledReason={isMuted ? "You have been muted by the host." : undefined}
-            />
-          </div>
+          <ChatPanel
+            roomCode={roomCode}
+            disabled={isMuted}
+            disabledReason={isMuted ? "You have been muted by the host." : undefined}
+          />
         )}
       </div>
 
