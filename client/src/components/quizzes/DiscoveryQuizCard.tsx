@@ -3,6 +3,8 @@ import { FiPlay } from "react-icons/fi";
 import clsx from "clsx";
 import { quizCategoryLabels, quizDifficultyLabels, type QuizDifficulty } from "shared";
 import HostQuizButton from "./HostQuizButton";
+import ImageFallback from "../ui/ImageFallback";
+import TagPill from "../ui/TagPill";
 import type { DiscoverQuiz } from "../../lib/quizzes";
 
 interface DiscoveryQuizCardProps {
@@ -18,21 +20,14 @@ const DIFFICULTY_BADGE_CLASS: Record<QuizDifficulty, string> = {
 function DiscoveryQuizCard({ quiz }: DiscoveryQuizCardProps) {
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-colors hover:border-primary">
-      <Link
-        to={`/discovery/${quiz.id}`}
-        className="relative flex h-36 items-center justify-center bg-chat"
-      >
-        {quiz.coverImage ? (
-          <img
-            src={quiz.coverImage}
-            alt=""
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <span className="text-3xl font-bold text-muted">
-            {quiz.title.charAt(0).toUpperCase()}
-          </span>
-        )}
+      <Link to={`/discovery/${quiz.id}`} className="relative block h-36">
+        <ImageFallback
+          src={quiz.coverImage}
+          fallbackText={quiz.title}
+          shape="none"
+          className="h-full w-full"
+          textClassName="text-3xl font-bold"
+        />
 
         {quiz.category && (
           <span className="absolute left-2 top-2 rounded-full bg-black/70 px-2.5 py-1 text-xs font-semibold text-white">
@@ -60,30 +55,21 @@ function DiscoveryQuizCard({ quiz }: DiscoveryQuizCardProps) {
         </Link>
 
         <div className="flex items-center gap-2 text-sm text-muted">
-          {quiz.ownerImage ? (
-            <img
-              src={quiz.ownerImage}
-              alt=""
-              referrerPolicy="no-referrer"
-              className="h-6 w-6 shrink-0 rounded-full object-cover"
-            />
-          ) : (
-            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-chat text-xs font-bold text-muted">
-              {(quiz.ownerName ?? "?").charAt(0).toUpperCase()}
-            </span>
-          )}
+          <ImageFallback
+            src={quiz.ownerImage}
+            fallbackText={quiz.ownerName ?? "?"}
+            shape="circle"
+            className="h-6 w-6"
+            textClassName="text-xs font-bold"
+            referrerPolicy="no-referrer"
+          />
           <span className="truncate">{quiz.ownerName ?? "Unknown host"}</span>
         </div>
 
         {quiz.tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {quiz.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full border border-primary/40 bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary"
-              >
-                #{tag}
-              </span>
+              <TagPill key={tag} tag={tag} />
             ))}
           </div>
         )}

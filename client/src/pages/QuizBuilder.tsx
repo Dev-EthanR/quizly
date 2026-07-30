@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/ui/Button";
+import ErrorRetry from "../components/ui/ErrorRetry";
 import QuizBuilderForm from "../components/quizzes/QuizBuilderForm";
 import { QuizBuilderProvider } from "../context/QuizBuilderContext";
 import { hydrateBuilderState } from "../lib/quizBuilderReducer";
@@ -37,17 +38,11 @@ function QuizBuilderEditLoader({ quizId }: QuizBuilderEditLoaderProps) {
 
   if (isError || !quiz) {
     return (
-      <div className="flex flex-col items-center gap-3 px-4 py-24 text-center">
-        <p className="text-danger">Couldn't load this quiz.</p>
-        <div className="flex gap-3">
-          <Button variant="secondary" onClick={() => refetch()}>
-            Try again
-          </Button>
-          <Link to="/my-quizzes">
-            <Button variant="secondary">Back to My Quizzes</Button>
-          </Link>
-        </div>
-      </div>
+      <ErrorRetry message="Couldn't load this quiz." onRetry={() => refetch()}>
+        <Link to="/my-quizzes">
+          <Button variant="secondary">Back to My Quizzes</Button>
+        </Link>
+      </ErrorRetry>
     );
   }
 

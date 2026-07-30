@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { FiCheck, FiCopy, FiPlay, FiUsers } from "react-icons/fi";
 import PlayerRoster from "./PlayerRoster";
 import Button from "../ui/Button";
+import { useCopyToClipboard } from "../../hooks/useCopyToClipboard";
 import type { LobbyPlayer } from "../../context/socket-context";
 
 interface HostLobbyPanelProps {
@@ -12,8 +12,6 @@ interface HostLobbyPanelProps {
   onSetMuted: (playerId: string, muted: boolean) => void;
 }
 
-const COPIED_RESET_MS = 2000;
-
 function HostLobbyPanel({
   roomCode,
   players,
@@ -21,13 +19,7 @@ function HostLobbyPanel({
   onKick,
   onSetMuted,
 }: HostLobbyPanelProps) {
-  const [copied, setCopied] = useState(false);
-
-  const copyRoomCode = async () => {
-    await navigator.clipboard.writeText(roomCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), COPIED_RESET_MS);
-  };
+  const { copied, copy } = useCopyToClipboard();
 
   return (
     <div className="flex w-full flex-col items-center gap-6 text-center">
@@ -42,7 +34,7 @@ function HostLobbyPanel({
         </span>
         <button
           type="button"
-          onClick={copyRoomCode}
+          onClick={() => copy(roomCode)}
           aria-label="Copy room code"
           className="cursor-pointer rounded-lg p-2 text-muted transition-colors hover:bg-chat hover:text-foreground"
         >

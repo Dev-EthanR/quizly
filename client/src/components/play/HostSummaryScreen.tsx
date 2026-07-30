@@ -15,6 +15,7 @@ import {
 import Avatar from "../ui/Avatar";
 import Button from "../ui/Button";
 import StatTile from "../ui/StatTile";
+import RankedListRow from "./RankedListRow";
 import { AVATAR_COLORS } from "../../lib/avatarColors";
 import { getInitials } from "../../lib/initials";
 
@@ -213,23 +214,33 @@ function HostSummaryScreen({ summary, onBack, heading, subheading }: HostSummary
           <h2 className="text-sm font-semibold text-muted">Leaderboard</h2>
           <ol className="flex flex-col gap-2">
             {rest.map((entry, index) => (
-              <li
+              <RankedListRow
                 key={entry.playerId}
-                className="flex items-center justify-between gap-3 rounded-lg border border-border bg-surface px-4 py-3"
-              >
-                <span className="flex min-w-0 items-center gap-3">
-                  <span className="w-5 shrink-0 text-sm font-bold text-muted">#{index + 2}</span>
-                  <Avatar
-                    initials={getInitials(entry.name)}
-                    bgClass={avatarColorFor(entry.color)}
-                  />
-                  <span className="truncate font-medium text-foreground">{entry.name}</span>
-                </span>
-                <span className="flex shrink-0 items-center gap-3 text-sm">
-                  <span className="text-muted">{entry.correctCount}/{totalQuestions} correct</span>
-                  <span className="font-bold text-primary">{entry.score} pts</span>
-                </span>
-              </li>
+                left={
+                  <>
+                    <span className="w-5 shrink-0 text-sm font-bold text-muted">
+                      #{index + 2}
+                    </span>
+                    <Avatar
+                      initials={getInitials(entry.name)}
+                      bgClass={avatarColorFor(entry.color)}
+                    />
+                    <span className="truncate font-medium text-foreground">
+                      {entry.name}
+                    </span>
+                  </>
+                }
+                right={
+                  <>
+                    <span className="text-sm text-muted">
+                      {entry.correctCount}/{totalQuestions} correct
+                    </span>
+                    <span className="text-sm font-bold text-primary">
+                      {entry.score} pts
+                    </span>
+                  </>
+                }
+              />
             ))}
           </ol>
         </div>

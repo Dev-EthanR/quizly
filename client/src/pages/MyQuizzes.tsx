@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import clsx from "clsx";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/ui/Button";
+import ErrorRetry from "../components/ui/ErrorRetry";
+import PillTabs from "../components/ui/PillTabs";
 import QuizCard from "../components/quizzes/QuizCard";
 import QuizCardSkeleton from "../components/quizzes/QuizCardSkeleton";
 import { fetchMyQuizzes, type QuizStatusFilter } from "../lib/quizzes";
@@ -52,22 +53,12 @@ function MyQuizzes() {
           </Link>
         </div>
 
-        <div className="mt-6 flex gap-2">
-          {FILTER_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setFilter(option.value)}
-              className={clsx(
-                "cursor-pointer rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
-                filter === option.value
-                  ? "bg-primary text-foreground"
-                  : "border border-border text-muted hover:bg-surface",
-              )}
-            >
-              {option.label}
-            </button>
-          ))}
+        <div className="mt-6">
+          <PillTabs
+            options={FILTER_OPTIONS}
+            value={filter}
+            onChange={setFilter}
+          />
         </div>
 
         <div className="mt-8">
@@ -80,12 +71,10 @@ function MyQuizzes() {
           )}
 
           {!isLoading && isError && (
-            <div className="flex flex-col items-center gap-3 py-24 text-center">
-              <p className="text-danger">Couldn't load your quizzes.</p>
-              <Button variant="secondary" onClick={() => refetch()}>
-                Try again
-              </Button>
-            </div>
+            <ErrorRetry
+              message="Couldn't load your quizzes."
+              onRetry={() => refetch()}
+            />
           )}
 
           {!isLoading && !isError && quizzes && quizzes.length === 0 && (

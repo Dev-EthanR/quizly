@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import type { QuizQuestionDraft } from "../../lib/quizzes";
+import IndexBadge from "../ui/IndexBadge";
 
 interface QuestionPreviewPanelProps {
   question: QuizQuestionDraft | null;
@@ -15,9 +16,7 @@ function QuestionPreviewPanel({ question, index }: QuestionPreviewPanelProps) {
         {question ? (
           <>
             <div className="flex items-center justify-between">
-              <span className="rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-xs font-bold text-primary">
-                Question {index + 1}
-              </span>
+              <IndexBadge shape="pill">Question {index + 1}</IndexBadge>
               <div className="flex items-center gap-2 text-sm font-semibold text-muted">
                 <span>{question.timeLimitSeconds}s</span>
                 <span>·</span>
@@ -43,16 +42,12 @@ function QuestionPreviewPanel({ question, index }: QuestionPreviewPanelProps) {
                           : "border-border bg-surface",
                       )}
                     >
-                      <span
-                        className={clsx(
-                          "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border text-sm font-bold",
-                          isCorrect
-                            ? "border-secondary bg-secondary text-black"
-                            : "border-primary/40 bg-primary/15 text-primary",
-                        )}
+                      <IndexBadge
+                        size="md"
+                        variant={isCorrect ? "correct" : "default"}
                       >
                         {String.fromCharCode(65 + answerIndex)}
-                      </span>
+                      </IndexBadge>
                       <span className="flex-1 break-words">
                         {answer.text.trim() || `Answer ${answerIndex + 1}`}
                       </span>

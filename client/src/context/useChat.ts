@@ -1,10 +1,6 @@
-import { useContext } from "react";
+import { useRequiredContext } from "./createContextHook";
 import { ChatContext, type ChatContextValue } from "./chat-context";
 
 export function useChat(): ChatContextValue {
-  const context = useContext(ChatContext);
-  if (!context) {
-    throw new Error("useChat must be used within a ChatProvider");
-  }
-  return context;
+  return useRequiredContext(ChatContext, "ChatProvider");
 }

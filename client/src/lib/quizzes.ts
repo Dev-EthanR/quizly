@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "./api";
 import type {
   QuizCategory,
   QuizDifficulty,
@@ -170,13 +170,6 @@ interface GenerateAnswersParams {
   quizTitle: string;
   prompt: string;
 }
-
-const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
-
-const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-});
 
 export async function fetchMyQuizzes({
   status,

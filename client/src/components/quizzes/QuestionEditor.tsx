@@ -1,9 +1,9 @@
-import clsx from "clsx";
 import type { QuizQuestionDraft } from "../../lib/quizzes";
 import type { QuestionValidationErrors } from "../../lib/questionValidation";
 import { useQuizBuilder } from "../../context/useQuizBuilder";
 import { ANSWER_BOUNDS } from "../../lib/quizBuilderReducer";
 import Input from "../ui/Input";
+import SegmentedControl from "../ui/SegmentedControl";
 import AnswerRow from "./AnswerRow";
 
 interface QuestionEditorProps {
@@ -11,7 +11,10 @@ interface QuestionEditorProps {
   errors: QuestionValidationErrors | null;
 }
 
-const TIME_LIMIT_OPTIONS = [10, 20, 30];
+const TIME_LIMIT_OPTIONS = [10, 20, 30].map((seconds) => ({
+  value: seconds,
+  label: `${seconds}s`,
+}));
 
 function QuestionEditor({ question, errors }: QuestionEditorProps) {
   const { dispatch } = useQuizBuilder();
@@ -71,30 +74,18 @@ function QuestionEditor({ question, errors }: QuestionEditorProps) {
 
       <div className="flex w-full gap-4">
         <div className="flex flex-1 flex-col gap-1 text-sm">
-          <span className="font-medium text-muted">Time limit</span>
-          <div className="flex gap-2">
-            {TIME_LIMIT_OPTIONS.map((seconds) => (
-              <button
-                key={seconds}
-                type="button"
-                onClick={() =>
-                  dispatch({
-                    type: "SET_QUESTION_TIME_LIMIT",
-                    questionId: question.id,
-                    timeLimitSeconds: seconds,
-                  })
-                }
-                className={clsx(
-                  "flex-1 cursor-pointer rounded-lg border px-4 py-2 text-sm font-bold transition-colors",
-                  question.timeLimitSeconds === seconds
-                    ? "border-primary/40 bg-primary/15 text-primary"
-                    : "border-border text-muted hover:bg-background",
-                )}
-              >
-                {seconds}s
-              </button>
-            ))}
-          </div>
+          <SegmentedControl
+            options={TIME_LIMIT_OPTIONS}
+            value={question.timeLimitSeconds}
+            size="sm"
+            onChange={(timeLimitSeconds) =>
+              dispatch({
+                type: "SET_QUESTION_TIME_LIMIT",
+                questionId: question.id,
+                timeLimitSeconds,
+              })
+            }
+          />
         </div>
 
         <div className="flex-1">

@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { Link } from "react-router-dom";
 import { FiAward, FiBarChart2, FiHome } from "react-icons/fi";
 import Button from "../ui/Button";
+import RankedListRow from "./RankedListRow";
 import type { LeaderboardEntry } from "../../context/socket-context";
 
 interface PodiumScreenProps {
@@ -69,16 +70,24 @@ function PodiumScreen({ leaderboard, onViewSummary }: PodiumScreenProps) {
       {rest.length > 0 && (
         <ol className="flex w-full max-w-md flex-col gap-2">
           {rest.map((entry, index) => (
-            <li
+            <RankedListRow
               key={entry.playerId}
-              className="flex items-center justify-between rounded-lg border border-border bg-surface px-4 py-3"
-            >
-              <span className="flex items-center gap-3">
-                <span className="text-sm font-bold text-muted">#{index + 4}</span>
-                <span className="font-medium text-foreground">{entry.name}</span>
-              </span>
-              <span className="font-bold text-primary">{entry.score} pts</span>
-            </li>
+              left={
+                <>
+                  <span className="text-sm font-bold text-muted">
+                    #{index + 4}
+                  </span>
+                  <span className="font-medium text-foreground">
+                    {entry.name}
+                  </span>
+                </>
+              }
+              right={
+                <span className="font-bold text-primary">
+                  {entry.score} pts
+                </span>
+              }
+            />
           ))}
         </ol>
       )}

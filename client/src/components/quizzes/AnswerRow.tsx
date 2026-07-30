@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import type { QuizAnswerDraft } from "../../lib/quizzes";
 import { useQuizBuilder } from "../../context/useQuizBuilder";
+import IndexBadge from "../ui/IndexBadge";
 
 interface AnswerRowProps {
   questionId: string;
@@ -53,9 +54,7 @@ function AnswerRow({
           ✓
         </button>
 
-        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-primary/40 bg-primary/15 text-xs font-bold text-primary">
-          {String.fromCharCode(65 + index)}
-        </span>
+        <IndexBadge>{String.fromCharCode(65 + index)}</IndexBadge>
 
         <input
           value={answer.text}

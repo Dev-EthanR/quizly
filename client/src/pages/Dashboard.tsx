@@ -9,9 +9,9 @@ import {
   FiVideo,
 } from "react-icons/fi";
 import Navbar from "../components/layout/Navbar";
-import Button from "../components/ui/Button";
+import ErrorRetry from "../components/ui/ErrorRetry";
 import Pagination from "../components/ui/Pagination";
-import StatCard from "../components/dashboard/StatCard";
+import StatTile from "../components/ui/StatTile";
 import AchievementCard from "../components/dashboard/AchievementCard";
 import RecentGameRow from "../components/dashboard/RecentGameRow";
 import HostedSessionRow from "../components/dashboard/HostedSessionRow";
@@ -54,12 +54,10 @@ function RecentGamesTab() {
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center gap-3 py-24 text-center">
-        <p className="text-danger">Couldn't load your recent games.</p>
-        <Button variant="secondary" onClick={() => refetch()}>
-          Try again
-        </Button>
-      </div>
+      <ErrorRetry
+        message="Couldn't load your recent games."
+        onRetry={() => refetch()}
+      />
     );
   }
 
@@ -110,12 +108,10 @@ function HostedQuizzesTab() {
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center gap-3 py-24 text-center">
-        <p className="text-danger">Couldn't load your hosted quizzes.</p>
-        <Button variant="secondary" onClick={() => refetch()}>
-          Try again
-        </Button>
-      </div>
+      <ErrorRetry
+        message="Couldn't load your hosted quizzes."
+        onRetry={() => refetch()}
+      />
     );
   }
 
@@ -177,12 +173,7 @@ function AchievementsTab({
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center gap-3 py-24 text-center">
-        <p className="text-danger">Couldn't load your achievements.</p>
-        <Button variant="secondary" onClick={onRetry}>
-          Try again
-        </Button>
-      </div>
+      <ErrorRetry message="Couldn't load your achievements." onRetry={onRetry} />
     );
   }
 
@@ -226,23 +217,27 @@ function Dashboard() {
         <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
 
         <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <StatCard
-            icon={FiBarChart2}
+          <StatTile
+            layout="row"
+            icon={<FiBarChart2 className="h-5 w-5" />}
             label="Games Played"
             value={statsLoading ? "-" : (stats?.gamesPlayed ?? 0)}
           />
-          <StatCard
-            icon={FiTrendingUp}
+          <StatTile
+            layout="row"
+            icon={<FiTrendingUp className="h-5 w-5" />}
             label="Average Score"
             value={statsLoading ? "-" : (stats?.averageScore ?? 0)}
           />
-          <StatCard
-            icon={FiFlag}
+          <StatTile
+            layout="row"
+            icon={<FiFlag className="h-5 w-5" />}
             label="Best Finish"
             value={statsLoading ? "-" : (stats?.bestFinish ?? "—")}
           />
-          <StatCard
-            icon={FiAward}
+          <StatTile
+            layout="row"
+            icon={<FiAward className="h-5 w-5" />}
             label="Wins"
             value={statsLoading ? "-" : (stats?.wins ?? 0)}
           />

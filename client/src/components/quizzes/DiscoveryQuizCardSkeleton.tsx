@@ -1,19 +1,21 @@
+import Skeleton from "../ui/Skeleton";
+
 function DiscoveryQuizCardSkeleton() {
   return (
     <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface">
-      <div className="h-36 animate-pulse bg-chat" />
+      <Skeleton className="h-36" />
 
       <div className="flex flex-col gap-3 p-4">
-        <div className="h-5 w-2/3 animate-pulse rounded bg-chat" />
+        <Skeleton className="h-5 w-2/3 rounded" />
 
         <div className="flex gap-3">
-          <div className="h-4 w-20 animate-pulse rounded bg-chat" />
-          <div className="h-4 w-16 animate-pulse rounded bg-chat" />
+          <Skeleton className="h-4 w-20 rounded" />
+          <Skeleton className="h-4 w-16 rounded" />
         </div>
 
-        <div className="h-4 w-1/2 animate-pulse rounded bg-chat" />
+        <Skeleton className="h-4 w-1/2 rounded" />
 
-        <div className="h-11 w-full animate-pulse rounded-lg bg-chat" />
+        <Skeleton className="h-11 w-full rounded-lg" />
       </div>
     </div>
   );

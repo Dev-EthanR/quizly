@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import ImageFallback from "../ui/ImageFallback";
 import type { RecentGame } from "../../lib/dashboard";
 
 interface RecentGameRowProps {
@@ -8,19 +9,11 @@ interface RecentGameRowProps {
 function RecentGameRow({ game }: RecentGameRowProps) {
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 sm:flex-row sm:items-center">
-      <div className="flex h-16 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-chat">
-        {game.quizCoverImage ? (
-          <img
-            src={game.quizCoverImage}
-            alt=""
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <span className="text-xl font-bold text-muted">
-            {game.quizTitle.charAt(0).toUpperCase()}
-          </span>
-        )}
-      </div>
+      <ImageFallback
+        src={game.quizCoverImage}
+        fallbackText={game.quizTitle}
+        className="h-16 w-24"
+      />
 
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex min-w-0 items-center gap-2">

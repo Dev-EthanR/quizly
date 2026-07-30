@@ -1,4 +1,5 @@
 import type { UseTagInputResult } from "../../../hooks/useTagInput";
+import TagPill from "../../ui/TagPill";
 
 interface TagsInputProps {
   state: UseTagInputResult;
@@ -20,23 +21,7 @@ function TagsInput({ state, maxTags, error }: TagsInputProps) {
         className="flex cursor-text flex-wrap items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 focus-within:ring-2 focus-within:ring-primary"
       >
         {tags.map((tag) => (
-          <span
-            key={tag}
-            className="flex items-center gap-1 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-xs font-semibold text-primary"
-          >
-            #{tag}
-            <button
-              type="button"
-              aria-label={`Remove tag ${tag}`}
-              onClick={(event) => {
-                event.stopPropagation();
-                handleRemoveTag(tag);
-              }}
-              className="cursor-pointer text-primary hover:text-foreground"
-            >
-              ✕
-            </button>
-          </span>
+          <TagPill key={tag} tag={tag} onRemove={() => handleRemoveTag(tag)} />
         ))}
         <input
           ref={inputRef}

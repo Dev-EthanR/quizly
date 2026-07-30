@@ -4,6 +4,7 @@ import { updateProfileSchema, type UpdateProfileInput } from "shared";
 import Navbar from "../components/layout/Navbar";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
+import ErrorRetry from "../components/ui/ErrorRetry";
 import ProfileAvatarField from "../components/settings/ProfileAvatarField";
 import GoogleConnectionCard from "../components/settings/GoogleConnectionCard";
 import { useProfile } from "../hooks/useProfile";
@@ -56,12 +57,10 @@ function Settings() {
           )}
 
           {!isLoading && isError && (
-            <div className="flex flex-col items-center gap-3 py-24 text-center">
-              <p className="text-danger">Couldn't load your profile.</p>
-              <Button variant="secondary" onClick={() => refetch()}>
-                Try again
-              </Button>
-            </div>
+            <ErrorRetry
+              message="Couldn't load your profile."
+              onRetry={() => refetch()}
+            />
           )}
 
           {!isLoading && !isError && profile && (

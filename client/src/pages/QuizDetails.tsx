@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import { useParams, Link } from "react-router-dom";
 import { isAxiosError } from "axios";
 import {
@@ -16,6 +15,11 @@ import clsx from "clsx";
 import { quizCategoryLabels, quizDifficultyLabels, type QuizDifficulty } from "shared";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/ui/Button";
+import ErrorRetry from "../components/ui/ErrorRetry";
+import ImageFallback from "../components/ui/ImageFallback";
+import IndexBadge from "../components/ui/IndexBadge";
+import StatTile from "../components/ui/StatTile";
+import TagPill from "../components/ui/TagPill";
 import HostQuizButton from "../components/quizzes/HostQuizButton";
 import { useDiscoverQuiz } from "../hooks/useDiscoverQuiz";
 import { useSaveQuizMutation } from "../hooks/useSaveQuizMutation";
@@ -30,22 +34,6 @@ const DIFFICULTY_BADGE_CLASS: Record<QuizDifficulty, string> = {
   medium: "bg-warning/90",
   hard: "bg-danger/90",
 };
-
-interface StatCardProps {
-  icon: ReactNode;
-  value: number;
-  label: string;
-}
-
-function StatCard({ icon, value, label }: StatCardProps) {
-  return (
-    <div className="flex flex-col items-center gap-1 rounded-xl border border-border bg-surface px-4 py-5 text-center">
-      <span className="text-primary">{icon}</span>
-      <span className="text-xl font-bold text-foreground">{value}</span>
-      <span className="text-xs text-muted">{label}</span>
-    </div>
-  );
-}
 
 function QuizDetails() {
   const { quizId } = useParams() as Partial<QuizDetailsParams>;
@@ -103,38 +91,31 @@ function QuizDetails() {
         )}
 
         {!isLoading && isError && !notFound && (
-          <div className="flex flex-col items-center gap-3 py-24 text-center">
-            <p className="text-danger">Couldn't load this quiz.</p>
-            <Button variant="secondary" onClick={() => refetch()}>
-              Try again
-            </Button>
-          </div>
+          <ErrorRetry
+            message="Couldn't load this quiz."
+            onRetry={() => refetch()}
+          />
         )}
 
         {!isLoading && !isError && quiz && (
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,320px)_1fr]">
             <div className="flex flex-col gap-4">
-              <div className="flex h-56 items-center justify-center overflow-hidden rounded-xl bg-chat">
-                {quiz.coverImage ? (
-                  <img
-                    src={quiz.coverImage}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span className="text-5xl font-bold text-muted">
-                    {quiz.title.charAt(0).toUpperCase()}
-                  </span>
-                )}
-              </div>
+              <ImageFallback
+                src={quiz.coverImage}
+                fallbackText={quiz.title}
+                className="h-56"
+                textClassName="text-5xl font-bold"
+              />
 
               <div className="grid grid-cols-2 gap-4">
-                <StatCard
+                <StatTile
+                  layout="compact"
                   icon={<FiHelpCircle className="h-5 w-5" />}
                   value={quiz.questionCount}
                   label={quiz.questionCount === 1 ? "Question" : "Questions"}
                 />
-                <StatCard
+                <StatTile
+                  layout="compact"
                   icon={<FiPlay className="h-5 w-5" />}
                   value={quiz.playCount}
                   label={quiz.playCount === 1 ? "Play" : "Plays"}
@@ -166,18 +147,14 @@ function QuizDetails() {
               </h1>
 
               <div className="flex items-center gap-2 text-sm text-muted">
-                {quiz.ownerImage ? (
-                  <img
-                    src={quiz.ownerImage}
-                    alt=""
-                    referrerPolicy="no-referrer"
-                    className="h-6 w-6 shrink-0 rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-chat text-xs font-bold text-muted">
-                    {(quiz.ownerName ?? "?").charAt(0).toUpperCase()}
-                  </span>
-                )}
+                <ImageFallback
+                  src={quiz.ownerImage}
+                  fallbackText={quiz.ownerName ?? "?"}
+                  shape="circle"
+                  className="h-6 w-6"
+                  textClassName="text-xs font-bold"
+                  referrerPolicy="no-referrer"
+                />
                 <span>Created by {quiz.ownerName ?? "Unknown host"}</span>
               </div>
 
@@ -188,12 +165,7 @@ function QuizDetails() {
               {quiz.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {quiz.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full border border-primary/40 bg-primary/15 px-2.5 py-0.5 text-xs font-semibold text-primary"
-                    >
-                      #{tag}
-                    </span>
+                    <TagPill key={tag} tag={tag} />
                   ))}
                 </div>
               )}
@@ -244,9 +216,7 @@ function QuizDetails() {
                       className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface px-4 py-3"
                     >
                       <div className="flex min-w-0 items-center gap-3">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-primary/40 bg-primary/15 text-sm font-bold text-primary">
-                          {index + 1}
-                        </span>
+                        <IndexBadge size="md">{index + 1}</IndexBadge>
                         <span className="truncate text-foreground">
                           {question.prompt}
                         </span>

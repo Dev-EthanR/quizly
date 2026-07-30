@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 import { FiAlertTriangle } from "react-icons/fi";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/ui/Button";
+import FullScreenStatus from "../components/ui/FullScreenStatus";
 import { useAuth } from "../context/useAuth";
 import { useSocket } from "../context/useSocket";
 import { createSessionToken, saveSession } from "../lib/session";
@@ -64,22 +65,17 @@ function Host() {
     return (
       <div className="min-h-screen">
         <Navbar />
-        <div className="flex flex-col items-center justify-center gap-4 px-4 py-24 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full border border-warning/40 bg-warning/10 text-warning">
-            <FiAlertTriangle size={28} />
-          </div>
-          <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold text-foreground">
-              No quiz selected
-            </h1>
-            <p className="text-muted">
-              Choose a quiz to host from your library.
-            </p>
-          </div>
+        <FullScreenStatus
+          variant="inline"
+          tone="warning"
+          icon={<FiAlertTriangle size={28} />}
+          title="No quiz selected"
+          message="Choose a quiz to host from your library."
+        >
           <Link to="/my-quizzes">
             <Button type="button">Go to My Quizzes</Button>
           </Link>
-        </div>
+        </FullScreenStatus>
       </div>
     );
   }

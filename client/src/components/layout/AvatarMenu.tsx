@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import clsx from "clsx";
 import Avatar from "../ui/Avatar";
 import { useAuth } from "../../context/useAuth";
+import { useModal } from "../../hooks/useModal";
 import { getInitials } from "../../lib/initials";
 
 function AvatarMenu() {
@@ -10,26 +11,7 @@ function AvatarMenu() {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-
-    function handlePointerDown(event: MouseEvent) {
-      if (!containerRef.current?.contains(event.target as Node)) {
-        setOpen(false);
-      }
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
-    }
-
-    document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [open]);
+  useModal(() => setOpen(false), { enabled: open, outsideClickRef: containerRef });
 
   const handleSignOut = async () => {
     setOpen(false);

@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { FiUsers } from "react-icons/fi";
 import HostQuizButton from "../quizzes/HostQuizButton";
+import ImageFallback from "../ui/ImageFallback";
 import type { HostedSession } from "../../lib/dashboard";
 
 interface HostedSessionRowProps {
@@ -22,19 +23,11 @@ function HostedSessionRow({ session }: HostedSessionRowProps) {
       }}
       className="flex cursor-pointer flex-col gap-4 rounded-xl border border-border bg-surface p-4 transition-colors hover:border-primary/40 sm:flex-row sm:items-center"
     >
-      <div className="flex h-16 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-chat">
-        {session.quizCoverImage ? (
-          <img
-            src={session.quizCoverImage}
-            alt=""
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <span className="text-xl font-bold text-muted">
-            {session.quizTitle.charAt(0).toUpperCase()}
-          </span>
-        )}
-      </div>
+      <ImageFallback
+        src={session.quizCoverImage}
+        fallbackText={session.quizTitle}
+        className="h-16 w-24"
+      />
 
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <h3 className="truncate font-semibold text-foreground">

@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { FiArrowDown, FiArrowUp, FiMinus } from "react-icons/fi";
+import RankedListRow from "./RankedListRow";
 
 export type LeaderboardRankChange = "up" | "down" | "same";
 
@@ -35,35 +36,37 @@ function Leaderboard({ entries, currentPlayerId }: LeaderboardProps) {
   return (
     <ol className="flex w-full max-w-md flex-col gap-2">
       {entries.map((entry, index) => (
-        <li
+        <RankedListRow
           key={entry.playerId}
-          className={clsx(
-            "flex items-center justify-between rounded-lg border bg-surface px-4 py-3",
-            entry.playerId === currentPlayerId ? "border-primary" : "border-border",
-          )}
-        >
-          <span className="flex items-center gap-3">
-            <span className="text-sm font-bold text-muted">#{index + 1}</span>
-            {entry.rankChange && <RankChangeIcon change={entry.rankChange} />}
-            <span className="font-medium text-foreground">{entry.name}</span>
-            {entry.connected === false && (
-              <span className="text-xs text-muted">(reconnecting)</span>
-            )}
-          </span>
-          <span className="flex items-center gap-3">
-            {typeof entry.pointsGained === "number" && (
-              <span
-                className={clsx(
-                  "text-xs font-semibold",
-                  entry.pointsGained > 0 ? "text-secondary" : "text-muted",
-                )}
-              >
-                {entry.pointsGained > 0 ? `+${entry.pointsGained}` : "+0"}
+          highlighted={entry.playerId === currentPlayerId}
+          left={
+            <>
+              <span className="text-sm font-bold text-muted">
+                #{index + 1}
               </span>
-            )}
-            <span className="font-bold text-primary">{entry.score} pts</span>
-          </span>
-        </li>
+              {entry.rankChange && <RankChangeIcon change={entry.rankChange} />}
+              <span className="font-medium text-foreground">{entry.name}</span>
+              {entry.connected === false && (
+                <span className="text-xs text-muted">(reconnecting)</span>
+              )}
+            </>
+          }
+          right={
+            <>
+              {typeof entry.pointsGained === "number" && (
+                <span
+                  className={clsx(
+                    "text-xs font-semibold",
+                    entry.pointsGained > 0 ? "text-secondary" : "text-muted",
+                  )}
+                >
+                  {entry.pointsGained > 0 ? `+${entry.pointsGained}` : "+0"}
+                </span>
+              )}
+              <span className="font-bold text-primary">{entry.score} pts</span>
+            </>
+          }
+        />
       ))}
     </ol>
   );

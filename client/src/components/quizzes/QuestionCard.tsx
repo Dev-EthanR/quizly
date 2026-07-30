@@ -3,6 +3,7 @@ import type { KeyboardEvent, MouseEvent } from "react";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import type { QuizQuestionDraft } from "../../lib/quizzes";
 import { isQuestionValid } from "../../lib/questionValidation";
+import IndexBadge from "../ui/IndexBadge";
 
 interface QuestionCardProps {
   question: QuizQuestionDraft;
@@ -53,9 +54,7 @@ function QuestionCard({
           : "border-border hover:border-primary/40",
       )}
     >
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-primary/40 bg-primary/15 text-xs font-bold text-primary">
-        {index + 1}
-      </span>
+      <IndexBadge>{index + 1}</IndexBadge>
 
       <div className="flex flex-1 flex-col gap-1">
         <span className="font-medium text-foreground">

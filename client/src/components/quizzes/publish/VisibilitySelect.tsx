@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { FiGlobe, FiLock } from "react-icons/fi";
 import type { IconType } from "react-icons";
 import type { QuizVisibility } from "../../../lib/quizzes";
+import SegmentedControl from "../../ui/SegmentedControl";
 
 interface VisibilityOption {
   value: QuizVisibility;
@@ -34,28 +35,13 @@ interface VisibilitySelectProps {
 function VisibilitySelect({ value, onChange, compact = false }: VisibilitySelectProps) {
   if (compact) {
     return (
-      <div className="flex gap-2">
-        {VISIBILITY_OPTIONS.map((option) => {
-          const isSelected = value === option.value;
-          const Icon = option.icon;
-          return (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => onChange(option.value)}
-              className={clsx(
-                "flex cursor-pointer items-center gap-2 rounded-lg border px-4 py-3 text-sm font-bold transition-colors",
-                isSelected
-                  ? "border-secondary bg-secondary/15 text-secondary"
-                  : "border-border text-muted hover:bg-surface",
-              )}
-            >
-              <Icon className="h-4 w-4" />
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
+      <SegmentedControl
+        options={VISIBILITY_OPTIONS}
+        value={value}
+        onChange={onChange}
+        tone="secondary"
+        fullWidth={false}
+      />
     );
   }
 

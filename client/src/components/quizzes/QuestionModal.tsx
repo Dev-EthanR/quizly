@@ -3,6 +3,7 @@ import type { QuizQuestionDraft } from "../../lib/quizzes";
 import { getQuestionErrors, isQuestionValid } from "../../lib/questionValidation";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
+import IndexBadge from "../ui/IndexBadge";
 import QuestionEditor from "./QuestionEditor";
 
 interface QuestionModalProps {
@@ -46,9 +47,7 @@ function QuestionModal({
     <Modal
       title={
         <span className="flex items-center gap-3">
-          <span className="rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-xs font-bold text-primary">
-            Question {index + 1}
-          </span>
+          <IndexBadge shape="pill">Question {index + 1}</IndexBadge>
           <span className="text-base font-semibold text-foreground">
             {modalLabel}
           </span>

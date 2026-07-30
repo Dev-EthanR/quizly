@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import clsx from "clsx";
 import { DISCOVER_QUIZZES_PAGE_SIZE, quizDifficultyLabels } from "shared";
 import Navbar from "../components/layout/Navbar";
-import Button from "../components/ui/Button";
+import ErrorRetry from "../components/ui/ErrorRetry";
 import Pagination from "../components/ui/Pagination";
+import PillTabs from "../components/ui/PillTabs";
 import DiscoveryQuizCard from "../components/quizzes/DiscoveryQuizCard";
 import DiscoveryQuizCardSkeleton from "../components/quizzes/DiscoveryQuizCardSkeleton";
 import { useQuizCategories } from "../hooks/useQuizCategories";
@@ -53,12 +53,10 @@ function SavedQuizzesTab() {
       )}
 
       {!isLoading && isError && (
-        <div className="flex flex-col items-center gap-3 py-24 text-center">
-          <p className="text-danger">Couldn't load your saved quizzes.</p>
-          <Button variant="secondary" onClick={() => refetch()}>
-            Try again
-          </Button>
-        </div>
+        <ErrorRetry
+          message="Couldn't load your saved quizzes."
+          onRetry={() => refetch()}
+        />
       )}
 
       {!isLoading && !isError && quizzes && quizzes.length === 0 && (
@@ -140,23 +138,7 @@ function Discovery() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-3xl font-bold text-foreground">Discover Quizzes</h1>
 
-          <div className="flex gap-2">
-            {TAB_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setTab(option.value)}
-                className={clsx(
-                  "cursor-pointer rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
-                  tab === option.value
-                    ? "bg-primary text-foreground"
-                    : "border border-border text-muted hover:bg-surface",
-                )}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
+          <PillTabs options={TAB_OPTIONS} value={tab} onChange={setTab} />
         </div>
 
         {tab === "saved" && <SavedQuizzesTab />}
@@ -213,12 +195,10 @@ function Discovery() {
               )}
 
               {!isLoading && isError && (
-                <div className="flex flex-col items-center gap-3 py-24 text-center">
-                  <p className="text-danger">Couldn't load quizzes.</p>
-                  <Button variant="secondary" onClick={() => refetch()}>
-                    Try again
-                  </Button>
-                </div>
+                <ErrorRetry
+                  message="Couldn't load quizzes."
+                  onRetry={() => refetch()}
+                />
               )}
 
               {!isLoading && !isError && quizzes && quizzes.length === 0 && (

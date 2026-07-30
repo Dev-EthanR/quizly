@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "./api";
 
 export type AchievementId =
   | "rookie"
@@ -127,13 +127,6 @@ export interface HostedSessionDetail {
 interface FetchGamesParams {
   page: number;
 }
-
-const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
-
-const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-});
 
 export async function fetchDashboardStats(): Promise<DashboardStats> {
   const { data } = await api.get<DashboardStats>("/api/users/me/stats");

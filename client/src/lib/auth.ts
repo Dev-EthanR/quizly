@@ -1,4 +1,5 @@
-import axios, { isAxiosError } from "axios";
+import api, { API_URL } from "./api";
+import { extractApiErrorMessage } from "./apiError";
 
 export interface AuthUser {
   id?: string;
@@ -29,30 +30,8 @@ interface RegisterSuccessResponse {
   message: string;
 }
 
-interface ZodFlattenedError {
-  formErrors: string[];
-  fieldErrors: Record<string, string[] | undefined>;
-}
-
-interface RegisterErrorResponse {
-  error: string | ZodFlattenedError;
-}
-
 interface AuthCallbackResponse {
   url: string;
-}
-
-const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
-
-const api = axios.create({
-  baseURL: API_URL,
-  withCredentials: true,
-});
-
-function isZodFlattenedError(
-  error: RegisterErrorResponse["error"],
-): error is ZodFlattenedError {
-  return typeof error === "object";
 }
 
 export async function fetchSession(): Promise<AuthSession | null> {
@@ -74,19 +53,10 @@ export async function registerUser(
     );
     return data;
   } catch (err) {
-    if (isAxiosError<RegisterErrorResponse>(err) && err.response) {
-      const { error } = err.response.data;
-      if (isZodFlattenedError(error)) {
-        const message =
-          error.formErrors[0] ??
-          Object.values(error.fieldErrors).flat().filter(Boolean)[0];
-        throw new Error(message ?? "Invalid registration details", {
-          cause: err,
-        });
-      }
-      throw new Error(error, { cause: err });
-    }
-    throw new Error("Invalid registration details", { cause: err });
+    throw new Error(
+      extractApiErrorMessage(err, "Invalid registration details"),
+      { cause: err },
+    );
   }
 }
 

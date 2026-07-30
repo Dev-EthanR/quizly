@@ -1,15 +1,9 @@
-import { useState } from "react";
-
-const COPIED_RESET_MS = 2000;
+import { useCopyToClipboard } from "./useCopyToClipboard";
 
 export function useShareLink() {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
 
-  const share = async () => {
-    await navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), COPIED_RESET_MS);
-  };
+  const share = () => copy(window.location.href);
 
   return { copied, share };
 }
