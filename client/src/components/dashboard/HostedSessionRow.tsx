@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { FiUsers } from "react-icons/fi";
 import HostQuizButton from "../quizzes/HostQuizButton";
 import type { HostedSession } from "../../lib/dashboard";
@@ -7,8 +8,20 @@ interface HostedSessionRowProps {
 }
 
 function HostedSessionRow({ session }: HostedSessionRowProps) {
+  const navigate = useNavigate();
+
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 sm:flex-row sm:items-center">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => navigate(`/dashboard/hosted/${session.id}`)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          navigate(`/dashboard/hosted/${session.id}`);
+        }
+      }}
+      className="flex cursor-pointer flex-col gap-4 rounded-xl border border-border bg-surface p-4 transition-colors hover:border-primary/40 sm:flex-row sm:items-center"
+    >
       <div className="flex h-16 w-24 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-chat">
         {session.quizCoverImage ? (
           <img
@@ -42,11 +55,17 @@ function HostedSessionRow({ session }: HostedSessionRowProps) {
         </div>
       </div>
 
-      <HostQuizButton
-        quizId={session.quizId}
-        label="Host Again"
-        className="flex w-full items-center justify-center gap-2 shrink-0 sm:w-auto"
-      />
+      <div
+        className="shrink-0"
+        onClick={(event) => event.stopPropagation()}
+        onKeyDown={(event) => event.stopPropagation()}
+      >
+        <HostQuizButton
+          quizId={session.quizId}
+          label="Host Again"
+          className="flex w-full items-center justify-center gap-2 sm:w-auto"
+        />
+      </div>
     </div>
   );
 }

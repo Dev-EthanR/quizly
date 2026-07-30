@@ -77,6 +77,53 @@ export interface HostedSessionsResult {
   totalCount: number;
 }
 
+export interface HostedSessionPlayerSummary {
+  playerId: string;
+  name: string;
+  color?: string;
+  score: number;
+  correctCount: number;
+  connected: boolean;
+  accuracy: number;
+  avgResponseMs: number;
+}
+
+export interface HostedSessionFastestPlayer {
+  playerId: string;
+  name: string;
+  avgResponseMs: number;
+}
+
+export interface HostedSessionHardestQuestion {
+  questionIndex: number;
+  prompt: string;
+  accuracy: number;
+}
+
+export interface HostedSessionQuestionBreakdown {
+  questionIndex: number;
+  prompt: string;
+  correctCount: number;
+  totalPlayers: number;
+  accuracy: number;
+  avgResponseMs: number;
+}
+
+export interface HostedSessionDetail {
+  quizTitle: string;
+  quizCoverImage: string | null;
+  playedAt: string;
+  leaderboard: HostedSessionPlayerSummary[];
+  totalQuestions: number;
+  totalPlayers: number;
+  averageAccuracy: number;
+  averageResponseMs: number;
+  completionRate: number;
+  questionBreakdown: HostedSessionQuestionBreakdown[];
+  fastestPlayer: HostedSessionFastestPlayer | null;
+  hardestQuestion: HostedSessionHardestQuestion | null;
+}
+
 interface FetchGamesParams {
   page: number;
 }
@@ -108,6 +155,15 @@ export async function fetchHostedSessions({
   const { data } = await api.get<HostedSessionsResult>(
     "/api/users/me/hosted-sessions",
     { params: { page } },
+  );
+  return data;
+}
+
+export async function fetchHostedSessionDetail(
+  sessionId: string,
+): Promise<HostedSessionDetail> {
+  const { data } = await api.get<HostedSessionDetail>(
+    `/api/users/me/hosted-sessions/${sessionId}`,
   );
   return data;
 }

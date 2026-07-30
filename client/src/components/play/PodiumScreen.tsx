@@ -1,11 +1,12 @@
 import clsx from "clsx";
 import { Link } from "react-router-dom";
-import { FiAward, FiHome } from "react-icons/fi";
+import { FiAward, FiBarChart2, FiHome } from "react-icons/fi";
 import Button from "../ui/Button";
 import type { LeaderboardEntry } from "../../context/socket-context";
 
 interface PodiumScreenProps {
   leaderboard: LeaderboardEntry[];
+  onViewSummary: () => void;
 }
 
 interface PodiumPlaceProps {
@@ -52,7 +53,7 @@ function PodiumPlace({ place, entry }: PodiumPlaceProps) {
   );
 }
 
-function PodiumScreen({ leaderboard }: PodiumScreenProps) {
+function PodiumScreen({ leaderboard, onViewSummary }: PodiumScreenProps) {
   const [first, second, third, ...rest] = leaderboard;
 
   return (
@@ -82,12 +83,18 @@ function PodiumScreen({ leaderboard }: PodiumScreenProps) {
         </ol>
       )}
 
-      <Link to="/dashboard">
-        <Button type="button" className="flex items-center gap-2">
-          <FiHome className="h-4 w-4" />
-          Back to Dashboard
+      <div className="flex items-center gap-3">
+        <Button type="button" onClick={onViewSummary} className="flex items-center gap-2">
+          <FiBarChart2 className="h-4 w-4" />
+          View Summary
         </Button>
-      </Link>
+        <Link to="/dashboard">
+          <Button type="button" variant="secondary" className="flex items-center gap-2">
+            <FiHome className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </Link>
+      </div>
     </div>
   );
 }

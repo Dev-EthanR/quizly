@@ -15,6 +15,7 @@ import Leaderboard, {
 import GameCountdown from "../components/play/GameCountdown";
 import QuestionTimer from "../components/play/QuestionTimer";
 import PodiumScreen from "../components/play/PodiumScreen";
+import HostSummaryScreen from "../components/play/HostSummaryScreen";
 import PlayerResultScreen from "../components/play/PlayerResultScreen";
 import LobbyChat from "../components/lobby/LobbyChat";
 import PlayerRoster from "../components/lobby/PlayerRoster";
@@ -84,6 +85,7 @@ function Play() {
   const [showManagePlayers, setShowManagePlayers] = useState(false);
   const [chatDisabled, setChatDisabled] = useState(false);
   const [showEndGameConfirm, setShowEndGameConfirm] = useState(false);
+  const [showHostSummary, setShowHostSummary] = useState(false);
   const attemptRef = useRef<"rejoin" | null>(null);
 
   const isHost = state?.isHost ?? session?.isHost ?? false;
@@ -165,7 +167,17 @@ function Play() {
       }
 
       if (payload.phase === "ended") {
-        setGameOver({ leaderboard: payload.leaderboard, totalQuestions: payload.totalQuestions });
+        setGameOver({
+          leaderboard: payload.leaderboard,
+          totalQuestions: payload.totalQuestions,
+          totalPlayers: payload.totalPlayers,
+          averageAccuracy: payload.averageAccuracy,
+          averageResponseMs: payload.averageResponseMs,
+          completionRate: payload.completionRate,
+          questionBreakdown: payload.questionBreakdown,
+          fastestPlayer: payload.fastestPlayer,
+          hardestQuestion: payload.hardestQuestion,
+        });
         setTotalQuestions(payload.totalQuestions);
         setPhase("ended");
         return;
@@ -353,7 +365,17 @@ function Play() {
     }
 
     if (isHost) {
-      return <PodiumScreen leaderboard={gameOver.leaderboard} />;
+      if (showHostSummary) {
+        return (
+          <HostSummaryScreen summary={gameOver} onBack={() => setShowHostSummary(false)} />
+        );
+      }
+      return (
+        <PodiumScreen
+          leaderboard={gameOver.leaderboard}
+          onViewSummary={() => setShowHostSummary(true)}
+        />
+      );
     }
 
     const ownRank = gameOver.leaderboard.findIndex(

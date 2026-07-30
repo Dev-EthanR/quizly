@@ -1,8 +1,11 @@
 import { DASHBOARD_LIST_PAGE_SIZE } from "shared";
 import { prisma } from "../lib/prisma.js";
+import { Prisma } from "../generated/prisma/client.js";
 
 export interface GamePlayedRecord {
   userId: string;
+  name: string;
+  color?: string | undefined;
   score: number;
   rank: number;
   totalPlayers: number;
@@ -11,11 +14,22 @@ export interface GamePlayedRecord {
   won: boolean;
 }
 
+export interface QuestionBreakdownRecord {
+  questionIndex: number;
+  prompt: string;
+  correctCount: number;
+  totalPlayers: number;
+  accuracy: number;
+  avgResponseMs: number;
+}
+
 export interface RecordGameSessionParams {
   quizId: string;
   hostUserId?: string | undefined;
   playerCount: number;
   questionCount: number;
+  completionRate: number;
+  questionBreakdown: QuestionBreakdownRecord[];
   participants: GamePlayedRecord[];
 }
 
@@ -97,11 +111,23 @@ export const gameHistoryRepository = {
     return { sessions, totalCount };
   },
 
+  findHostedSessionById(id: string, hostUserId: string) {
+    return prisma.gameSession.findFirst({
+      where: { id, hostUserId },
+      include: {
+        quiz: { select: { title: true, coverImage: true } },
+        participants: { orderBy: { rank: "asc" } },
+      },
+    });
+  },
+
   recordGameSession({
     quizId,
     hostUserId,
     playerCount,
     questionCount,
+    completionRate,
+    questionBreakdown,
     participants,
   }: RecordGameSessionParams) {
     return prisma.gameSession.create({
@@ -110,9 +136,13 @@ export const gameHistoryRepository = {
         hostUserId: hostUserId ?? null,
         playerCount,
         questionCount,
+        completionRate,
+        questionBreakdown: questionBreakdown as unknown as Prisma.InputJsonValue,
         participants: {
           create: participants.map((participant) => ({
             userId: participant.userId,
+            name: participant.name,
+            color: participant.color ?? null,
             score: participant.score,
             rank: participant.rank,
             totalPlayers: participant.totalPlayers,

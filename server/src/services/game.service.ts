@@ -8,6 +8,7 @@ import {
   roomsRepository,
   type GameQuestion,
   type GameState,
+  type QuestionStat,
   type RoomRecord,
 } from "../repositories/rooms.repository.js";
 import type { QuizCategory } from "shared";
@@ -69,6 +70,45 @@ export interface QuestionRevealPayload {
   leaderboard: LeaderboardEntry[];
 }
 
+export interface PlayerSummaryEntry extends LeaderboardEntry {
+  color?: string | undefined;
+  accuracy: number;
+  avgResponseMs: number;
+}
+
+export interface QuestionBreakdownEntry {
+  questionIndex: number;
+  prompt: string;
+  correctCount: number;
+  totalPlayers: number;
+  accuracy: number;
+  avgResponseMs: number;
+}
+
+export interface FastestPlayerSummary {
+  playerId: string;
+  name: string;
+  avgResponseMs: number;
+}
+
+export interface HardestQuestionSummary {
+  questionIndex: number;
+  prompt: string;
+  accuracy: number;
+}
+
+export interface GameOverPayload {
+  leaderboard: PlayerSummaryEntry[];
+  totalQuestions: number;
+  totalPlayers: number;
+  averageAccuracy: number;
+  averageResponseMs: number;
+  completionRate: number;
+  questionBreakdown: QuestionBreakdownEntry[];
+  fastestPlayer: FastestPlayerSummary | null;
+  hardestQuestion: HardestQuestionSummary | null;
+}
+
 export type RoomState =
   | { phase: "lobby" }
   | {
@@ -86,7 +126,7 @@ export type RoomState =
       startedAt: number;
       reveal: QuestionRevealPayload;
     }
-  | { phase: "ended"; leaderboard: LeaderboardEntry[]; totalQuestions: number };
+  | ({ phase: "ended" } & GameOverPayload);
 
 interface QuizWithQuestions {
   questions: {
@@ -190,46 +230,134 @@ function buildRevealPayload(room: RoomRecord, game: GameState): QuestionRevealPa
   };
 }
 
-async function endGameSession(room: RoomRecord, game: GameState) {
-  game.phase = "ended";
-  const leaderboard = buildLeaderboard(room, game);
-  await Promise.all([
-    quizzesRepository.incrementPlayCount(room.quizId),
-    persistGameHistory(room, game, leaderboard),
-  ]);
+function buildGameOverSummary(room: RoomRecord, game: GameState): GameOverPayload {
+  const totalQuestions = game.questions.length;
 
-  return { leaderboard, totalQuestions: game.questions.length };
+  const leaderboard: PlayerSummaryEntry[] = buildLeaderboard(room, game).map((entry) => {
+    const player = room.players.find((p) => p.token === entry.playerId);
+    const answeredCount = game.answeredCounts[entry.playerId] ?? 0;
+    const avgResponseMs =
+      answeredCount > 0
+        ? Math.round((game.answerTimeTotals[entry.playerId] ?? 0) / answeredCount)
+        : 0;
+
+    return {
+      ...entry,
+      color: player?.color,
+      accuracy:
+        totalQuestions > 0 ? Math.round((entry.correctCount / totalQuestions) * 100) : 0,
+      avgResponseMs,
+    };
+  });
+
+  const totalPlayers = leaderboard.length;
+  const respondedPlayers = leaderboard.filter(
+    (entry) => (game.answeredCounts[entry.playerId] ?? 0) > 0,
+  );
+
+  const averageAccuracy =
+    totalPlayers > 0
+      ? Math.round(leaderboard.reduce((sum, entry) => sum + entry.accuracy, 0) / totalPlayers)
+      : 0;
+
+  const averageResponseMs =
+    respondedPlayers.length > 0
+      ? Math.round(
+          respondedPlayers.reduce((sum, entry) => sum + entry.avgResponseMs, 0) /
+            respondedPlayers.length,
+        )
+      : 0;
+
+  const totalPossibleAnswers = totalPlayers * totalQuestions;
+  const totalActualAnswers = Object.values(game.answeredCounts).reduce(
+    (sum, count) => sum + count,
+    0,
+  );
+  const completionRate =
+    totalPossibleAnswers > 0
+      ? Math.round((totalActualAnswers / totalPossibleAnswers) * 100)
+      : 0;
+
+  const questionBreakdown: QuestionBreakdownEntry[] = game.questionStats.map((stat) => ({
+    questionIndex: stat.questionIndex,
+    prompt: game.questions[stat.questionIndex]?.prompt ?? "",
+    correctCount: stat.correctCount,
+    totalPlayers: stat.totalPlayers,
+    accuracy:
+      stat.totalPlayers > 0 ? Math.round((stat.correctCount / stat.totalPlayers) * 100) : 0,
+    avgResponseMs:
+      stat.answeredCount > 0 ? Math.round(stat.totalResponseMs / stat.answeredCount) : 0,
+  }));
+
+  const fastestPlayer = respondedPlayers.reduce<PlayerSummaryEntry | null>(
+    (fastest, entry) =>
+      !fastest || entry.avgResponseMs < fastest.avgResponseMs ? entry : fastest,
+    null,
+  );
+
+  const hardestQuestion = questionBreakdown.reduce<QuestionBreakdownEntry | null>(
+    (hardest, question) =>
+      !hardest || question.accuracy < hardest.accuracy ? question : hardest,
+    null,
+  );
+
+  return {
+    leaderboard,
+    totalQuestions,
+    totalPlayers,
+    averageAccuracy,
+    averageResponseMs,
+    completionRate,
+    questionBreakdown,
+    fastestPlayer: fastestPlayer
+      ? {
+          playerId: fastestPlayer.playerId,
+          name: fastestPlayer.name,
+          avgResponseMs: fastestPlayer.avgResponseMs,
+        }
+      : null,
+    hardestQuestion: hardestQuestion
+      ? {
+          questionIndex: hardestQuestion.questionIndex,
+          prompt: hardestQuestion.prompt,
+          accuracy: hardestQuestion.accuracy,
+        }
+      : null,
+  };
 }
 
-async function persistGameHistory(
-  room: RoomRecord,
-  game: GameState,
-  leaderboard: LeaderboardEntry[],
-) {
+async function endGameSession(room: RoomRecord, game: GameState): Promise<GameOverPayload> {
+  game.phase = "ended";
+  const summary = buildGameOverSummary(room, game);
+  await Promise.all([
+    quizzesRepository.incrementPlayCount(room.quizId),
+    persistGameHistory(room, summary),
+  ]);
+
+  return summary;
+}
+
+async function persistGameHistory(room: RoomRecord, summary: GameOverPayload) {
   if (!room.hostUserId && !room.players.some((player) => player.userId)) {
     return;
   }
 
   const participants: GamePlayedRecord[] = [];
-  leaderboard.forEach((entry, index) => {
+  summary.leaderboard.forEach((entry, index) => {
     const player = room.players.find((p) => p.token === entry.playerId);
     if (!player?.userId) {
       return;
     }
 
-    const answeredCount = game.answeredCounts[entry.playerId] ?? 0;
-    const avgAnswerMs =
-      answeredCount > 0
-        ? Math.round((game.answerTimeTotals[entry.playerId] ?? 0) / answeredCount)
-        : 0;
-
     participants.push({
       userId: player.userId,
+      name: entry.name,
+      color: entry.color,
       score: entry.score,
       rank: index + 1,
-      totalPlayers: leaderboard.length,
+      totalPlayers: summary.leaderboard.length,
       correctCount: entry.correctCount,
-      avgAnswerMs,
+      avgAnswerMs: entry.avgResponseMs,
       won: index === 0,
     });
   });
@@ -238,7 +366,9 @@ async function persistGameHistory(
     quizId: room.quizId,
     hostUserId: room.hostUserId,
     playerCount: room.players.length,
-    questionCount: game.questions.length,
+    questionCount: summary.totalQuestions,
+    completionRate: summary.completionRate,
+    questionBreakdown: summary.questionBreakdown,
     participants,
   });
 }
@@ -265,6 +395,7 @@ export const gameService = {
       correctCounts: {},
       answerTimeTotals: {},
       answeredCounts: {},
+      questionStats: [],
       category: quiz.category,
       leaderboardShown: false,
     };
@@ -335,7 +466,21 @@ export const gameService = {
     game.phase = "reveal";
     game.leaderboardShown = false;
 
-    return buildRevealPayload(room, game);
+    const payload = buildRevealPayload(room, game);
+
+    const stat: QuestionStat = {
+      questionIndex: game.currentQuestionIndex,
+      correctCount: payload.results.filter((result) => result.correct).length,
+      answeredCount: game.answers.length,
+      totalPlayers: payload.results.length,
+      totalResponseMs: game.answers.reduce(
+        (sum, answer) => sum + (answer.answeredAt - game.questionStartedAt),
+        0,
+      ),
+    };
+    game.questionStats.push(stat);
+
+    return payload;
   },
 
   markLeaderboardShown({ socketId, roomCode }: MarkLeaderboardShownParams): boolean {
@@ -363,8 +508,8 @@ export const gameService = {
 
     const nextIndex = game.currentQuestionIndex + 1;
     if (nextIndex >= game.questions.length) {
-      const { leaderboard, totalQuestions } = await endGameSession(room, game);
-      return { ended: true as const, leaderboard, totalQuestions };
+      const summary = await endGameSession(room, game);
+      return { ended: true as const, summary };
     }
 
     game.currentQuestionIndex = nextIndex;
@@ -412,8 +557,7 @@ export const gameService = {
     if (game.phase === "ended") {
       return {
         phase: "ended",
-        leaderboard: buildLeaderboard(room, game),
-        totalQuestions: game.questions.length,
+        ...buildGameOverSummary(room, game),
       };
     }
 

@@ -1,5 +1,8 @@
 import { DASHBOARD_LIST_PAGE_SIZE } from "shared";
-import { gameHistoryRepository } from "../repositories/gameHistory.repository.js";
+import {
+  gameHistoryRepository,
+  type QuestionBreakdownRecord,
+} from "../repositories/gameHistory.repository.js";
 
 const PARTY_HOST_TARGET = 20;
 const MEGA_HOST_TARGET = 50;
@@ -31,6 +34,44 @@ export interface DashboardStats {
   bestFinish: number | null;
   wins: number;
   achievements: Achievement[];
+}
+
+export interface HostedSessionPlayerSummary {
+  playerId: string;
+  name: string;
+  color?: string | undefined;
+  score: number;
+  correctCount: number;
+  connected: boolean;
+  accuracy: number;
+  avgResponseMs: number;
+}
+
+export interface HostedSessionFastestPlayer {
+  playerId: string;
+  name: string;
+  avgResponseMs: number;
+}
+
+export interface HostedSessionHardestQuestion {
+  questionIndex: number;
+  prompt: string;
+  accuracy: number;
+}
+
+export interface HostedSessionDetail {
+  quizTitle: string;
+  quizCoverImage: string | null;
+  playedAt: Date;
+  leaderboard: HostedSessionPlayerSummary[];
+  totalQuestions: number;
+  totalPlayers: number;
+  averageAccuracy: number;
+  averageResponseMs: number;
+  completionRate: number;
+  questionBreakdown: QuestionBreakdownRecord[];
+  fastestPlayer: HostedSessionFastestPlayer | null;
+  hardestQuestion: HostedSessionHardestQuestion | null;
 }
 
 function longestWinStreak(rows: { won: boolean }[]): number {
@@ -283,6 +324,90 @@ export const statsService = {
       page,
       totalPages: Math.max(1, Math.ceil(totalCount / DASHBOARD_LIST_PAGE_SIZE)),
       totalCount,
+    };
+  },
+
+  async getHostedSessionDetail(
+    userId: string,
+    sessionId: string,
+  ): Promise<HostedSessionDetail | null> {
+    const session = await gameHistoryRepository.findHostedSessionById(sessionId, userId);
+    if (!session) {
+      return null;
+    }
+
+    const totalQuestions = session.questionCount;
+    const totalPlayers = session.participants.length;
+
+    const leaderboard: HostedSessionPlayerSummary[] = session.participants
+      .slice()
+      .sort((a, b) => a.rank - b.rank)
+      .map((participant) => ({
+        playerId: participant.userId,
+        name: participant.name,
+        color: participant.color ?? undefined,
+        score: participant.score,
+        correctCount: participant.correctCount,
+        connected: true,
+        accuracy:
+          totalQuestions > 0
+            ? Math.round((participant.correctCount / totalQuestions) * 100)
+            : 0,
+        avgResponseMs: participant.avgAnswerMs,
+      }));
+
+    const averageAccuracy =
+      totalPlayers > 0
+        ? Math.round(leaderboard.reduce((sum, entry) => sum + entry.accuracy, 0) / totalPlayers)
+        : 0;
+    const averageResponseMs =
+      totalPlayers > 0
+        ? Math.round(
+            leaderboard.reduce((sum, entry) => sum + entry.avgResponseMs, 0) / totalPlayers,
+          )
+        : 0;
+
+    const questionBreakdown = (session.questionBreakdown as unknown as
+      | QuestionBreakdownRecord[]
+      | null) ?? [];
+
+    const fastestPlayer = leaderboard.reduce<HostedSessionPlayerSummary | null>(
+      (fastest, entry) =>
+        !fastest || entry.avgResponseMs < fastest.avgResponseMs ? entry : fastest,
+      null,
+    );
+
+    const hardestQuestion = questionBreakdown.reduce<QuestionBreakdownRecord | null>(
+      (hardest, question) =>
+        !hardest || question.accuracy < hardest.accuracy ? question : hardest,
+      null,
+    );
+
+    return {
+      quizTitle: session.quiz.title,
+      quizCoverImage: session.quiz.coverImage,
+      playedAt: session.playedAt,
+      leaderboard,
+      totalQuestions,
+      totalPlayers,
+      averageAccuracy,
+      averageResponseMs,
+      completionRate: session.completionRate,
+      questionBreakdown,
+      fastestPlayer: fastestPlayer
+        ? {
+            playerId: fastestPlayer.playerId,
+            name: fastestPlayer.name,
+            avgResponseMs: fastestPlayer.avgResponseMs,
+          }
+        : null,
+      hardestQuestion: hardestQuestion
+        ? {
+            questionIndex: hardestQuestion.questionIndex,
+            prompt: hardestQuestion.prompt,
+            accuracy: hardestQuestion.accuracy,
+          }
+        : null,
     };
   },
 

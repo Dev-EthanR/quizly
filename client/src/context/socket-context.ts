@@ -104,9 +104,43 @@ export interface QuestionRevealPayload {
   leaderboard: LeaderboardEntry[];
 }
 
+export interface PlayerSummaryEntry extends LeaderboardEntry {
+  color?: string;
+  accuracy: number;
+  avgResponseMs: number;
+}
+
+export interface QuestionBreakdownEntry {
+  questionIndex: number;
+  prompt: string;
+  correctCount: number;
+  totalPlayers: number;
+  accuracy: number;
+  avgResponseMs: number;
+}
+
+export interface FastestPlayerSummary {
+  playerId: string;
+  name: string;
+  avgResponseMs: number;
+}
+
+export interface HardestQuestionSummary {
+  questionIndex: number;
+  prompt: string;
+  accuracy: number;
+}
+
 export interface GameOverPayload {
-  leaderboard: LeaderboardEntry[];
+  leaderboard: PlayerSummaryEntry[];
   totalQuestions: number;
+  totalPlayers: number;
+  averageAccuracy: number;
+  averageResponseMs: number;
+  completionRate: number;
+  questionBreakdown: QuestionBreakdownEntry[];
+  fastestPlayer: FastestPlayerSummary | null;
+  hardestQuestion: HardestQuestionSummary | null;
 }
 
 export type RoomStatePayload =
@@ -126,7 +160,7 @@ export type RoomStatePayload =
       startedAt: number;
       reveal: QuestionRevealPayload;
     }
-  | { phase: "ended"; leaderboard: LeaderboardEntry[]; totalQuestions: number };
+  | ({ phase: "ended" } & GameOverPayload);
 
 export interface LobbyPlayer {
   id: string;

@@ -50,4 +50,21 @@ export const statsController = {
     );
     res.json(result);
   },
+
+  async getHostedSessionDetail(req: Request, res: Response) {
+    const session = await getSession(req, authConfig);
+    if (!session?.user?.id) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const detail = await statsService.getHostedSessionDetail(
+      session.user.id,
+      req.params.sessionId as string,
+    );
+    if (!detail) {
+      return res.status(404).json({ error: "Not found" });
+    }
+
+    res.json(detail);
+  },
 };

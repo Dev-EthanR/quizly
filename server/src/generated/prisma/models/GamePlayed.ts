@@ -48,6 +48,8 @@ export type GamePlayedMinAggregateOutputType = {
   id: string | null
   sessionId: string | null
   userId: string | null
+  name: string | null
+  color: string | null
   score: number | null
   rank: number | null
   totalPlayers: number | null
@@ -62,6 +64,8 @@ export type GamePlayedMaxAggregateOutputType = {
   id: string | null
   sessionId: string | null
   userId: string | null
+  name: string | null
+  color: string | null
   score: number | null
   rank: number | null
   totalPlayers: number | null
@@ -76,6 +80,8 @@ export type GamePlayedCountAggregateOutputType = {
   id: number
   sessionId: number
   userId: number
+  name: number
+  color: number
   score: number
   rank: number
   totalPlayers: number
@@ -110,6 +116,8 @@ export type GamePlayedMinAggregateInputType = {
   id?: true
   sessionId?: true
   userId?: true
+  name?: true
+  color?: true
   score?: true
   rank?: true
   totalPlayers?: true
@@ -124,6 +132,8 @@ export type GamePlayedMaxAggregateInputType = {
   id?: true
   sessionId?: true
   userId?: true
+  name?: true
+  color?: true
   score?: true
   rank?: true
   totalPlayers?: true
@@ -138,6 +148,8 @@ export type GamePlayedCountAggregateInputType = {
   id?: true
   sessionId?: true
   userId?: true
+  name?: true
+  color?: true
   score?: true
   rank?: true
   totalPlayers?: true
@@ -239,6 +251,8 @@ export type GamePlayedGroupByOutputType = {
   id: string
   sessionId: string
   userId: string
+  name: string
+  color: string | null
   score: number
   rank: number
   totalPlayers: number
@@ -276,6 +290,8 @@ export type GamePlayedWhereInput = {
   id?: Prisma.StringFilter<"GamePlayed"> | string
   sessionId?: Prisma.StringFilter<"GamePlayed"> | string
   userId?: Prisma.StringFilter<"GamePlayed"> | string
+  name?: Prisma.StringFilter<"GamePlayed"> | string
+  color?: Prisma.StringNullableFilter<"GamePlayed"> | string | null
   score?: Prisma.IntFilter<"GamePlayed"> | number
   rank?: Prisma.IntFilter<"GamePlayed"> | number
   totalPlayers?: Prisma.IntFilter<"GamePlayed"> | number
@@ -292,6 +308,8 @@ export type GamePlayedOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   sessionId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
+  color?: Prisma.SortOrderInput | Prisma.SortOrder
   score?: Prisma.SortOrder
   rank?: Prisma.SortOrder
   totalPlayers?: Prisma.SortOrder
@@ -311,6 +329,8 @@ export type GamePlayedWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.GamePlayedWhereInput | Prisma.GamePlayedWhereInput[]
   sessionId?: Prisma.StringFilter<"GamePlayed"> | string
   userId?: Prisma.StringFilter<"GamePlayed"> | string
+  name?: Prisma.StringFilter<"GamePlayed"> | string
+  color?: Prisma.StringNullableFilter<"GamePlayed"> | string | null
   score?: Prisma.IntFilter<"GamePlayed"> | number
   rank?: Prisma.IntFilter<"GamePlayed"> | number
   totalPlayers?: Prisma.IntFilter<"GamePlayed"> | number
@@ -327,6 +347,8 @@ export type GamePlayedOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   sessionId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
+  color?: Prisma.SortOrderInput | Prisma.SortOrder
   score?: Prisma.SortOrder
   rank?: Prisma.SortOrder
   totalPlayers?: Prisma.SortOrder
@@ -349,6 +371,8 @@ export type GamePlayedScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"GamePlayed"> | string
   sessionId?: Prisma.StringWithAggregatesFilter<"GamePlayed"> | string
   userId?: Prisma.StringWithAggregatesFilter<"GamePlayed"> | string
+  name?: Prisma.StringWithAggregatesFilter<"GamePlayed"> | string
+  color?: Prisma.StringNullableWithAggregatesFilter<"GamePlayed"> | string | null
   score?: Prisma.IntWithAggregatesFilter<"GamePlayed"> | number
   rank?: Prisma.IntWithAggregatesFilter<"GamePlayed"> | number
   totalPlayers?: Prisma.IntWithAggregatesFilter<"GamePlayed"> | number
@@ -361,6 +385,8 @@ export type GamePlayedScalarWhereWithAggregatesInput = {
 
 export type GamePlayedCreateInput = {
   id?: string
+  name?: string
+  color?: string | null
   score: number
   rank: number
   totalPlayers: number
@@ -377,6 +403,8 @@ export type GamePlayedUncheckedCreateInput = {
   id?: string
   sessionId: string
   userId: string
+  name?: string
+  color?: string | null
   score: number
   rank: number
   totalPlayers: number
@@ -389,6 +417,8 @@ export type GamePlayedUncheckedCreateInput = {
 
 export type GamePlayedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   rank?: Prisma.IntFieldUpdateOperationsInput | number
   totalPlayers?: Prisma.IntFieldUpdateOperationsInput | number
@@ -405,6 +435,8 @@ export type GamePlayedUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sessionId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   rank?: Prisma.IntFieldUpdateOperationsInput | number
   totalPlayers?: Prisma.IntFieldUpdateOperationsInput | number
@@ -419,6 +451,8 @@ export type GamePlayedCreateManyInput = {
   id?: string
   sessionId: string
   userId: string
+  name?: string
+  color?: string | null
   score: number
   rank: number
   totalPlayers: number
@@ -431,6 +465,8 @@ export type GamePlayedCreateManyInput = {
 
 export type GamePlayedUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   rank?: Prisma.IntFieldUpdateOperationsInput | number
   totalPlayers?: Prisma.IntFieldUpdateOperationsInput | number
@@ -445,6 +481,8 @@ export type GamePlayedUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sessionId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   rank?: Prisma.IntFieldUpdateOperationsInput | number
   totalPlayers?: Prisma.IntFieldUpdateOperationsInput | number
@@ -469,6 +507,8 @@ export type GamePlayedCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   sessionId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
+  color?: Prisma.SortOrder
   score?: Prisma.SortOrder
   rank?: Prisma.SortOrder
   totalPlayers?: Prisma.SortOrder
@@ -492,6 +532,8 @@ export type GamePlayedMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   sessionId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
+  color?: Prisma.SortOrder
   score?: Prisma.SortOrder
   rank?: Prisma.SortOrder
   totalPlayers?: Prisma.SortOrder
@@ -506,6 +548,8 @@ export type GamePlayedMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   sessionId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
+  color?: Prisma.SortOrder
   score?: Prisma.SortOrder
   rank?: Prisma.SortOrder
   totalPlayers?: Prisma.SortOrder
@@ -611,6 +655,8 @@ export type GamePlayedUncheckedUpdateManyWithoutSessionNestedInput = {
 
 export type GamePlayedCreateWithoutUserInput = {
   id?: string
+  name?: string
+  color?: string | null
   score: number
   rank: number
   totalPlayers: number
@@ -625,6 +671,8 @@ export type GamePlayedCreateWithoutUserInput = {
 export type GamePlayedUncheckedCreateWithoutUserInput = {
   id?: string
   sessionId: string
+  name?: string
+  color?: string | null
   score: number
   rank: number
   totalPlayers: number
@@ -668,6 +716,8 @@ export type GamePlayedScalarWhereInput = {
   id?: Prisma.StringFilter<"GamePlayed"> | string
   sessionId?: Prisma.StringFilter<"GamePlayed"> | string
   userId?: Prisma.StringFilter<"GamePlayed"> | string
+  name?: Prisma.StringFilter<"GamePlayed"> | string
+  color?: Prisma.StringNullableFilter<"GamePlayed"> | string | null
   score?: Prisma.IntFilter<"GamePlayed"> | number
   rank?: Prisma.IntFilter<"GamePlayed"> | number
   totalPlayers?: Prisma.IntFilter<"GamePlayed"> | number
@@ -680,6 +730,8 @@ export type GamePlayedScalarWhereInput = {
 
 export type GamePlayedCreateWithoutSessionInput = {
   id?: string
+  name?: string
+  color?: string | null
   score: number
   rank: number
   totalPlayers: number
@@ -694,6 +746,8 @@ export type GamePlayedCreateWithoutSessionInput = {
 export type GamePlayedUncheckedCreateWithoutSessionInput = {
   id?: string
   userId: string
+  name?: string
+  color?: string | null
   score: number
   rank: number
   totalPlayers: number
@@ -733,6 +787,8 @@ export type GamePlayedUpdateManyWithWhereWithoutSessionInput = {
 export type GamePlayedCreateManyUserInput = {
   id?: string
   sessionId: string
+  name?: string
+  color?: string | null
   score: number
   rank: number
   totalPlayers: number
@@ -745,6 +801,8 @@ export type GamePlayedCreateManyUserInput = {
 
 export type GamePlayedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   rank?: Prisma.IntFieldUpdateOperationsInput | number
   totalPlayers?: Prisma.IntFieldUpdateOperationsInput | number
@@ -759,6 +817,8 @@ export type GamePlayedUpdateWithoutUserInput = {
 export type GamePlayedUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sessionId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   rank?: Prisma.IntFieldUpdateOperationsInput | number
   totalPlayers?: Prisma.IntFieldUpdateOperationsInput | number
@@ -772,6 +832,8 @@ export type GamePlayedUncheckedUpdateWithoutUserInput = {
 export type GamePlayedUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   sessionId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   rank?: Prisma.IntFieldUpdateOperationsInput | number
   totalPlayers?: Prisma.IntFieldUpdateOperationsInput | number
@@ -785,6 +847,8 @@ export type GamePlayedUncheckedUpdateManyWithoutUserInput = {
 export type GamePlayedCreateManySessionInput = {
   id?: string
   userId: string
+  name?: string
+  color?: string | null
   score: number
   rank: number
   totalPlayers: number
@@ -797,6 +861,8 @@ export type GamePlayedCreateManySessionInput = {
 
 export type GamePlayedUpdateWithoutSessionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   rank?: Prisma.IntFieldUpdateOperationsInput | number
   totalPlayers?: Prisma.IntFieldUpdateOperationsInput | number
@@ -811,6 +877,8 @@ export type GamePlayedUpdateWithoutSessionInput = {
 export type GamePlayedUncheckedUpdateWithoutSessionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   rank?: Prisma.IntFieldUpdateOperationsInput | number
   totalPlayers?: Prisma.IntFieldUpdateOperationsInput | number
@@ -824,6 +892,8 @@ export type GamePlayedUncheckedUpdateWithoutSessionInput = {
 export type GamePlayedUncheckedUpdateManyWithoutSessionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   rank?: Prisma.IntFieldUpdateOperationsInput | number
   totalPlayers?: Prisma.IntFieldUpdateOperationsInput | number
@@ -840,6 +910,8 @@ export type GamePlayedSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   id?: boolean
   sessionId?: boolean
   userId?: boolean
+  name?: boolean
+  color?: boolean
   score?: boolean
   rank?: boolean
   totalPlayers?: boolean
@@ -856,6 +928,8 @@ export type GamePlayedSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   id?: boolean
   sessionId?: boolean
   userId?: boolean
+  name?: boolean
+  color?: boolean
   score?: boolean
   rank?: boolean
   totalPlayers?: boolean
@@ -872,6 +946,8 @@ export type GamePlayedSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   id?: boolean
   sessionId?: boolean
   userId?: boolean
+  name?: boolean
+  color?: boolean
   score?: boolean
   rank?: boolean
   totalPlayers?: boolean
@@ -888,6 +964,8 @@ export type GamePlayedSelectScalar = {
   id?: boolean
   sessionId?: boolean
   userId?: boolean
+  name?: boolean
+  color?: boolean
   score?: boolean
   rank?: boolean
   totalPlayers?: boolean
@@ -898,7 +976,7 @@ export type GamePlayedSelectScalar = {
   playedAt?: boolean
 }
 
-export type GamePlayedOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sessionId" | "userId" | "score" | "rank" | "totalPlayers" | "correctCount" | "questionCount" | "avgAnswerMs" | "won" | "playedAt", ExtArgs["result"]["gamePlayed"]>
+export type GamePlayedOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "sessionId" | "userId" | "name" | "color" | "score" | "rank" | "totalPlayers" | "correctCount" | "questionCount" | "avgAnswerMs" | "won" | "playedAt", ExtArgs["result"]["gamePlayed"]>
 export type GamePlayedInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   session?: boolean | Prisma.GameSessionDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -922,6 +1000,8 @@ export type $GamePlayedPayload<ExtArgs extends runtime.Types.Extensions.Internal
     id: string
     sessionId: string
     userId: string
+    name: string
+    color: string | null
     score: number
     rank: number
     totalPlayers: number
@@ -1358,6 +1438,8 @@ export interface GamePlayedFieldRefs {
   readonly id: Prisma.FieldRef<"GamePlayed", 'String'>
   readonly sessionId: Prisma.FieldRef<"GamePlayed", 'String'>
   readonly userId: Prisma.FieldRef<"GamePlayed", 'String'>
+  readonly name: Prisma.FieldRef<"GamePlayed", 'String'>
+  readonly color: Prisma.FieldRef<"GamePlayed", 'String'>
   readonly score: Prisma.FieldRef<"GamePlayed", 'Int'>
   readonly rank: Prisma.FieldRef<"GamePlayed", 'Int'>
   readonly totalPlayers: Prisma.FieldRef<"GamePlayed", 'Int'>

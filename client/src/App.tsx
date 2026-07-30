@@ -11,6 +11,7 @@ import QuizDetails from "./pages/QuizDetails";
 import MyQuizzes from "./pages/MyQuizzes";
 import QuizBuilder from "./pages/QuizBuilder";
 import Settings from "./pages/Settings";
+import HostedSessionSummary from "./pages/HostedSessionSummary";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/host/:quizId" element={<Host />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/dashboard/hosted/:sessionId" element={<HostedSessionSummary />} />
         <Route path="/discovery" element={<Discovery />} />
         <Route path="/discovery/:quizId" element={<QuizDetails />} />
         <Route path="/my-quizzes" element={<MyQuizzes />} />

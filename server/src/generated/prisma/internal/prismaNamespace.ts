@@ -1309,6 +1309,8 @@ export const GameSessionScalarFieldEnum = {
   hostUserId: 'hostUserId',
   playerCount: 'playerCount',
   questionCount: 'questionCount',
+  completionRate: 'completionRate',
+  questionBreakdown: 'questionBreakdown',
   playedAt: 'playedAt'
 } as const
 
@@ -1319,6 +1321,8 @@ export const GamePlayedScalarFieldEnum = {
   id: 'id',
   sessionId: 'sessionId',
   userId: 'userId',
+  name: 'name',
+  color: 'color',
   score: 'score',
   rank: 'rank',
   totalPlayers: 'totalPlayers',
@@ -1340,6 +1344,13 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -1354,6 +1365,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -1464,6 +1484,20 @@ export type ListEnumQuizStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$P
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 

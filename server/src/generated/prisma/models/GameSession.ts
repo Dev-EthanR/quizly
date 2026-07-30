@@ -29,11 +29,13 @@ export type AggregateGameSession = {
 export type GameSessionAvgAggregateOutputType = {
   playerCount: number | null
   questionCount: number | null
+  completionRate: number | null
 }
 
 export type GameSessionSumAggregateOutputType = {
   playerCount: number | null
   questionCount: number | null
+  completionRate: number | null
 }
 
 export type GameSessionMinAggregateOutputType = {
@@ -42,6 +44,7 @@ export type GameSessionMinAggregateOutputType = {
   hostUserId: string | null
   playerCount: number | null
   questionCount: number | null
+  completionRate: number | null
   playedAt: Date | null
 }
 
@@ -51,6 +54,7 @@ export type GameSessionMaxAggregateOutputType = {
   hostUserId: string | null
   playerCount: number | null
   questionCount: number | null
+  completionRate: number | null
   playedAt: Date | null
 }
 
@@ -60,6 +64,8 @@ export type GameSessionCountAggregateOutputType = {
   hostUserId: number
   playerCount: number
   questionCount: number
+  completionRate: number
+  questionBreakdown: number
   playedAt: number
   _all: number
 }
@@ -68,11 +74,13 @@ export type GameSessionCountAggregateOutputType = {
 export type GameSessionAvgAggregateInputType = {
   playerCount?: true
   questionCount?: true
+  completionRate?: true
 }
 
 export type GameSessionSumAggregateInputType = {
   playerCount?: true
   questionCount?: true
+  completionRate?: true
 }
 
 export type GameSessionMinAggregateInputType = {
@@ -81,6 +89,7 @@ export type GameSessionMinAggregateInputType = {
   hostUserId?: true
   playerCount?: true
   questionCount?: true
+  completionRate?: true
   playedAt?: true
 }
 
@@ -90,6 +99,7 @@ export type GameSessionMaxAggregateInputType = {
   hostUserId?: true
   playerCount?: true
   questionCount?: true
+  completionRate?: true
   playedAt?: true
 }
 
@@ -99,6 +109,8 @@ export type GameSessionCountAggregateInputType = {
   hostUserId?: true
   playerCount?: true
   questionCount?: true
+  completionRate?: true
+  questionBreakdown?: true
   playedAt?: true
   _all?: true
 }
@@ -195,6 +207,8 @@ export type GameSessionGroupByOutputType = {
   hostUserId: string | null
   playerCount: number
   questionCount: number
+  completionRate: number
+  questionBreakdown: runtime.JsonValue
   playedAt: Date
   _count: GameSessionCountAggregateOutputType | null
   _avg: GameSessionAvgAggregateOutputType | null
@@ -227,6 +241,8 @@ export type GameSessionWhereInput = {
   hostUserId?: Prisma.StringNullableFilter<"GameSession"> | string | null
   playerCount?: Prisma.IntFilter<"GameSession"> | number
   questionCount?: Prisma.IntFilter<"GameSession"> | number
+  completionRate?: Prisma.IntFilter<"GameSession"> | number
+  questionBreakdown?: Prisma.JsonFilter<"GameSession">
   playedAt?: Prisma.DateTimeFilter<"GameSession"> | Date | string
   quiz?: Prisma.XOR<Prisma.QuizScalarRelationFilter, Prisma.QuizWhereInput>
   hostUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
@@ -239,6 +255,8 @@ export type GameSessionOrderByWithRelationInput = {
   hostUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   playerCount?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
+  completionRate?: Prisma.SortOrder
+  questionBreakdown?: Prisma.SortOrder
   playedAt?: Prisma.SortOrder
   quiz?: Prisma.QuizOrderByWithRelationInput
   hostUser?: Prisma.UserOrderByWithRelationInput
@@ -254,6 +272,8 @@ export type GameSessionWhereUniqueInput = Prisma.AtLeast<{
   hostUserId?: Prisma.StringNullableFilter<"GameSession"> | string | null
   playerCount?: Prisma.IntFilter<"GameSession"> | number
   questionCount?: Prisma.IntFilter<"GameSession"> | number
+  completionRate?: Prisma.IntFilter<"GameSession"> | number
+  questionBreakdown?: Prisma.JsonFilter<"GameSession">
   playedAt?: Prisma.DateTimeFilter<"GameSession"> | Date | string
   quiz?: Prisma.XOR<Prisma.QuizScalarRelationFilter, Prisma.QuizWhereInput>
   hostUser?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
@@ -266,6 +286,8 @@ export type GameSessionOrderByWithAggregationInput = {
   hostUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   playerCount?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
+  completionRate?: Prisma.SortOrder
+  questionBreakdown?: Prisma.SortOrder
   playedAt?: Prisma.SortOrder
   _count?: Prisma.GameSessionCountOrderByAggregateInput
   _avg?: Prisma.GameSessionAvgOrderByAggregateInput
@@ -283,6 +305,8 @@ export type GameSessionScalarWhereWithAggregatesInput = {
   hostUserId?: Prisma.StringNullableWithAggregatesFilter<"GameSession"> | string | null
   playerCount?: Prisma.IntWithAggregatesFilter<"GameSession"> | number
   questionCount?: Prisma.IntWithAggregatesFilter<"GameSession"> | number
+  completionRate?: Prisma.IntWithAggregatesFilter<"GameSession"> | number
+  questionBreakdown?: Prisma.JsonWithAggregatesFilter<"GameSession">
   playedAt?: Prisma.DateTimeWithAggregatesFilter<"GameSession"> | Date | string
 }
 
@@ -290,6 +314,8 @@ export type GameSessionCreateInput = {
   id?: string
   playerCount: number
   questionCount: number
+  completionRate?: number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Date | string
   quiz: Prisma.QuizCreateNestedOneWithoutGameSessionsInput
   hostUser?: Prisma.UserCreateNestedOneWithoutHostedGameSessionsInput
@@ -302,6 +328,8 @@ export type GameSessionUncheckedCreateInput = {
   hostUserId?: string | null
   playerCount: number
   questionCount: number
+  completionRate?: number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Date | string
   participants?: Prisma.GamePlayedUncheckedCreateNestedManyWithoutSessionInput
 }
@@ -310,6 +338,8 @@ export type GameSessionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   playerCount?: Prisma.IntFieldUpdateOperationsInput | number
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  completionRate?: Prisma.IntFieldUpdateOperationsInput | number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   quiz?: Prisma.QuizUpdateOneRequiredWithoutGameSessionsNestedInput
   hostUser?: Prisma.UserUpdateOneWithoutHostedGameSessionsNestedInput
@@ -322,6 +352,8 @@ export type GameSessionUncheckedUpdateInput = {
   hostUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   playerCount?: Prisma.IntFieldUpdateOperationsInput | number
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  completionRate?: Prisma.IntFieldUpdateOperationsInput | number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   participants?: Prisma.GamePlayedUncheckedUpdateManyWithoutSessionNestedInput
 }
@@ -332,6 +364,8 @@ export type GameSessionCreateManyInput = {
   hostUserId?: string | null
   playerCount: number
   questionCount: number
+  completionRate?: number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Date | string
 }
 
@@ -339,6 +373,8 @@ export type GameSessionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   playerCount?: Prisma.IntFieldUpdateOperationsInput | number
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  completionRate?: Prisma.IntFieldUpdateOperationsInput | number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -348,6 +384,8 @@ export type GameSessionUncheckedUpdateManyInput = {
   hostUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   playerCount?: Prisma.IntFieldUpdateOperationsInput | number
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  completionRate?: Prisma.IntFieldUpdateOperationsInput | number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -367,12 +405,15 @@ export type GameSessionCountOrderByAggregateInput = {
   hostUserId?: Prisma.SortOrder
   playerCount?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
+  completionRate?: Prisma.SortOrder
+  questionBreakdown?: Prisma.SortOrder
   playedAt?: Prisma.SortOrder
 }
 
 export type GameSessionAvgOrderByAggregateInput = {
   playerCount?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
+  completionRate?: Prisma.SortOrder
 }
 
 export type GameSessionMaxOrderByAggregateInput = {
@@ -381,6 +422,7 @@ export type GameSessionMaxOrderByAggregateInput = {
   hostUserId?: Prisma.SortOrder
   playerCount?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
+  completionRate?: Prisma.SortOrder
   playedAt?: Prisma.SortOrder
 }
 
@@ -390,12 +432,14 @@ export type GameSessionMinOrderByAggregateInput = {
   hostUserId?: Prisma.SortOrder
   playerCount?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
+  completionRate?: Prisma.SortOrder
   playedAt?: Prisma.SortOrder
 }
 
 export type GameSessionSumOrderByAggregateInput = {
   playerCount?: Prisma.SortOrder
   questionCount?: Prisma.SortOrder
+  completionRate?: Prisma.SortOrder
 }
 
 export type GameSessionScalarRelationFilter = {
@@ -505,6 +549,8 @@ export type GameSessionCreateWithoutHostUserInput = {
   id?: string
   playerCount: number
   questionCount: number
+  completionRate?: number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Date | string
   quiz: Prisma.QuizCreateNestedOneWithoutGameSessionsInput
   participants?: Prisma.GamePlayedCreateNestedManyWithoutSessionInput
@@ -515,6 +561,8 @@ export type GameSessionUncheckedCreateWithoutHostUserInput = {
   quizId: string
   playerCount: number
   questionCount: number
+  completionRate?: number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Date | string
   participants?: Prisma.GamePlayedUncheckedCreateNestedManyWithoutSessionInput
 }
@@ -554,6 +602,8 @@ export type GameSessionScalarWhereInput = {
   hostUserId?: Prisma.StringNullableFilter<"GameSession"> | string | null
   playerCount?: Prisma.IntFilter<"GameSession"> | number
   questionCount?: Prisma.IntFilter<"GameSession"> | number
+  completionRate?: Prisma.IntFilter<"GameSession"> | number
+  questionBreakdown?: Prisma.JsonFilter<"GameSession">
   playedAt?: Prisma.DateTimeFilter<"GameSession"> | Date | string
 }
 
@@ -561,6 +611,8 @@ export type GameSessionCreateWithoutQuizInput = {
   id?: string
   playerCount: number
   questionCount: number
+  completionRate?: number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Date | string
   hostUser?: Prisma.UserCreateNestedOneWithoutHostedGameSessionsInput
   participants?: Prisma.GamePlayedCreateNestedManyWithoutSessionInput
@@ -571,6 +623,8 @@ export type GameSessionUncheckedCreateWithoutQuizInput = {
   hostUserId?: string | null
   playerCount: number
   questionCount: number
+  completionRate?: number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Date | string
   participants?: Prisma.GamePlayedUncheckedCreateNestedManyWithoutSessionInput
 }
@@ -605,6 +659,8 @@ export type GameSessionCreateWithoutParticipantsInput = {
   id?: string
   playerCount: number
   questionCount: number
+  completionRate?: number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Date | string
   quiz: Prisma.QuizCreateNestedOneWithoutGameSessionsInput
   hostUser?: Prisma.UserCreateNestedOneWithoutHostedGameSessionsInput
@@ -616,6 +672,8 @@ export type GameSessionUncheckedCreateWithoutParticipantsInput = {
   hostUserId?: string | null
   playerCount: number
   questionCount: number
+  completionRate?: number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Date | string
 }
 
@@ -639,6 +697,8 @@ export type GameSessionUpdateWithoutParticipantsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   playerCount?: Prisma.IntFieldUpdateOperationsInput | number
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  completionRate?: Prisma.IntFieldUpdateOperationsInput | number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   quiz?: Prisma.QuizUpdateOneRequiredWithoutGameSessionsNestedInput
   hostUser?: Prisma.UserUpdateOneWithoutHostedGameSessionsNestedInput
@@ -650,6 +710,8 @@ export type GameSessionUncheckedUpdateWithoutParticipantsInput = {
   hostUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   playerCount?: Prisma.IntFieldUpdateOperationsInput | number
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  completionRate?: Prisma.IntFieldUpdateOperationsInput | number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -658,6 +720,8 @@ export type GameSessionCreateManyHostUserInput = {
   quizId: string
   playerCount: number
   questionCount: number
+  completionRate?: number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Date | string
 }
 
@@ -665,6 +729,8 @@ export type GameSessionUpdateWithoutHostUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   playerCount?: Prisma.IntFieldUpdateOperationsInput | number
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  completionRate?: Prisma.IntFieldUpdateOperationsInput | number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   quiz?: Prisma.QuizUpdateOneRequiredWithoutGameSessionsNestedInput
   participants?: Prisma.GamePlayedUpdateManyWithoutSessionNestedInput
@@ -675,6 +741,8 @@ export type GameSessionUncheckedUpdateWithoutHostUserInput = {
   quizId?: Prisma.StringFieldUpdateOperationsInput | string
   playerCount?: Prisma.IntFieldUpdateOperationsInput | number
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  completionRate?: Prisma.IntFieldUpdateOperationsInput | number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   participants?: Prisma.GamePlayedUncheckedUpdateManyWithoutSessionNestedInput
 }
@@ -684,6 +752,8 @@ export type GameSessionUncheckedUpdateManyWithoutHostUserInput = {
   quizId?: Prisma.StringFieldUpdateOperationsInput | string
   playerCount?: Prisma.IntFieldUpdateOperationsInput | number
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  completionRate?: Prisma.IntFieldUpdateOperationsInput | number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -692,6 +762,8 @@ export type GameSessionCreateManyQuizInput = {
   hostUserId?: string | null
   playerCount: number
   questionCount: number
+  completionRate?: number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Date | string
 }
 
@@ -699,6 +771,8 @@ export type GameSessionUpdateWithoutQuizInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   playerCount?: Prisma.IntFieldUpdateOperationsInput | number
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  completionRate?: Prisma.IntFieldUpdateOperationsInput | number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   hostUser?: Prisma.UserUpdateOneWithoutHostedGameSessionsNestedInput
   participants?: Prisma.GamePlayedUpdateManyWithoutSessionNestedInput
@@ -709,6 +783,8 @@ export type GameSessionUncheckedUpdateWithoutQuizInput = {
   hostUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   playerCount?: Prisma.IntFieldUpdateOperationsInput | number
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  completionRate?: Prisma.IntFieldUpdateOperationsInput | number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   participants?: Prisma.GamePlayedUncheckedUpdateManyWithoutSessionNestedInput
 }
@@ -718,6 +794,8 @@ export type GameSessionUncheckedUpdateManyWithoutQuizInput = {
   hostUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   playerCount?: Prisma.IntFieldUpdateOperationsInput | number
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
+  completionRate?: Prisma.IntFieldUpdateOperationsInput | number
+  questionBreakdown?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   playedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -758,6 +836,8 @@ export type GameSessionSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   hostUserId?: boolean
   playerCount?: boolean
   questionCount?: boolean
+  completionRate?: boolean
+  questionBreakdown?: boolean
   playedAt?: boolean
   quiz?: boolean | Prisma.QuizDefaultArgs<ExtArgs>
   hostUser?: boolean | Prisma.GameSession$hostUserArgs<ExtArgs>
@@ -771,6 +851,8 @@ export type GameSessionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   hostUserId?: boolean
   playerCount?: boolean
   questionCount?: boolean
+  completionRate?: boolean
+  questionBreakdown?: boolean
   playedAt?: boolean
   quiz?: boolean | Prisma.QuizDefaultArgs<ExtArgs>
   hostUser?: boolean | Prisma.GameSession$hostUserArgs<ExtArgs>
@@ -782,6 +864,8 @@ export type GameSessionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   hostUserId?: boolean
   playerCount?: boolean
   questionCount?: boolean
+  completionRate?: boolean
+  questionBreakdown?: boolean
   playedAt?: boolean
   quiz?: boolean | Prisma.QuizDefaultArgs<ExtArgs>
   hostUser?: boolean | Prisma.GameSession$hostUserArgs<ExtArgs>
@@ -793,10 +877,12 @@ export type GameSessionSelectScalar = {
   hostUserId?: boolean
   playerCount?: boolean
   questionCount?: boolean
+  completionRate?: boolean
+  questionBreakdown?: boolean
   playedAt?: boolean
 }
 
-export type GameSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "quizId" | "hostUserId" | "playerCount" | "questionCount" | "playedAt", ExtArgs["result"]["gameSession"]>
+export type GameSessionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "quizId" | "hostUserId" | "playerCount" | "questionCount" | "completionRate" | "questionBreakdown" | "playedAt", ExtArgs["result"]["gameSession"]>
 export type GameSessionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   quiz?: boolean | Prisma.QuizDefaultArgs<ExtArgs>
   hostUser?: boolean | Prisma.GameSession$hostUserArgs<ExtArgs>
@@ -825,6 +911,8 @@ export type $GameSessionPayload<ExtArgs extends runtime.Types.Extensions.Interna
     hostUserId: string | null
     playerCount: number
     questionCount: number
+    completionRate: number
+    questionBreakdown: runtime.JsonValue
     playedAt: Date
   }, ExtArgs["result"]["gameSession"]>
   composites: {}
@@ -1257,6 +1345,8 @@ export interface GameSessionFieldRefs {
   readonly hostUserId: Prisma.FieldRef<"GameSession", 'String'>
   readonly playerCount: Prisma.FieldRef<"GameSession", 'Int'>
   readonly questionCount: Prisma.FieldRef<"GameSession", 'Int'>
+  readonly completionRate: Prisma.FieldRef<"GameSession", 'Int'>
+  readonly questionBreakdown: Prisma.FieldRef<"GameSession", 'Json'>
   readonly playedAt: Prisma.FieldRef<"GameSession", 'DateTime'>
 }
     

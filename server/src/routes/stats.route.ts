@@ -22,4 +22,10 @@ router.get(
   asyncHandler(statsController.listHostedSessions),
 );
 
+router.get(
+  "/users/me/hosted-sessions/:sessionId",
+  requireAuth,
+  asyncHandler(statsController.getHostedSessionDetail),
+);
+
 export default router;

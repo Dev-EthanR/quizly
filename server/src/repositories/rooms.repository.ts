@@ -46,6 +46,14 @@ export interface QuestionAnswer {
   answeredAt: number;
 }
 
+export interface QuestionStat {
+  questionIndex: number;
+  correctCount: number;
+  answeredCount: number;
+  totalPlayers: number;
+  totalResponseMs: number;
+}
+
 export type GamePhase = "question" | "reveal" | "ended";
 
 export interface GameState {
@@ -58,6 +66,7 @@ export interface GameState {
   correctCounts: Record<string, number>;
   answerTimeTotals: Record<string, number>;
   answeredCounts: Record<string, number>;
+  questionStats: QuestionStat[];
   category: QuizCategory | null;
   leaderboardShown: boolean;
 }

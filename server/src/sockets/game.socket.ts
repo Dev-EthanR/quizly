@@ -309,10 +309,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
     }
 
     if (next.ended) {
-      io.to(parsed.data.roomCode).emit("game_over", {
-        leaderboard: next.leaderboard,
-        totalQuestions: next.totalQuestions,
-      });
+      io.to(parsed.data.roomCode).emit("game_over", next.summary);
       return;
     }
 
@@ -357,10 +354,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       return;
     }
 
-    io.to(parsed.data.roomCode).emit("game_over", {
-      leaderboard: ended.leaderboard,
-      totalQuestions: ended.totalQuestions,
-    });
+    io.to(parsed.data.roomCode).emit("game_over", ended);
   });
 
   socket.on("disconnect", () => {
