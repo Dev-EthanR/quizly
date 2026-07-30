@@ -4,6 +4,7 @@ import { FiUsers } from "react-icons/fi";
 import clsx from "clsx";
 import { quizCategoryLabels } from "shared";
 import Button from "../components/ui/Button";
+import Modal from "../components/ui/Modal";
 import AnswerButton from "../components/play/AnswerButton";
 import AnswerResultButton from "../components/play/AnswerResultButton";
 import Leaderboard, {
@@ -15,6 +16,7 @@ import QuestionTimer from "../components/play/QuestionTimer";
 import PodiumScreen from "../components/play/PodiumScreen";
 import PlayerResultScreen from "../components/play/PlayerResultScreen";
 import LobbyChat from "../components/lobby/LobbyChat";
+import PlayerRoster from "../components/lobby/PlayerRoster";
 import HostDisconnected from "../components/lobby/HostDisconnected";
 import RoomNotFound from "../components/lobby/RoomNotFound";
 import { useSocket } from "../context/useSocket";
@@ -22,6 +24,8 @@ import { clearSession, loadSession, type RoomSession } from "../lib/session";
 import type {
   AnswerProgressPayload,
   GameOverPayload,
+  LobbyPlayer,
+  LobbyPlayersPayload,
   PublicQuestion,
   QuestionRevealPayload,
   QuestionStartedPayload,
@@ -74,6 +78,8 @@ function Play() {
   const [hostDisconnected, setHostDisconnected] = useState(false);
   const [hostReconnecting, setHostReconnecting] = useState(false);
   const [roomNotFound, setRoomNotFound] = useState(false);
+  const [players, setPlayers] = useState<LobbyPlayer[]>([]);
+  const [showManagePlayers, setShowManagePlayers] = useState(false);
   const attemptRef = useRef<"rejoin" | null>(null);
 
   const isHost = state?.isHost ?? session?.isHost ?? false;
@@ -131,6 +137,17 @@ function Play() {
       setRoomNotFound(true);
     }
 
+    function handleLobbyPlayers(payload: LobbyPlayersPayload) {
+      setPlayers(payload.players);
+    }
+
+    function handlePlayerKicked() {
+      if (roomCode) {
+        clearSession(roomCode);
+      }
+      navigate("/removed", { replace: true });
+    }
+
     function handleRoomState(payload: RoomStatePayload) {
       if (payload.phase === "lobby") {
         if (roomCode) {
@@ -178,6 +195,8 @@ function Play() {
     socket.on("host_disconnected", handleHostDisconnected);
     socket.on("room_not_found", handleRoomNotFound);
     socket.on("room_state", handleRoomState);
+    socket.on("lobby_players", handleLobbyPlayers);
+    socket.on("player_kicked", handlePlayerKicked);
 
     return () => {
       socket.off("question_started", handleQuestionStarted);
@@ -190,6 +209,8 @@ function Play() {
       socket.off("host_disconnected", handleHostDisconnected);
       socket.off("room_not_found", handleRoomNotFound);
       socket.off("room_state", handleRoomState);
+      socket.off("lobby_players", handleLobbyPlayers);
+      socket.off("player_kicked", handlePlayerKicked);
     };
   }, [socket, isHost, roomCode, navigate, session?.token]);
 
@@ -295,6 +316,10 @@ function Play() {
     socket.emit("next_question", { roomCode });
   };
 
+  const handleKickPlayer = (playerId: string) => {
+    socket.emit("kick_player", { roomCode, token: playerId });
+  };
+
   if (phase === "ended") {
     if (!gameOver) {
       return (
@@ -356,14 +381,26 @@ function Play() {
             <span className="text-sm font-medium text-muted">
               Question {questionIndex + 1} of {totalQuestions}
             </span>
-            {phase === "question" && (
-              <div className="w-40">
-                <QuestionTimer
-                  remainingSeconds={remainingSeconds}
-                  totalSeconds={question.timeLimitSeconds}
-                />
-              </div>
-            )}
+            <div className="flex items-center gap-3">
+              {isHost && (
+                <button
+                  type="button"
+                  onClick={() => setShowManagePlayers(true)}
+                  className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:text-foreground"
+                >
+                  <FiUsers className="h-3.5 w-3.5" />
+                  Manage players
+                </button>
+              )}
+              {phase === "question" && (
+                <div className="w-40">
+                  <QuestionTimer
+                    remainingSeconds={remainingSeconds}
+                    totalSeconds={question.timeLimitSeconds}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {(phase === "question" || phase === "result") && (
@@ -475,6 +512,20 @@ function Play() {
           <LobbyChat roomCode={roomCode} />
         </div>
       </div>
+
+      {showManagePlayers && (
+        <Modal
+          title="Manage players"
+          ariaLabel="Manage players"
+          onClose={() => setShowManagePlayers(false)}
+        >
+          <PlayerRoster
+            players={players}
+            currentPlayerId={session?.token}
+            onKick={handleKickPlayer}
+          />
+        </Modal>
+      )}
     </div>
   );
 }

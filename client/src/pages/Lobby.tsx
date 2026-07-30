@@ -123,12 +123,20 @@ function Lobby() {
       }
     }
 
+    function handlePlayerKicked() {
+      if (roomCode) {
+        clearSession(roomCode);
+      }
+      navigate("/removed", { replace: true });
+    }
+
     socket.on("lobby_players", handleLobbyPlayers);
     socket.on("room_not_found", handleRoomNotFound);
     socket.on("room_state", handleRoomState);
     socket.on("host_reconnecting", handleHostReconnecting);
     socket.on("host_reconnected", handleHostReconnected);
     socket.on("host_disconnected", handleHostDisconnected);
+    socket.on("player_kicked", handlePlayerKicked);
     return () => {
       socket.off("lobby_players", handleLobbyPlayers);
       socket.off("room_not_found", handleRoomNotFound);
@@ -136,6 +144,7 @@ function Lobby() {
       socket.off("host_reconnecting", handleHostReconnecting);
       socket.off("host_reconnected", handleHostReconnected);
       socket.off("host_disconnected", handleHostDisconnected);
+      socket.off("player_kicked", handlePlayerKicked);
     };
   }, [
     isValidRoomCode,
@@ -211,6 +220,13 @@ function Lobby() {
     socket.emit("start_game", { roomCode });
   };
 
+  const handleKickPlayer = (playerId: string) => {
+    if (!roomCode) {
+      return;
+    }
+    socket.emit("kick_player", { roomCode, token: playerId });
+  };
+
   if (!isValidRoomCode || roomNotFound || !session) {
     return <RoomNotFound roomCode={roomCode} />;
   }
@@ -244,6 +260,7 @@ function Lobby() {
               roomCode={roomCode}
               players={players}
               onStartGame={handleStartGame}
+              onKick={handleKickPlayer}
             />
           ) : (
             <ParticipantLobbyPanel

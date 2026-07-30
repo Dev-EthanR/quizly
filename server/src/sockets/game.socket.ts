@@ -2,6 +2,7 @@ import type { Server, Socket } from "socket.io";
 import {
   hostGameSchema,
   joinRoomSchema,
+  kickPlayerSchema,
   rejoinRoomSchema,
   startGameSchema,
   submitAnswerSchema,
@@ -137,6 +138,38 @@ export function registerGameHandlers(io: Server, socket: Socket) {
     }
 
     socket.emit("room_not_found", { roomCode });
+  });
+
+  socket.on("kick_player", (payload) => {
+    const parsed = kickPlayerSchema.safeParse(payload);
+    if (!parsed.success) {
+      console.warn("Invalid kick_player payload", parsed.error.flatten());
+      return;
+    }
+
+    const { roomCode, token } = parsed.data;
+
+    if (!roomsService.isHost({ socketId: socket.id, roomCode })) {
+      return;
+    }
+
+    const kicked = roomsService.kickPlayer(roomCode, token);
+    if (!kicked) {
+      return;
+    }
+
+    clearPlayerDisconnectTimer(roomCode, token);
+
+    const { room, socketId: kickedSocketId } = kicked;
+    if (kickedSocketId) {
+      const kickedSocket = io.sockets.sockets.get(kickedSocketId);
+      if (kickedSocket) {
+        kickedSocket.emit("player_kicked", { roomCode });
+        kickedSocket.leave(roomCode);
+      }
+    }
+
+    broadcastLobbyPlayers(io, room);
   });
 
   socket.on("start_game", async (payload) => {

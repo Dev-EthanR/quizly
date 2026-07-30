@@ -69,3 +69,10 @@ export const submitAnswerSchema = z.object({
 });
 
 export type SubmitAnswerInput = z.infer<typeof submitAnswerSchema>;
+
+export const kickPlayerSchema = z.object({
+  roomCode: roomCodeSchema,
+  token: sessionTokenSchema,
+});
+
+export type KickPlayerInput = z.infer<typeof kickPlayerSchema>;

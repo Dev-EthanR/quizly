@@ -125,6 +125,21 @@ export const roomsService = {
     return roomsRepository.removePlayerByToken(roomCode, token);
   },
 
+  kickPlayer(
+    roomCode: string,
+    token: string,
+  ): { room: RoomRecord; socketId: string | null } | undefined {
+    const player = roomsRepository.findPlayerByToken(roomCode, token);
+    if (!player) {
+      return undefined;
+    }
+    const room = roomsRepository.removePlayerByToken(roomCode, token);
+    if (!room) {
+      return undefined;
+    }
+    return { room, socketId: player.socketId };
+  },
+
   isHost({ socketId, roomCode }: IsHostParams): boolean {
     const room = roomsRepository.findByCode(roomCode);
     return !!room && room.hostSocketId === socketId;

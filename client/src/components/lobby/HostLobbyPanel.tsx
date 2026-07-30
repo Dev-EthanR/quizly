@@ -8,11 +8,17 @@ interface HostLobbyPanelProps {
   roomCode: string;
   players: LobbyPlayer[];
   onStartGame: () => void;
+  onKick: (playerId: string) => void;
 }
 
 const COPIED_RESET_MS = 2000;
 
-function HostLobbyPanel({ roomCode, players, onStartGame }: HostLobbyPanelProps) {
+function HostLobbyPanel({
+  roomCode,
+  players,
+  onStartGame,
+  onKick,
+}: HostLobbyPanelProps) {
   const [copied, setCopied] = useState(false);
 
   const copyRoomCode = async () => {
@@ -54,7 +60,7 @@ function HostLobbyPanel({ roomCode, players, onStartGame }: HostLobbyPanelProps)
         </span>
       </div>
 
-      <PlayerRoster players={players} />
+      <PlayerRoster players={players} onKick={onKick} />
 
       <Button type="button" onClick={onStartGame} className="flex items-center gap-2">
         <FiPlay className="h-4 w-4" />

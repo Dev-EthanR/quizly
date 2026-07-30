@@ -3,6 +3,7 @@ import type { Socket } from "socket.io-client";
 import type {
   HostGameInput,
   JoinRoomInput,
+  KickPlayerInput,
   QuizCategory,
   RejoinRoomInput,
   SendChatMessageInput,
@@ -27,6 +28,10 @@ export interface HostReconnectingPayload {
 }
 
 export interface HostReconnectedPayload {
+  roomCode: string;
+}
+
+export interface PlayerKickedPayload {
   roomCode: string;
 }
 
@@ -150,6 +155,7 @@ export interface ServerToClientEvents {
   question_reveal: (payload: QuestionRevealPayload) => void;
   leaderboard_shown: () => void;
   game_over: (payload: GameOverPayload) => void;
+  player_kicked: (payload: PlayerKickedPayload) => void;
 }
 
 export interface ClientToServerEvents {
@@ -161,6 +167,7 @@ export interface ClientToServerEvents {
   submit_answer: (payload: SubmitAnswerInput) => void;
   show_leaderboard: (payload: StartGameInput) => void;
   next_question: (payload: StartGameInput) => void;
+  kick_player: (payload: KickPlayerInput) => void;
 }
 
 export type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;
