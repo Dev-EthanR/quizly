@@ -1,4 +1,5 @@
 import { quizzesRepository } from "../repositories/quizzes.repository.js";
+import { shuffleArray } from "../lib/shuffle.js";
 import {
   gameHistoryRepository,
   type GamePlayedRecord,
@@ -103,11 +104,9 @@ function toGameQuestions(quiz: QuizWithQuestions): GameQuestion[] {
     prompt: question.prompt,
     timeLimitSeconds: question.timeLimitSeconds,
     points: question.points,
-    answers: question.answers.map(({ id, text, isCorrect }) => ({
-      id,
-      text,
-      isCorrect,
-    })),
+    answers: shuffleArray(
+      question.answers.map(({ id, text, isCorrect }) => ({ id, text, isCorrect })),
+    ),
   }));
 }
 
