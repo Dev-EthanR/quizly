@@ -1,6 +1,13 @@
 import { useState } from "react";
 import clsx from "clsx";
-import { FiAward, FiBarChart2, FiFlag, FiTrendingUp } from "react-icons/fi";
+import {
+  FiAward,
+  FiBarChart2,
+  FiFlag,
+  FiPlay,
+  FiTrendingUp,
+  FiVideo,
+} from "react-icons/fi";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/ui/Button";
 import Pagination from "../components/ui/Pagination";
@@ -9,6 +16,7 @@ import AchievementCard from "../components/dashboard/AchievementCard";
 import RecentGameRow from "../components/dashboard/RecentGameRow";
 import HostedSessionRow from "../components/dashboard/HostedSessionRow";
 import DashboardRowSkeleton from "../components/dashboard/DashboardRowSkeleton";
+import EmptyState from "../components/dashboard/EmptyState";
 import { useDashboardStats } from "../hooks/useDashboardStats";
 import { useRecentGames } from "../hooks/useRecentGames";
 import { useHostedSessions } from "../hooks/useHostedSessions";
@@ -57,9 +65,12 @@ function RecentGamesTab() {
 
   if (!games || games.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 py-24 text-center">
-        <p className="text-muted">You haven't played any games yet.</p>
-      </div>
+      <EmptyState
+        icon={FiPlay}
+        title="No games played yet"
+        description="Join a live quiz with a room code and your results will show up here."
+        action={{ label: "Join a game", to: "/" }}
+      />
     );
   }
 
@@ -110,9 +121,12 @@ function HostedQuizzesTab() {
 
   if (!sessions || sessions.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 py-24 text-center">
-        <p className="text-muted">You haven't hosted any games yet.</p>
-      </div>
+      <EmptyState
+        icon={FiVideo}
+        title="No hosted games yet"
+        description="Host a quiz from your library and it will show up here once the game ends."
+        action={{ label: "Go to My Quizzes", to: "/my-quizzes" }}
+      />
     );
   }
 
@@ -174,9 +188,11 @@ function AchievementsTab({
 
   if (!achievements || achievements.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 py-24 text-center">
-        <p className="text-muted">No achievements yet.</p>
-      </div>
+      <EmptyState
+        icon={FiAward}
+        title="No achievements available"
+        description="Play or host a few games to start unlocking achievements."
+      />
     );
   }
 
