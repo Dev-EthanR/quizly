@@ -1,5 +1,5 @@
 import { quizQuestionSchema } from "shared";
-import type { QuizQuestionDraft } from "./quizzes";
+import type { QuizQuestionDraft } from "../entities/quiz";
 
 export interface QuestionValidationErrors {
   prompt?: string;

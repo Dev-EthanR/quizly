@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { FiAward, FiBarChart2, FiHome } from "react-icons/fi";
 import Button from "../ui/Button";
 import RankedListRow from "./RankedListRow";
-import type { LeaderboardEntry } from "../../context/socket-context";
+import type { LeaderboardEntry } from "../../entities/socket";
 
 interface PodiumScreenProps {
   leaderboard: LeaderboardEntry[];

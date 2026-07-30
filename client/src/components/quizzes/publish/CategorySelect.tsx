@@ -1,6 +1,6 @@
 import clsx from "clsx";
-import type { QuizCategory } from "shared";
 import { useQuizCategories } from "../../../hooks/useQuizCategories";
+import type { QuizCategory } from "../../../entities/quiz";
 
 interface CategorySelectProps {
   value: QuizCategory | "";

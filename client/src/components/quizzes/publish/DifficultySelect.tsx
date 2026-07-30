@@ -1,4 +1,4 @@
-import type { QuizDifficulty } from "../../../lib/quizzes";
+import type { QuizDifficulty } from "../../../entities/quiz";
 import SegmentedControl from "../../ui/SegmentedControl";
 
 interface DifficultyOption {

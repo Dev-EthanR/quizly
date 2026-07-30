@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { QuizQuestionDraft } from "../../lib/quizzes";
+import type { QuizQuestionDraft } from "../../entities/quiz";
 import { getQuestionErrors, isQuestionValid } from "../../lib/questionValidation";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";

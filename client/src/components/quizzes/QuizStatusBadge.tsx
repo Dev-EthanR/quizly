@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { QuizStatus } from "../../lib/quizzes";
+import type { QuizStatus } from "../../entities/quiz";
 
 interface QuizStatusBadgeProps {
   status: QuizStatus;

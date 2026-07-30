@@ -11,7 +11,8 @@ import ChatPanel from "../components/lobby/ChatPanel";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { useAuth } from "../context/useAuth";
 import { useSocket } from "../context/useSocket";
-import { clearSession, loadSession, saveSession, type RoomSession } from "../lib/session";
+import { clearSession, loadSession, saveSession } from "../lib/session";
+import type { RoomSession } from "../entities/session";
 import type {
   GameStartedPayload,
   JoinRejectedPayload,
@@ -19,7 +20,7 @@ import type {
   LobbyPlayersPayload,
   RoomSettingsPayload,
   RoomStatePayload,
-} from "../context/socket-context";
+} from "../entities/socket";
 
 interface LobbyLocation {
   state?: {

@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { AuthUser, CredentialsPayload, RegisterPayload } from "../lib/auth";
+import type { AuthUser, CredentialsPayload, RegisterPayload } from "../entities/auth";
 
 export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 

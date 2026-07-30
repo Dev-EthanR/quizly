@@ -8,12 +8,8 @@ import PillTabs from "../components/ui/PillTabs";
 import DiscoveryQuizCard from "../components/quizzes/DiscoveryQuizCard";
 import DiscoveryQuizCardSkeleton from "../components/quizzes/DiscoveryQuizCardSkeleton";
 import { useQuizCategories } from "../hooks/useQuizCategories";
-import {
-  fetchDiscoverQuizzes,
-  fetchSavedQuizzes,
-  type QuizCategory,
-  type QuizDifficulty,
-} from "../lib/quizzes";
+import { fetchDiscoverQuizzes, fetchSavedQuizzes } from "../lib/quizzes";
+import type { QuizCategory, QuizDifficulty } from "../entities/quiz";
 
 type DiscoveryTab = "browse" | "saved";
 

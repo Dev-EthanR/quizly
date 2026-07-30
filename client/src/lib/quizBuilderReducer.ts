@@ -1,4 +1,4 @@
-import type { QuizDetail, QuizQuestionDraft } from "./quizzes";
+import type { QuizDetail, QuizQuestionDraft } from "../entities/quiz";
 import type {
   QuizBuilderAction,
   QuizBuilderState,

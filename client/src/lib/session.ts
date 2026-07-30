@@ -1,10 +1,4 @@
-export interface RoomSession {
-  roomCode: string;
-  token: string;
-  isHost: boolean;
-  name?: string;
-  color?: string;
-}
+import type { RoomSession } from "../entities/session";
 
 const STORAGE_KEY_PREFIX = "quizly:session:";
 

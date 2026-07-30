@@ -7,8 +7,8 @@ import {
   DEFAULT_HOST_SETTINGS,
   MAX_PLAYERS_MAX,
   MAX_PLAYERS_MIN,
-  type HostSettings,
 } from "../../lib/hostSettings";
+import type { HostSettings } from "../../entities/hostSettings";
 
 interface HostSettingsModalProps {
   onClose: () => void;

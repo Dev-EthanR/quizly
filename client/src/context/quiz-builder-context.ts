@@ -3,7 +3,7 @@ import type {
   QuizAnswerDraft,
   QuizDraft,
   QuizQuestionDraft,
-} from "../lib/quizzes";
+} from "../entities/quiz";
 
 export type QuizBuilderState = QuizDraft;
 

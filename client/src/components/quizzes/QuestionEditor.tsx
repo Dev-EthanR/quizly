@@ -1,4 +1,4 @@
-import type { QuizQuestionDraft } from "../../lib/quizzes";
+import type { QuizQuestionDraft } from "../../entities/quiz";
 import type { QuestionValidationErrors } from "../../lib/questionValidation";
 import { useQuizBuilder } from "../../context/useQuizBuilder";
 import { ANSWER_BOUNDS } from "../../lib/quizBuilderReducer";

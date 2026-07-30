@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import type { KeyboardEvent, MouseEvent } from "react";
 import { FiEdit2, FiTrash2 } from "react-icons/fi";
-import type { QuizQuestionDraft } from "../../lib/quizzes";
+import type { QuizQuestionDraft } from "../../entities/quiz";
 import { isQuestionValid } from "../../lib/questionValidation";
 import IndexBadge from "../ui/IndexBadge";
 

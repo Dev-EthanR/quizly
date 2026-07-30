@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import type { ChatMessage } from "./socket-context";
+import type { ChatMessage } from "../entities/socket";
 
 export interface ChatContextValue {
   messages: ChatMessage[];

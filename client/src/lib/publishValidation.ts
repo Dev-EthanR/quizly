@@ -1,9 +1,5 @@
-import {
-  publishQuizMetadataSchema,
-  type QuizCategory,
-  type QuizDifficulty,
-  type QuizVisibility,
-} from "shared";
+import { publishQuizMetadataSchema } from "shared";
+import type { QuizCategory, QuizDifficulty, QuizVisibility } from "../entities/quiz";
 
 export interface PublishMetadataDraft {
   category: QuizCategory | "";

@@ -4,16 +4,14 @@ import { useMutation } from "@tanstack/react-query";
 import { publishQuizContentSchema, publishQuizSchema, saveQuizDraftSchema } from "shared";
 import { useQuizBuilder } from "../context/useQuizBuilder";
 import { isPublishMetadataValid, type PublishMetadataDraft } from "../lib/publishValidation";
-import {
-  createQuiz,
-  publishQuiz,
-  updateQuizDraft,
-  type PublishQuizMetadata,
-  type QuizCategory,
-  type QuizDifficulty,
-  type QuizVisibility,
-  type SaveQuizPayload,
-} from "../lib/quizzes";
+import { createQuiz, publishQuiz, updateQuizDraft } from "../lib/quizzes";
+import type {
+  PublishQuizMetadata,
+  QuizCategory,
+  QuizDifficulty,
+  QuizVisibility,
+  SaveQuizPayload,
+} from "../entities/quiz";
 
 interface UseQuizBuilderSaveParams {
   quizId?: string;

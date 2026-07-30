@@ -1,7 +1,4 @@
-export interface AvatarColor {
-  id: string;
-  bgClass: string;
-}
+import type { AvatarColor } from "../entities/avatarColors";
 
 export const AVATAR_COLORS: AvatarColor[] = [
   { id: "violet", bgClass: "bg-[#7C3AED]" },

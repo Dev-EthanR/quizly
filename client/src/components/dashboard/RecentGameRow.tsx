@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import ImageFallback from "../ui/ImageFallback";
-import type { RecentGame } from "../../lib/dashboard";
+import type { RecentGame } from "../../entities/dashboard";
 
 interface RecentGameRowProps {
   game: RecentGame;

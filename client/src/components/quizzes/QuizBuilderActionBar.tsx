@@ -4,7 +4,7 @@ import Button from "../ui/Button";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import VisibilitySelect from "./publish/VisibilitySelect";
 import HostQuizButton from "./HostQuizButton";
-import type { QuizVisibility } from "../../lib/quizzes";
+import type { QuizVisibility } from "../../entities/quiz";
 
 interface QuizBuilderActionBarProps {
   isPublished: boolean;

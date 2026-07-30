@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FiPlay } from "react-icons/fi";
 import Button from "../ui/Button";
 import HostSettingsModal from "./HostSettingsModal";
-import type { HostSettings } from "../../lib/hostSettings";
+import type { HostSettings } from "../../entities/hostSettings";
 
 interface HostQuizButtonProps {
   quizId: string;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { QuizQuestionDraft } from "../lib/quizzes";
+import type { QuizQuestionDraft } from "../entities/quiz";
 
 export interface UseQuestionPreviewSelectionResult {
   resolvedSelectedId: string | null;

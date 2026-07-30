@@ -7,8 +7,9 @@ import FullScreenStatus from "../components/ui/FullScreenStatus";
 import { useAuth } from "../context/useAuth";
 import { useSocket } from "../context/useSocket";
 import { createSessionToken, saveSession } from "../lib/session";
-import { DEFAULT_HOST_SETTINGS, type HostSettings } from "../lib/hostSettings";
-import type { RoomCreatedPayload } from "../context/socket-context";
+import { DEFAULT_HOST_SETTINGS } from "../lib/hostSettings";
+import type { HostSettings } from "../entities/hostSettings";
+import type { RoomCreatedPayload } from "../entities/socket";
 
 interface HostLocation {
   state?: {

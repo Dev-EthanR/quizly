@@ -1,10 +1,4 @@
-export interface HostSettings {
-  randomizeQuestionOrder: boolean;
-  allowLateJoins: boolean;
-  showCorrectAnswers: boolean;
-  disableChat: boolean;
-  maxPlayers: number | null;
-}
+import type { HostSettings } from "../entities/hostSettings";
 
 export const DEFAULT_HOST_SETTINGS: HostSettings = {
   randomizeQuestionOrder: false,

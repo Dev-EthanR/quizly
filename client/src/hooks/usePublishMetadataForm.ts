@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { QuizCategory, QuizDifficulty, QuizVisibility } from "../lib/quizzes";
+import type { QuizCategory, QuizDifficulty, QuizVisibility } from "../entities/quiz";
 import { useTagInput, type UseTagInputResult } from "./useTagInput";
 import {
   useCoverImageDropzone,

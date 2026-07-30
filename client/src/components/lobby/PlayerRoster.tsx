@@ -5,7 +5,7 @@ import Avatar from "../ui/Avatar";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import { AVATAR_COLORS } from "../../lib/avatarColors";
 import { getInitials } from "../../lib/initials";
-import type { LobbyPlayer } from "../../context/socket-context";
+import type { LobbyPlayer } from "../../entities/socket";
 
 interface PlayerRosterProps {
   players: LobbyPlayer[];
@@ -94,12 +94,11 @@ function PlayerRoster({
               </div>
               <p
                 className={clsx(
-                  "w-full truncate text-sm",
+                  "w-full break-words text-center text-sm",
                   isYou ? "font-semibold text-primary" : "text-foreground",
                 )}
               >
                 {player.name}
-                {isYou && " (You)"}
               </p>
               {!player.connected && (
                 <p className="text-xs text-muted">Reconnecting...</p>

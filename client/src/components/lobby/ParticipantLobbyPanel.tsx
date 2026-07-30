@@ -2,7 +2,7 @@ import Avatar from "../ui/Avatar";
 import PlayerRoster from "./PlayerRoster";
 import { AVATAR_COLORS } from "../../lib/avatarColors";
 import { getInitials } from "../../lib/initials";
-import type { LobbyPlayer } from "../../context/socket-context";
+import type { LobbyPlayer } from "../../entities/socket";
 
 interface ParticipantLobbyPanelProps {
   roomCode: string;

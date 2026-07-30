@@ -1,9 +1,7 @@
 import type { ReactNode } from "react";
-import clsx from "clsx";
 import { Link } from "react-router-dom";
 import {
   FiArrowLeft,
-  FiAward,
   FiBarChart2,
   FiCheckCircle,
   FiClock,
@@ -16,52 +14,13 @@ import Avatar from "../ui/Avatar";
 import Button from "../ui/Button";
 import StatTile from "../ui/StatTile";
 import RankedListRow from "./RankedListRow";
+import WinnerCard from "./WinnerCard";
+import InsightCard from "./InsightCard";
+import QuestionBreakdownRow from "./QuestionBreakdownRow";
 import { AVATAR_COLORS } from "../../lib/avatarColors";
 import { getInitials } from "../../lib/initials";
-
-interface HostSummaryPlayer {
-  playerId: string;
-  name: string;
-  color?: string;
-  score: number;
-  correctCount: number;
-  connected: boolean;
-  accuracy: number;
-  avgResponseMs: number;
-}
-
-interface HostSummaryQuestion {
-  questionIndex: number;
-  prompt: string;
-  correctCount: number;
-  totalPlayers: number;
-  accuracy: number;
-  avgResponseMs: number;
-}
-
-interface HostSummaryFastestPlayer {
-  playerId: string;
-  name: string;
-  avgResponseMs: number;
-}
-
-interface HostSummaryHardestQuestion {
-  questionIndex: number;
-  prompt: string;
-  accuracy: number;
-}
-
-export interface HostSummaryData {
-  leaderboard: HostSummaryPlayer[];
-  totalQuestions: number;
-  totalPlayers: number;
-  averageAccuracy: number;
-  averageResponseMs: number;
-  completionRate: number;
-  questionBreakdown: HostSummaryQuestion[];
-  fastestPlayer: HostSummaryFastestPlayer | null;
-  hardestQuestion: HostSummaryHardestQuestion | null;
-}
+import { formatResponseTime } from "../../lib/format";
+import type { HostSummaryData } from "../../entities/hostSummary";
 
 interface HostSummaryScreenProps {
   summary: HostSummaryData;
@@ -70,24 +29,8 @@ interface HostSummaryScreenProps {
   subheading?: ReactNode;
 }
 
-function formatResponseTime(ms: number): string {
-  return `${(ms / 1000).toFixed(1)}s`;
-}
-
 function avatarColorFor(colorId?: string): string {
   return (AVATAR_COLORS.find((c) => c.id === colorId) ?? AVATAR_COLORS[0]!).bgClass;
-}
-
-function accuracyBarColor(accuracy: number): string {
-  if (accuracy >= 70) return "bg-secondary";
-  if (accuracy >= 40) return "bg-warning";
-  return "bg-danger";
-}
-
-function accuracyTextColor(accuracy: number): string {
-  if (accuracy >= 70) return "text-secondary";
-  if (accuracy >= 40) return "text-warning";
-  return "text-danger";
 }
 
 function HostSummaryScreen({ summary, onBack, heading, subheading }: HostSummaryScreenProps) {
@@ -113,19 +56,13 @@ function HostSummaryScreen({ summary, onBack, heading, subheading }: HostSummary
       </div>
 
       {winner && (
-        <div className="flex w-full max-w-md flex-col items-center gap-3 rounded-2xl border border-border bg-surface p-8">
-          <span className="flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-            <FiAward className="h-3.5 w-3.5" />
-            Winner
-          </span>
-          <Avatar initials={getInitials(winner.name)} bgClass={avatarColorFor(winner.color)} size="lg" />
-          <span className="max-w-full truncate text-xl font-bold text-foreground">
-            {winner.name}
-          </span>
-          <span className="text-sm text-muted">
-            {winner.score} pts &middot; {winner.correctCount}/{totalQuestions} correct
-          </span>
-        </div>
+        <WinnerCard
+          name={winner.name}
+          avatarBgClass={avatarColorFor(winner.color)}
+          score={winner.score}
+          correctCount={winner.correctCount}
+          totalQuestions={totalQuestions}
+        />
       )}
 
       <div className="grid w-full max-w-2xl grid-cols-2 gap-4 sm:grid-cols-4">
@@ -142,31 +79,21 @@ function HostSummaryScreen({ summary, onBack, heading, subheading }: HostSummary
       {(fastestPlayer || hardestQuestion) && (
         <div className="grid w-full max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">
           {fastestPlayer && (
-            <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary/15 text-secondary">
-                <FiZap className="h-5 w-5" />
-              </span>
-              <div className="flex min-w-0 flex-col">
-                <span className="text-xs text-muted">Fastest responder</span>
-                <span className="truncate font-semibold text-foreground">
-                  {fastestPlayer.name} &middot; {formatResponseTime(fastestPlayer.avgResponseMs)} avg
-                </span>
-              </div>
-            </div>
+            <InsightCard
+              icon={<FiZap className="h-5 w-5" />}
+              tone="secondary"
+              label="Fastest responder"
+              value={`${fastestPlayer.name} · ${formatResponseTime(fastestPlayer.avgResponseMs)} avg`}
+            />
           )}
 
           {hardestQuestion && (
-            <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-danger/15 text-danger">
-                <FiBarChart2 className="h-5 w-5" />
-              </span>
-              <div className="flex min-w-0 flex-col">
-                <span className="text-xs text-muted">Hardest question</span>
-                <span className="truncate font-semibold text-foreground">
-                  {hardestQuestion.prompt} &middot; {hardestQuestion.accuracy}% correct
-                </span>
-              </div>
-            </div>
+            <InsightCard
+              icon={<FiBarChart2 className="h-5 w-5" />}
+              tone="danger"
+              label="Hardest question"
+              value={`${hardestQuestion.prompt} · ${hardestQuestion.accuracy}% correct`}
+            />
           )}
         </div>
       )}
@@ -176,34 +103,13 @@ function HostSummaryScreen({ summary, onBack, heading, subheading }: HostSummary
           <h2 className="text-sm font-semibold text-muted">Question breakdown</h2>
           <ol className="flex flex-col gap-2">
             {questionBreakdown.map((question) => (
-              <li
+              <QuestionBreakdownRow
                 key={question.questionIndex}
-                className="flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3"
-              >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
-                  {question.questionIndex + 1}
-                </span>
-                <span className="max-w-[40%] shrink-0 truncate text-sm text-foreground">
-                  {question.prompt}
-                </span>
-                <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-background">
-                  <div
-                    className={clsx("h-full rounded-full", accuracyBarColor(question.accuracy))}
-                    style={{ width: `${question.accuracy}%` }}
-                  />
-                </div>
-                <span
-                  className={clsx(
-                    "shrink-0 text-sm font-semibold",
-                    accuracyTextColor(question.accuracy),
-                  )}
-                >
-                  {question.accuracy}%
-                </span>
-                <span className="shrink-0 text-sm text-muted">
-                  {formatResponseTime(question.avgResponseMs)}
-                </span>
-              </li>
+                index={question.questionIndex}
+                prompt={question.prompt}
+                accuracy={question.accuracy}
+                avgResponseMs={question.avgResponseMs}
+              />
             ))}
           </ol>
         </div>

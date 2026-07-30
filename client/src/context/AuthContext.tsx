@@ -6,9 +6,8 @@ import {
   signInWithCredentials,
   signInWithGoogle,
   signOutUser,
-  type CredentialsPayload,
-  type RegisterPayload,
 } from "../lib/auth";
+import type { CredentialsPayload, RegisterPayload } from "../entities/auth";
 import {
   AuthContext,
   type AuthContextValue,

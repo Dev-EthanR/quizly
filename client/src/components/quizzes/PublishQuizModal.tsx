@@ -8,7 +8,7 @@ import DescriptionInput from "./publish/DescriptionInput";
 import DifficultySelect from "./publish/DifficultySelect";
 import TagsInput from "./publish/TagsInput";
 import { usePublishMetadataForm } from "../../hooks/usePublishMetadataForm";
-import type { PublishQuizMetadata, QuizCategory, QuizDifficulty } from "../../lib/quizzes";
+import type { PublishQuizMetadata, QuizCategory, QuizDifficulty } from "../../entities/quiz";
 import {
   getPublishMetadataErrors,
   isPublishMetadataValid,

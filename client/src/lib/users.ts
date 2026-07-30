@@ -1,15 +1,7 @@
 import type { UpdateProfileInput } from "shared";
 import api from "./api";
 import { extractApiErrorMessage } from "./apiError";
-
-export interface UserProfile {
-  id: string;
-  name: string | null;
-  email: string;
-  image: string | null;
-  avatarColor: string;
-  providers: string[];
-}
+import type { UserProfile } from "../entities/user";
 
 export async function fetchMe(): Promise<UserProfile> {
   const { data } = await api.get<UserProfile>("/api/users/me");

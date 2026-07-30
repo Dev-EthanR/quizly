@@ -2,7 +2,7 @@ import { FiCheck, FiCopy, FiPlay, FiUsers } from "react-icons/fi";
 import PlayerRoster from "./PlayerRoster";
 import Button from "../ui/Button";
 import { useCopyToClipboard } from "../../hooks/useCopyToClipboard";
-import type { LobbyPlayer } from "../../context/socket-context";
+import type { LobbyPlayer } from "../../entities/socket";
 
 interface HostLobbyPanelProps {
   roomCode: string;

@@ -5,7 +5,7 @@ import TagsInput from "./publish/TagsInput";
 import { MAX_TAGS } from "./PublishQuizModal";
 import type { UseTagInputResult } from "../../hooks/useTagInput";
 import type { PublishMetadataErrors } from "../../lib/publishValidation";
-import type { QuizCategory, QuizDifficulty } from "../../lib/quizzes";
+import type { QuizCategory, QuizDifficulty } from "../../entities/quiz";
 
 interface PublishMetadataFieldsProps {
   category: QuizCategory | "";

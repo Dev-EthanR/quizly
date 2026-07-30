@@ -7,7 +7,8 @@ import ErrorRetry from "../components/ui/ErrorRetry";
 import PillTabs from "../components/ui/PillTabs";
 import QuizCard from "../components/quizzes/QuizCard";
 import QuizCardSkeleton from "../components/quizzes/QuizCardSkeleton";
-import { fetchMyQuizzes, type QuizStatusFilter } from "../lib/quizzes";
+import { fetchMyQuizzes } from "../lib/quizzes";
+import type { QuizStatusFilter } from "../entities/quiz";
 
 interface FilterOption {
   label: string;

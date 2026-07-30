@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { FiUsers } from "react-icons/fi";
 import HostQuizButton from "../quizzes/HostQuizButton";
 import ImageFallback from "../ui/ImageFallback";
-import type { HostedSession } from "../../lib/dashboard";
+import type { HostedSession } from "../../entities/dashboard";
 
 interface HostedSessionRowProps {
   session: HostedSession;

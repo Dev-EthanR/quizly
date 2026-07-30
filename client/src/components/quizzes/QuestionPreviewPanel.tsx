@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { QuizQuestionDraft } from "../../lib/quizzes";
+import type { QuizQuestionDraft } from "../../entities/quiz";
 import IndexBadge from "../ui/IndexBadge";
 
 interface QuestionPreviewPanelProps {

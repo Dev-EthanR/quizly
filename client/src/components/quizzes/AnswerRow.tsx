@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { QuizAnswerDraft } from "../../lib/quizzes";
+import type { QuizAnswerDraft } from "../../entities/quiz";
 import { useQuizBuilder } from "../../context/useQuizBuilder";
 import IndexBadge from "../ui/IndexBadge";
 

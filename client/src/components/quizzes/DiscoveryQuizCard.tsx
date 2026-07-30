@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { FiPlay } from "react-icons/fi";
 import clsx from "clsx";
-import { quizCategoryLabels, quizDifficultyLabels, type QuizDifficulty } from "shared";
+import { quizCategoryLabels, quizDifficultyLabels } from "shared";
 import HostQuizButton from "./HostQuizButton";
 import ImageFallback from "../ui/ImageFallback";
 import TagPill from "../ui/TagPill";
-import type { DiscoverQuiz } from "../../lib/quizzes";
+import type { DiscoverQuiz, QuizDifficulty } from "../../entities/quiz";
 
 interface DiscoveryQuizCardProps {
   quiz: DiscoverQuiz;

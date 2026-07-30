@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, type ReactNode } from "react";
 import { useSocket } from "./useSocket";
 import { ChatContext, type ChatContextValue } from "./chat-context";
-import type { ChatMessage } from "./socket-context";
+import type { ChatMessage } from "../entities/socket";
 
 interface ChatState {
   roomCode: string | null;

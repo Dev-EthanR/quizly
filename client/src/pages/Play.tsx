@@ -22,7 +22,8 @@ import PlayerRoster from "../components/lobby/PlayerRoster";
 import HostDisconnected from "../components/lobby/HostDisconnected";
 import RoomNotFound from "../components/lobby/RoomNotFound";
 import { useSocket } from "../context/useSocket";
-import { clearSession, loadSession, type RoomSession } from "../lib/session";
+import { clearSession, loadSession } from "../lib/session";
+import type { RoomSession } from "../entities/session";
 import type {
   AnswerProgressPayload,
   GameOverPayload,
@@ -33,7 +34,7 @@ import type {
   QuestionStartedPayload,
   RoomSettingsPayload,
   RoomStatePayload,
-} from "../context/socket-context";
+} from "../entities/socket";
 
 const ANSWER_OPTION_LABELS = ["A", "B", "C", "D"];
 

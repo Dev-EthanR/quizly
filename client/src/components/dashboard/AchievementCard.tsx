@@ -23,7 +23,7 @@ import {
   FiWind,
   FiZap,
 } from "react-icons/fi";
-import type { Achievement, AchievementId } from "../../lib/dashboard";
+import type { Achievement, AchievementId } from "../../entities/dashboard";
 
 interface AchievementCardProps {
   achievement: Achievement;

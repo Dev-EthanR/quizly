@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { saveQuiz, unsaveQuiz, type DiscoverQuizDetail } from "../lib/quizzes";
+import { saveQuiz, unsaveQuiz } from "../lib/quizzes";
+import type { DiscoverQuizDetail } from "../entities/quiz";
 
 export function useSaveQuizMutation(quizId: string) {
   const queryClient = useQueryClient();

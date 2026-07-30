@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { QuizQuestionDraft } from "../../lib/quizzes";
+import type { QuizQuestionDraft } from "../../entities/quiz";
 import { useQuizBuilder } from "../../context/useQuizBuilder";
 import { createEmptyQuestion } from "../../lib/quizBuilderReducer";
 import Button from "../ui/Button";

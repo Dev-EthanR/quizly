@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { FiGlobe, FiLock } from "react-icons/fi";
 import type { IconType } from "react-icons";
-import type { QuizVisibility } from "../../../lib/quizzes";
+import type { QuizVisibility } from "../../../entities/quiz";
 import SegmentedControl from "../../ui/SegmentedControl";
 
 interface VisibilityOption {

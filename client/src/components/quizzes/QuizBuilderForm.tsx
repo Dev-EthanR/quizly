@@ -14,7 +14,7 @@ import {
   getPublishMetadataErrors,
   type PublishMetadataDraft,
 } from "../../lib/publishValidation";
-import type { QuizDetail } from "../../lib/quizzes";
+import type { QuizDetail } from "../../entities/quiz";
 
 interface QuizBuilderFormProps {
   quizId?: string;

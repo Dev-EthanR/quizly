@@ -20,7 +20,7 @@ import EmptyState from "../components/dashboard/EmptyState";
 import { useDashboardStats } from "../hooks/useDashboardStats";
 import { useRecentGames } from "../hooks/useRecentGames";
 import { useHostedSessions } from "../hooks/useHostedSessions";
-import type { Achievement } from "../lib/dashboard";
+import type { Achievement } from "../entities/dashboard";
 
 type DashboardTab = "recent" | "hosted" | "achievements";
 

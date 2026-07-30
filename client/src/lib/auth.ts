@@ -1,29 +1,13 @@
 import api, { API_URL } from "./api";
 import { extractApiErrorMessage } from "./apiError";
-
-export interface AuthUser {
-  id?: string;
-  name?: string | null;
-  email?: string | null;
-  image?: string | null;
-}
-
-export interface AuthSession {
-  user: AuthUser;
-  expires: string;
-}
+import type {
+  AuthSession,
+  CredentialsPayload,
+  RegisterPayload,
+} from "../entities/auth";
 
 interface CsrfResponse {
   csrfToken: string;
-}
-
-export interface CredentialsPayload {
-  email: string;
-  password: string;
-}
-
-export interface RegisterPayload extends CredentialsPayload {
-  name: string;
 }
 
 interface RegisterSuccessResponse {

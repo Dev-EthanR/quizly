@@ -3,7 +3,7 @@ import QuizStatusBadge from "./QuizStatusBadge";
 import HostQuizButton from "./HostQuizButton";
 import ImageFallback from "../ui/ImageFallback";
 import TagPill from "../ui/TagPill";
-import type { Quiz } from "../../lib/quizzes";
+import type { Quiz } from "../../entities/quiz";
 
 interface QuizCardProps {
   quiz: Quiz;
