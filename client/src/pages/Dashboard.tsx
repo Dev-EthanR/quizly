@@ -228,17 +228,17 @@ function Dashboard() {
           />
         </div>
 
-        <div className="mt-8 flex gap-2">
+        <div className="mt-8 flex gap-6 border-b border-border">
           {TAB_OPTIONS.map((option) => (
             <button
               key={option.value}
               type="button"
               onClick={() => setTab(option.value)}
               className={clsx(
-                "cursor-pointer rounded-lg px-4 py-2 text-sm font-semibold transition-colors",
+                "-mb-px cursor-pointer border-b-2 pb-3 text-sm font-semibold transition-colors",
                 tab === option.value
-                  ? "bg-primary text-foreground"
-                  : "border border-border text-muted hover:bg-surface",
+                  ? "border-primary text-foreground"
+                  : "border-transparent text-muted hover:text-foreground",
               )}
             >
               {option.label}
