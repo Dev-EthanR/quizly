@@ -180,9 +180,13 @@ function AchievementsTab({
     );
   }
 
+  const sortedAchievements = [...achievements].sort(
+    (a, b) => Number(b.unlocked) - Number(a.unlocked),
+  );
+
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {achievements.map((achievement) => (
+      {sortedAchievements.map((achievement) => (
         <AchievementCard key={achievement.id} achievement={achievement} />
       ))}
     </div>

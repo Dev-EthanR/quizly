@@ -22,6 +22,7 @@ export interface RecordGameSessionParams {
 export interface PlayedHistoryRow {
   score: number;
   rank: number;
+  totalPlayers: number;
   correctCount: number;
   questionCount: number;
   avgAnswerMs: number;
@@ -41,6 +42,7 @@ export const gameHistoryRepository = {
       select: {
         score: true,
         rank: true,
+        totalPlayers: true,
         correctCount: true,
         questionCount: true,
         avgAnswerMs: true,

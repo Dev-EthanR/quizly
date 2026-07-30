@@ -82,7 +82,7 @@ function PodiumScreen({ leaderboard }: PodiumScreenProps) {
         </ol>
       )}
 
-      <Link to="/host">
+      <Link to="/dashboard">
         <Button type="button" className="flex items-center gap-2">
           <FiHome className="h-4 w-4" />
           Back to Dashboard

@@ -2,9 +2,19 @@ import { DASHBOARD_LIST_PAGE_SIZE } from "shared";
 import { gameHistoryRepository } from "../repositories/gameHistory.repository.js";
 
 const PARTY_HOST_TARGET = 20;
+const MEGA_HOST_TARGET = 50;
 const ON_FIRE_TARGET = 3;
+const HOT_STREAK_TARGET = 5;
+const UNSTOPPABLE_TARGET = 10;
 const QUIZ_MASTER_TARGET = 25;
+const RISING_HOST_TARGET = 10;
 const SPEED_DEMON_MAX_AVG_MS = 3000;
+const LIGHTNING_MAX_AVG_MS = 1500;
+const VETERAN_TARGET = 10;
+const CENTURION_TARGET = 100;
+const SHARPSHOOTER_TARGET = 5;
+const VETERAN_CHAMPION_WINS_TARGET = 10;
+const UNDERDOG_MIN_PLAYERS = 10;
 
 export interface Achievement {
   id: string;
@@ -45,21 +55,29 @@ export const statsService = {
     ]);
 
     const gamesPlayed = playedRows.length;
+    const totalScore = playedRows.reduce((sum, row) => sum + row.score, 0);
     const averageScore =
-      gamesPlayed > 0
-        ? Math.round(
-            playedRows.reduce((sum, row) => sum + row.score, 0) / gamesPlayed,
-          )
-        : 0;
+      gamesPlayed > 0 ? Math.round(totalScore / gamesPlayed) : 0;
     const bestFinish =
       gamesPlayed > 0 ? Math.min(...playedRows.map((row) => row.rank)) : null;
     const wins = playedRows.filter((row) => row.won).length;
 
-    const hasPerfectScore = playedRows.some(
+    const perfectScoreCount = playedRows.filter(
       (row) => row.questionCount > 0 && row.correctCount === row.questionCount,
-    );
+    ).length;
     const hasSpeedDemon = playedRows.some(
       (row) => row.avgAnswerMs > 0 && row.avgAnswerMs < SPEED_DEMON_MAX_AVG_MS,
+    );
+    const hasLightningReflexes = playedRows.some(
+      (row) => row.avgAnswerMs > 0 && row.avgAnswerMs < LIGHTNING_MAX_AVG_MS,
+    );
+    const hasPodiumFinish = playedRows.some((row) => row.rank <= 3);
+    const hasRunnerUp = playedRows.some((row) => row.rank === 2);
+    const hasUnderdogWin = playedRows.some(
+      (row) => row.won && row.totalPlayers >= UNDERDOG_MIN_PLAYERS,
+    );
+    const hasFlawlessVictory = playedRows.some(
+      (row) => row.won && row.questionCount > 0 && row.correctCount === row.questionCount,
     );
     const bestWinStreak = longestWinStreak(playedRows);
 
@@ -70,6 +88,14 @@ export const statsService = {
     );
 
     const achievements: Achievement[] = [
+      {
+        id: "rookie",
+        title: "Rookie",
+        description: "Play your first game",
+        unlocked: gamesPlayed >= 1,
+        progress: Math.min(gamesPlayed, 1),
+        target: 1,
+      },
       {
         id: "first_win",
         title: "First Win",
@@ -82,8 +108,8 @@ export const statsService = {
         id: "perfect_score",
         title: "Perfect Score",
         description: "Answer every question correctly in a game",
-        unlocked: hasPerfectScore,
-        progress: hasPerfectScore ? 1 : 0,
+        unlocked: perfectScoreCount >= 1,
+        progress: Math.min(perfectScoreCount, 1),
         target: 1,
       },
       {
@@ -95,12 +121,28 @@ export const statsService = {
         target: 1,
       },
       {
+        id: "lightning_reflexes",
+        title: "Lightning Reflexes",
+        description: "Average under 1.5 seconds per answer in a game",
+        unlocked: hasLightningReflexes,
+        progress: hasLightningReflexes ? 1 : 0,
+        target: 1,
+      },
+      {
         id: "party_host",
         title: "Party Host",
         description: `Host a game with ${PARTY_HOST_TARGET} or more players`,
         unlocked: maxPartySize >= PARTY_HOST_TARGET,
         progress: Math.min(maxPartySize, PARTY_HOST_TARGET),
         target: PARTY_HOST_TARGET,
+      },
+      {
+        id: "mega_host",
+        title: "Mega Host",
+        description: `Host a game with ${MEGA_HOST_TARGET} or more players`,
+        unlocked: maxPartySize >= MEGA_HOST_TARGET,
+        progress: Math.min(maxPartySize, MEGA_HOST_TARGET),
+        target: MEGA_HOST_TARGET,
       },
       {
         id: "on_fire",
@@ -111,12 +153,108 @@ export const statsService = {
         target: ON_FIRE_TARGET,
       },
       {
+        id: "hot_streak",
+        title: "Hot Streak",
+        description: `Win ${HOT_STREAK_TARGET} games in a row`,
+        unlocked: bestWinStreak >= HOT_STREAK_TARGET,
+        progress: Math.min(bestWinStreak, HOT_STREAK_TARGET),
+        target: HOT_STREAK_TARGET,
+      },
+      {
+        id: "unstoppable",
+        title: "Unstoppable",
+        description: `Win ${UNSTOPPABLE_TARGET} games in a row`,
+        unlocked: bestWinStreak >= UNSTOPPABLE_TARGET,
+        progress: Math.min(bestWinStreak, UNSTOPPABLE_TARGET),
+        target: UNSTOPPABLE_TARGET,
+      },
+      {
         id: "quiz_master",
         title: "Quiz Master",
         description: `Host ${QUIZ_MASTER_TARGET} quizzes`,
         unlocked: hostedCount >= QUIZ_MASTER_TARGET,
         progress: Math.min(hostedCount, QUIZ_MASTER_TARGET),
         target: QUIZ_MASTER_TARGET,
+      },
+      {
+        id: "rising_host",
+        title: "Rising Host",
+        description: `Host ${RISING_HOST_TARGET} quizzes`,
+        unlocked: hostedCount >= RISING_HOST_TARGET,
+        progress: Math.min(hostedCount, RISING_HOST_TARGET),
+        target: RISING_HOST_TARGET,
+      },
+      {
+        id: "veteran",
+        title: "Veteran",
+        description: `Play ${VETERAN_TARGET} games`,
+        unlocked: gamesPlayed >= VETERAN_TARGET,
+        progress: Math.min(gamesPlayed, VETERAN_TARGET),
+        target: VETERAN_TARGET,
+      },
+      {
+        id: "centurion",
+        title: "Centurion",
+        description: `Play ${CENTURION_TARGET} games`,
+        unlocked: gamesPlayed >= CENTURION_TARGET,
+        progress: Math.min(gamesPlayed, CENTURION_TARGET),
+        target: CENTURION_TARGET,
+      },
+      {
+        id: "flawless_victory",
+        title: "Flawless Victory",
+        description: "Win a game with a perfect score",
+        unlocked: hasFlawlessVictory,
+        progress: hasFlawlessVictory ? 1 : 0,
+        target: 1,
+      },
+      {
+        id: "first_host",
+        title: "First Host",
+        description: "Host your first game",
+        unlocked: hostedCount >= 1,
+        progress: Math.min(hostedCount, 1),
+        target: 1,
+      },
+      {
+        id: "sharpshooter",
+        title: "Sharpshooter",
+        description: `Get a perfect score in ${SHARPSHOOTER_TARGET} different games`,
+        unlocked: perfectScoreCount >= SHARPSHOOTER_TARGET,
+        progress: Math.min(perfectScoreCount, SHARPSHOOTER_TARGET),
+        target: SHARPSHOOTER_TARGET,
+      },
+      {
+        id: "podium_finish",
+        title: "Podium Finish",
+        description: "Finish in the top 3 of a game",
+        unlocked: hasPodiumFinish,
+        progress: hasPodiumFinish ? 1 : 0,
+        target: 1,
+      },
+      {
+        id: "runner_up",
+        title: "Runner Up",
+        description: "Finish 2nd place in a game",
+        unlocked: hasRunnerUp,
+        progress: hasRunnerUp ? 1 : 0,
+        target: 1,
+      },
+      {
+        id: "underdog",
+        title: "Underdog",
+        description: `Win a game with ${UNDERDOG_MIN_PLAYERS} or more players`,
+        unlocked: hasUnderdogWin,
+        progress: hasUnderdogWin ? 1 : 0,
+        target: 1,
+      },
+      {
+        id: "veteran_champion",
+        title: "Veteran Champion",
+        description: `Win ${VETERAN_CHAMPION_WINS_TARGET} games total`,
+        unlocked: wins >= VETERAN_CHAMPION_WINS_TARGET,
+        progress: Math.min(wins, VETERAN_CHAMPION_WINS_TARGET),
+        target: VETERAN_CHAMPION_WINS_TARGET,
       },
     ];
 
@@ -155,6 +293,7 @@ export const statsService = {
     return {
       sessions: sessions.map((session) => ({
         id: session.id,
+        quizId: session.quizId,
         quizTitle: session.quiz.title,
         quizCoverImage: session.quiz.coverImage,
         playerCount: session.playerCount,

@@ -1,4 +1,6 @@
-import { FiUsers } from "react-icons/fi";
+import { Link } from "react-router-dom";
+import { FiPlay, FiUsers } from "react-icons/fi";
+import Button from "../ui/Button";
 import type { HostedSession } from "../../lib/dashboard";
 
 interface HostedSessionRowProps {
@@ -40,6 +42,16 @@ function HostedSessionRow({ session }: HostedSessionRowProps) {
           <span>{new Date(session.playedAt).toLocaleDateString()}</span>
         </div>
       </div>
+
+      <Link to={`/host/${session.quizId}`} className="shrink-0">
+        <Button
+          type="button"
+          className="flex w-full items-center justify-center gap-2 sm:w-auto"
+        >
+          <FiPlay className="h-4 w-4" />
+          Host Again
+        </Button>
+      </Link>
     </div>
   );
 }

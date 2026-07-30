@@ -22,7 +22,6 @@ function App() {
       <Route path="/play/:roomCode" element={<Play />} />
       <Route path="/removed" element={<Removed />} />
       <Route element={<ProtectedRoute />}>
-        <Route path="/host" element={<Host />} />
         <Route path="/host/:quizId" element={<Host />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/discovery" element={<Discovery />} />
