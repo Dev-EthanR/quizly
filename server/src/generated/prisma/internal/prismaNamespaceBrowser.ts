@@ -58,7 +58,9 @@ export const ModelName = {
   Quiz: 'Quiz',
   SavedQuiz: 'SavedQuiz',
   Question: 'Question',
-  Answer: 'Answer'
+  Answer: 'Answer',
+  GameSession: 'GameSession',
+  GamePlayed: 'GamePlayed'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -186,6 +188,35 @@ export const AnswerScalarFieldEnum = {
 } as const
 
 export type AnswerScalarFieldEnum = (typeof AnswerScalarFieldEnum)[keyof typeof AnswerScalarFieldEnum]
+
+
+export const GameSessionScalarFieldEnum = {
+  id: 'id',
+  quizId: 'quizId',
+  hostUserId: 'hostUserId',
+  playerCount: 'playerCount',
+  questionCount: 'questionCount',
+  playedAt: 'playedAt'
+} as const
+
+export type GameSessionScalarFieldEnum = (typeof GameSessionScalarFieldEnum)[keyof typeof GameSessionScalarFieldEnum]
+
+
+export const GamePlayedScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  userId: 'userId',
+  score: 'score',
+  rank: 'rank',
+  totalPlayers: 'totalPlayers',
+  correctCount: 'correctCount',
+  questionCount: 'questionCount',
+  avgAnswerMs: 'avgAnswerMs',
+  won: 'won',
+  playedAt: 'playedAt'
+} as const
+
+export type GamePlayedScalarFieldEnum = (typeof GamePlayedScalarFieldEnum)[keyof typeof GamePlayedScalarFieldEnum]
 
 
 export const SortOrder = {

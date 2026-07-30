@@ -13,6 +13,7 @@ const sessionTokenSchema = z.string().min(1, "Token is required");
 export const hostGameSchema = z.object({
   quizId: z.string().min(1, "Quiz is required"),
   token: sessionTokenSchema,
+  userId: z.string().optional(),
 });
 
 export type HostGameInput = z.infer<typeof hostGameSchema>;
@@ -29,6 +30,7 @@ export const joinRoomSchema = z.object({
   color: z.string().optional(),
   roomCode: roomCodeSchema,
   token: sessionTokenSchema,
+  userId: z.string().optional(),
 });
 
 export type JoinRoomInput = z.infer<typeof joinRoomSchema>;

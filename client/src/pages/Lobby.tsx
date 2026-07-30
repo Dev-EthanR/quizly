@@ -8,6 +8,7 @@ import HostLobbyPanel from "../components/lobby/HostLobbyPanel";
 import ParticipantLobbyPanel from "../components/lobby/ParticipantLobbyPanel";
 import LobbyChat from "../components/lobby/LobbyChat";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
+import { useAuth } from "../context/useAuth";
 import { useSocket } from "../context/useSocket";
 import { clearSession, loadSession, saveSession, type RoomSession } from "../lib/session";
 import type {
@@ -31,6 +32,7 @@ function Lobby() {
   const { state } = useLocation() as LobbyLocation;
   const navigate = useNavigate();
   const { socket, status } = useSocket();
+  const { user } = useAuth();
   const [players, setPlayers] = useState<LobbyPlayer[]>([]);
   const hadExistingSessionRef = useRef<boolean>(
     !!(roomCode && loadSession(roomCode)),
@@ -186,8 +188,9 @@ function Lobby() {
       name: session.name ?? "Guest",
       color: session.color,
       token: session.token,
+      userId: user?.id,
     });
-  }, [isValidRoomCode, roomCode, status, session, socket]);
+  }, [isValidRoomCode, roomCode, status, session, socket, user?.id]);
 
   useEffect(() => {
     if (!isValidRoomCode) {

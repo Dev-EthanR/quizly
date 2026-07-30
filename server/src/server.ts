@@ -6,6 +6,7 @@ import { authHandler } from "./routes/auth.route";
 import registerRouter from "./routes/register.route";
 import quizzesRouter from "./routes/quizzes.route";
 import usersRouter from "./routes/users.route";
+import statsRouter from "./routes/stats.route";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
 import { registerGameHandlers } from "./sockets/game.socket.js";
@@ -35,6 +36,7 @@ app.use("/api/auth", authHandler);
 app.use("/api", registerRouter);
 app.use("/api", quizzesRouter);
 app.use("/api", usersRouter);
+app.use("/api", statsRouter);
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello World!");
 });

@@ -6,6 +6,7 @@ export interface PlayerRecord {
   connected: boolean;
   name: string;
   color?: string | undefined;
+  userId?: string | undefined;
 }
 
 export interface GameAnswerOption {
@@ -38,6 +39,8 @@ export interface GameState {
   answers: QuestionAnswer[];
   scores: Record<string, number>;
   correctCounts: Record<string, number>;
+  answerTimeTotals: Record<string, number>;
+  answeredCounts: Record<string, number>;
   category: QuizCategory | null;
   leaderboardShown: boolean;
 }
@@ -47,6 +50,7 @@ export interface RoomRecord {
   hostToken: string;
   hostSocketId: string | null;
   hostConnected: boolean;
+  hostUserId?: string | undefined;
   quizId: string;
   createdAt: number;
   players: PlayerRecord[];

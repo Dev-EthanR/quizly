@@ -78,6 +78,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       hostSocketId: socket.id,
       quizId: parsed.data.quizId,
       token: parsed.data.token,
+      userId: parsed.data.userId,
     });
 
     socket.join(room.code);
@@ -97,6 +98,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       name: parsed.data.name,
       color: parsed.data.color,
       token: parsed.data.token,
+      userId: parsed.data.userId,
     });
 
     if (!room) {

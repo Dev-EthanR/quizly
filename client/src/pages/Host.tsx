@@ -3,6 +3,7 @@ import { Link, Navigate, useParams } from "react-router-dom";
 import { FiAlertTriangle } from "react-icons/fi";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/ui/Button";
+import { useAuth } from "../context/useAuth";
 import { useSocket } from "../context/useSocket";
 import { createSessionToken, saveSession } from "../lib/session";
 import type { RoomCreatedPayload } from "../context/socket-context";
@@ -10,6 +11,7 @@ import type { RoomCreatedPayload } from "../context/socket-context";
 function Host() {
   const { quizId } = useParams();
   const { socket, status } = useSocket();
+  const { user } = useAuth();
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const hasHostedRef = useRef(false);
   const tokenRef = useRef<string>(createSessionToken());
@@ -31,14 +33,18 @@ function Host() {
     socket.on("room_created", handleRoomCreated);
 
     if (status === "connected" && !hasHostedRef.current) {
-      socket.emit("host_game", { quizId, token: tokenRef.current });
+      socket.emit("host_game", {
+        quizId,
+        token: tokenRef.current,
+        userId: user?.id,
+      });
       hasHostedRef.current = true;
     }
 
     return () => {
       socket.off("room_created", handleRoomCreated);
     };
-  }, [quizId, status, socket]);
+  }, [quizId, status, socket, user?.id]);
 
   if (!quizId) {
     return (

@@ -391,7 +391,9 @@ export const ModelName = {
   Quiz: 'Quiz',
   SavedQuiz: 'SavedQuiz',
   Question: 'Question',
-  Answer: 'Answer'
+  Answer: 'Answer',
+  GameSession: 'GameSession',
+  GamePlayed: 'GamePlayed'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -407,7 +409,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "account" | "session" | "verificationToken" | "quiz" | "savedQuiz" | "question" | "answer"
+    modelProps: "user" | "account" | "session" | "verificationToken" | "quiz" | "savedQuiz" | "question" | "answer" | "gameSession" | "gamePlayed"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1003,6 +1005,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    GameSession: {
+      payload: Prisma.$GameSessionPayload<ExtArgs>
+      fields: Prisma.GameSessionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GameSessionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameSessionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GameSessionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameSessionPayload>
+        }
+        findFirst: {
+          args: Prisma.GameSessionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameSessionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GameSessionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameSessionPayload>
+        }
+        findMany: {
+          args: Prisma.GameSessionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameSessionPayload>[]
+        }
+        create: {
+          args: Prisma.GameSessionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameSessionPayload>
+        }
+        createMany: {
+          args: Prisma.GameSessionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GameSessionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameSessionPayload>[]
+        }
+        delete: {
+          args: Prisma.GameSessionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameSessionPayload>
+        }
+        update: {
+          args: Prisma.GameSessionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameSessionPayload>
+        }
+        deleteMany: {
+          args: Prisma.GameSessionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GameSessionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GameSessionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameSessionPayload>[]
+        }
+        upsert: {
+          args: Prisma.GameSessionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GameSessionPayload>
+        }
+        aggregate: {
+          args: Prisma.GameSessionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGameSession>
+        }
+        groupBy: {
+          args: Prisma.GameSessionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GameSessionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GameSessionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GameSessionCountAggregateOutputType> | number
+        }
+      }
+    }
+    GamePlayed: {
+      payload: Prisma.$GamePlayedPayload<ExtArgs>
+      fields: Prisma.GamePlayedFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GamePlayedFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePlayedPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GamePlayedFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePlayedPayload>
+        }
+        findFirst: {
+          args: Prisma.GamePlayedFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePlayedPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GamePlayedFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePlayedPayload>
+        }
+        findMany: {
+          args: Prisma.GamePlayedFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePlayedPayload>[]
+        }
+        create: {
+          args: Prisma.GamePlayedCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePlayedPayload>
+        }
+        createMany: {
+          args: Prisma.GamePlayedCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GamePlayedCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePlayedPayload>[]
+        }
+        delete: {
+          args: Prisma.GamePlayedDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePlayedPayload>
+        }
+        update: {
+          args: Prisma.GamePlayedUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePlayedPayload>
+        }
+        deleteMany: {
+          args: Prisma.GamePlayedDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GamePlayedUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GamePlayedUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePlayedPayload>[]
+        }
+        upsert: {
+          args: Prisma.GamePlayedUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GamePlayedPayload>
+        }
+        aggregate: {
+          args: Prisma.GamePlayedAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGamePlayed>
+        }
+        groupBy: {
+          args: Prisma.GamePlayedGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GamePlayedGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GamePlayedCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GamePlayedCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1151,6 +1301,35 @@ export const AnswerScalarFieldEnum = {
 } as const
 
 export type AnswerScalarFieldEnum = (typeof AnswerScalarFieldEnum)[keyof typeof AnswerScalarFieldEnum]
+
+
+export const GameSessionScalarFieldEnum = {
+  id: 'id',
+  quizId: 'quizId',
+  hostUserId: 'hostUserId',
+  playerCount: 'playerCount',
+  questionCount: 'questionCount',
+  playedAt: 'playedAt'
+} as const
+
+export type GameSessionScalarFieldEnum = (typeof GameSessionScalarFieldEnum)[keyof typeof GameSessionScalarFieldEnum]
+
+
+export const GamePlayedScalarFieldEnum = {
+  id: 'id',
+  sessionId: 'sessionId',
+  userId: 'userId',
+  score: 'score',
+  rank: 'rank',
+  totalPlayers: 'totalPlayers',
+  correctCount: 'correctCount',
+  questionCount: 'questionCount',
+  avgAnswerMs: 'avgAnswerMs',
+  won: 'won',
+  playedAt: 'playedAt'
+} as const
+
+export type GamePlayedScalarFieldEnum = (typeof GamePlayedScalarFieldEnum)[keyof typeof GamePlayedScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1419,6 +1598,8 @@ export type GlobalOmitConfig = {
   savedQuiz?: Prisma.SavedQuizOmit
   question?: Prisma.QuestionOmit
   answer?: Prisma.AnswerOmit
+  gameSession?: Prisma.GameSessionOmit
+  gamePlayed?: Prisma.GamePlayedOmit
 }
 
 /* Types for Logging */

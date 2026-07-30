@@ -11,7 +11,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { label: "Discovery", to: "/discovery" },
   { label: "My Quizzes", to: "/my-quizzes" },
-  { label: "Dashboard", to: "/host" },
+  { label: "Dashboard", to: "/dashboard" },
 ];
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>

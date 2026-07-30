@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
 import Host from "./pages/Host";
 import Lobby from "./pages/Lobby";
@@ -23,6 +24,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/host" element={<Host />} />
         <Route path="/host/:quizId" element={<Host />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/discovery" element={<Discovery />} />
         <Route path="/discovery/:quizId" element={<QuizDetails />} />
         <Route path="/my-quizzes" element={<MyQuizzes />} />

@@ -1,5 +1,9 @@
 import { quizzesRepository } from "../repositories/quizzes.repository.js";
 import {
+  gameHistoryRepository,
+  type GamePlayedRecord,
+} from "../repositories/gameHistory.repository.js";
+import {
   roomsRepository,
   type GameQuestion,
   type GameState,
@@ -180,6 +184,48 @@ function buildRevealPayload(room: RoomRecord, game: GameState): QuestionRevealPa
   };
 }
 
+async function persistGameHistory(
+  room: RoomRecord,
+  game: GameState,
+  leaderboard: LeaderboardEntry[],
+) {
+  if (!room.hostUserId && !room.players.some((player) => player.userId)) {
+    return;
+  }
+
+  const participants: GamePlayedRecord[] = [];
+  leaderboard.forEach((entry, index) => {
+    const player = room.players.find((p) => p.token === entry.playerId);
+    if (!player?.userId) {
+      return;
+    }
+
+    const answeredCount = game.answeredCounts[entry.playerId] ?? 0;
+    const avgAnswerMs =
+      answeredCount > 0
+        ? Math.round((game.answerTimeTotals[entry.playerId] ?? 0) / answeredCount)
+        : 0;
+
+    participants.push({
+      userId: player.userId,
+      score: entry.score,
+      rank: index + 1,
+      totalPlayers: leaderboard.length,
+      correctCount: entry.correctCount,
+      avgAnswerMs,
+      won: index === 0,
+    });
+  });
+
+  await gameHistoryRepository.recordGameSession({
+    quizId: room.quizId,
+    hostUserId: room.hostUserId,
+    playerCount: room.players.length,
+    questionCount: game.questions.length,
+    participants,
+  });
+}
+
 export const gameService = {
   async startGame({ socketId, roomCode }: StartGameParams) {
     const room = roomsRepository.findByCode(roomCode);
@@ -200,6 +246,8 @@ export const gameService = {
       answers: [],
       scores: {},
       correctCounts: {},
+      answerTimeTotals: {},
+      answeredCounts: {},
       category: quiz.category,
       leaderboardShown: false,
     };
@@ -237,15 +285,16 @@ export const gameService = {
     const answeredAt = Date.now();
     game.answers.push({ token: player.token, answerId, answeredAt });
 
-    const { correct, pointsAwarded } = scoreAnswer(
-      question,
-      answerId,
-      answeredAt - game.questionStartedAt,
-    );
+    const elapsedMs = answeredAt - game.questionStartedAt;
+    const { correct, pointsAwarded } = scoreAnswer(question, answerId, elapsedMs);
     game.scores[player.token] = (game.scores[player.token] ?? 0) + pointsAwarded;
     if (correct) {
       game.correctCounts[player.token] = (game.correctCounts[player.token] ?? 0) + 1;
     }
+    game.answerTimeTotals[player.token] =
+      (game.answerTimeTotals[player.token] ?? 0) + elapsedMs;
+    game.answeredCounts[player.token] =
+      (game.answeredCounts[player.token] ?? 0) + 1;
 
     const connectedPlayers = room.players.filter((p) => p.connected);
     const answeredConnectedCount = game.answers.filter((a) =>
@@ -298,10 +347,14 @@ export const gameService = {
     const nextIndex = game.currentQuestionIndex + 1;
     if (nextIndex >= game.questions.length) {
       game.phase = "ended";
-      await quizzesRepository.incrementPlayCount(room.quizId);
+      const leaderboard = buildLeaderboard(room, game);
+      await Promise.all([
+        quizzesRepository.incrementPlayCount(room.quizId),
+        persistGameHistory(room, game, leaderboard),
+      ]);
       return {
         ended: true as const,
-        leaderboard: buildLeaderboard(room, game),
+        leaderboard,
         totalQuestions: game.questions.length,
       };
     }

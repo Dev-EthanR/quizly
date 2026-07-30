@@ -13,6 +13,7 @@ interface HostGameParams {
   hostSocketId: string;
   quizId: string;
   token: string;
+  userId?: string | undefined;
 }
 
 interface JoinRoomParams {
@@ -21,6 +22,7 @@ interface JoinRoomParams {
   name: string;
   color?: string | undefined;
   token: string;
+  userId?: string | undefined;
 }
 
 interface RejoinParams {
@@ -51,12 +53,13 @@ function generateUniqueRoomCode(): string {
 }
 
 export const roomsService = {
-  hostGame({ hostSocketId, quizId, token }: HostGameParams): RoomRecord {
+  hostGame({ hostSocketId, quizId, token, userId }: HostGameParams): RoomRecord {
     const room: RoomRecord = {
       code: generateUniqueRoomCode(),
       hostToken: token,
       hostSocketId,
       hostConnected: true,
+      hostUserId: userId,
       quizId,
       createdAt: Date.now(),
       players: [],
@@ -79,6 +82,7 @@ export const roomsService = {
     name,
     color,
     token,
+    userId,
   }: JoinRoomParams): RoomRecord | undefined {
     return roomsRepository.addPlayer(roomCode, {
       token,
@@ -86,6 +90,7 @@ export const roomsService = {
       connected: true,
       name,
       color,
+      userId,
     });
   },
 

@@ -81,3 +81,13 @@ export type Question = Prisma.QuestionModel
  * 
  */
 export type Answer = Prisma.AnswerModel
+/**
+ * Model GameSession
+ * 
+ */
+export type GameSession = Prisma.GameSessionModel
+/**
+ * Model GamePlayed
+ * 
+ */
+export type GamePlayed = Prisma.GamePlayedModel
