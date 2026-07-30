@@ -74,18 +74,37 @@ interface FindPublishedParams {
   page: number;
 }
 
-function buildPublishedWhere({
+async function findQuizIdsMatchingTag(search: string): Promise<string[]> {
+  const escaped = search.replace(/[\\%_]/g, (char) => `\\${char}`);
+  const rows = await prisma.$queryRaw<{ id: string }[]>`
+    SELECT id FROM "Quiz"
+    WHERE EXISTS (
+      SELECT 1 FROM unnest(tags) AS tag
+      WHERE tag ILIKE ${`%${escaped}%`} ESCAPE '\\'
+    )
+  `;
+  return rows.map((row) => row.id);
+}
+
+async function buildPublishedWhere({
   search,
   category,
   difficulty,
 }: Omit<FindPublishedParams, "page">) {
+  const tagMatchIds = search ? await findQuizIdsMatchingTag(search) : [];
+
   return {
     status: "published" as const,
     visibility: "public" as const,
     ...(category ? { category } : {}),
     ...(difficulty ? { difficulty } : {}),
     ...(search
-      ? { title: { contains: search, mode: "insensitive" as const } }
+      ? {
+          OR: [
+            { title: { contains: search, mode: "insensitive" as const } },
+            { id: { in: tagMatchIds } },
+          ],
+        }
       : {}),
   };
 }
@@ -142,7 +161,7 @@ export const quizzesRepository = {
   },
 
   async findPublished({ search, category, difficulty, page }: FindPublishedParams) {
-    const where = buildPublishedWhere({ search, category, difficulty });
+    const where = await buildPublishedWhere({ search, category, difficulty });
 
     const [quizzes, totalCount] = await Promise.all([
       prisma.quiz.findMany({

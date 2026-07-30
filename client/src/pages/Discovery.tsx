@@ -168,7 +168,7 @@ function Discovery() {
                 type="text"
                 value={searchInput}
                 onChange={(event) => setSearchInput(event.target.value)}
-                placeholder="Search quizzes..."
+                placeholder="Search by title or tag..."
                 className="min-w-48 flex-1 rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary"
               />
 
