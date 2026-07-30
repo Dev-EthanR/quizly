@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
-import { FiPlay } from "react-icons/fi";
 import QuizStatusBadge from "./QuizStatusBadge";
-import Button from "../ui/Button";
+import HostQuizButton from "./HostQuizButton";
 import type { Quiz } from "../../lib/quizzes";
 
 interface QuizCardProps {
@@ -65,15 +64,10 @@ function QuizCard({ quiz }: QuizCardProps) {
         </div>
       </Link>
 
-      <Link to={`/host/${quiz.id}`} className="shrink-0">
-        <Button
-          type="button"
-          className="flex w-full items-center justify-center gap-2 sm:w-auto"
-        >
-          <FiPlay className="h-4 w-4" />
-          Host
-        </Button>
-      </Link>
+      <HostQuizButton
+        quizId={quiz.id}
+        className="flex w-full items-center justify-center gap-2 shrink-0 sm:w-auto"
+      />
     </div>
   );
 }

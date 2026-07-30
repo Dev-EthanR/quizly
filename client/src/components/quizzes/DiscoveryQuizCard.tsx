@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { FiPlay } from "react-icons/fi";
 import clsx from "clsx";
 import { quizCategoryLabels, quizDifficultyLabels, type QuizDifficulty } from "shared";
-import Button from "../ui/Button";
+import HostQuizButton from "./HostQuizButton";
 import type { DiscoverQuiz } from "../../lib/quizzes";
 
 interface DiscoveryQuizCardProps {
@@ -99,12 +99,7 @@ function DiscoveryQuizCard({ quiz }: DiscoveryQuizCardProps) {
             </span>
           </div>
 
-          <Link to={`/host/${quiz.id}`}>
-            <Button type="button" className="flex items-center gap-2">
-              <FiPlay className="h-4 w-4" />
-              Host
-            </Button>
-          </Link>
+          <HostQuizButton quizId={quiz.id} />
         </div>
       </div>
     </div>

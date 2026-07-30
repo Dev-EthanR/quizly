@@ -14,6 +14,9 @@ export const hostGameSchema = z.object({
   quizId: z.string().min(1, "Quiz is required"),
   token: sessionTokenSchema,
   userId: z.string().optional(),
+  randomizeQuestionOrder: z.boolean().optional(),
+  allowLateJoins: z.boolean().optional(),
+  showCorrectAnswers: z.boolean().optional(),
 });
 
 export type HostGameInput = z.infer<typeof hostGameSchema>;

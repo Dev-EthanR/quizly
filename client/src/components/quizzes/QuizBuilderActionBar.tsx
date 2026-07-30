@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { FiPlay } from "react-icons/fi";
 import clsx from "clsx";
 import Button from "../ui/Button";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import VisibilitySelect from "./publish/VisibilitySelect";
+import HostQuizButton from "./HostQuizButton";
 import type { QuizVisibility } from "../../lib/quizzes";
 
 interface QuizBuilderActionBarProps {
@@ -57,14 +56,9 @@ function QuizBuilderActionBar({
           >
             {isSaving ? "Saving..." : isPublished ? "Save changes" : "Save draft"}
           </Button>
-          {isPublished ? (
-            <Link to={`/host/${quizId}`}>
-              <Button type="button" className="flex items-center gap-2">
-                <FiPlay className="h-4 w-4" />
-                Host
-              </Button>
-            </Link>
-          ) : (
+          {isPublished && quizId ? (
+            <HostQuizButton quizId={quizId} />
+          ) : isPublished ? null : (
             <Button type="button" disabled={isSaving} onClick={onOpenPublishModal}>
               {isSaving ? "Publishing..." : "Publish"}
             </Button>

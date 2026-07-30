@@ -16,6 +16,7 @@ import clsx from "clsx";
 import { quizCategoryLabels, quizDifficultyLabels, type QuizDifficulty } from "shared";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/ui/Button";
+import HostQuizButton from "../components/quizzes/HostQuizButton";
 import { useDiscoverQuiz } from "../hooks/useDiscoverQuiz";
 import { useSaveQuizMutation } from "../hooks/useSaveQuizMutation";
 import { useShareLink } from "../hooks/useShareLink";
@@ -198,12 +199,7 @@ function QuizDetails() {
               )}
 
               <div className="flex flex-wrap items-center gap-3">
-                <Link to={`/host/${quiz.id}`}>
-                  <Button type="button" className="flex items-center gap-2">
-                    <FiPlay className="h-4 w-4" />
-                    Host quiz
-                  </Button>
-                </Link>
+                <HostQuizButton quizId={quiz.id} label="Host quiz" />
 
                 <Button
                   type="button"

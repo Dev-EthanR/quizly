@@ -1,20 +1,29 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 import { FiAlertTriangle } from "react-icons/fi";
 import Navbar from "../components/layout/Navbar";
 import Button from "../components/ui/Button";
 import { useAuth } from "../context/useAuth";
 import { useSocket } from "../context/useSocket";
 import { createSessionToken, saveSession } from "../lib/session";
+import { DEFAULT_HOST_SETTINGS, type HostSettings } from "../lib/hostSettings";
 import type { RoomCreatedPayload } from "../context/socket-context";
+
+interface HostLocation {
+  state?: {
+    settings?: HostSettings;
+  };
+}
 
 function Host() {
   const { quizId } = useParams();
+  const { state } = useLocation() as HostLocation;
   const { socket, status } = useSocket();
   const { user } = useAuth();
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const hasHostedRef = useRef(false);
   const tokenRef = useRef<string>(createSessionToken());
+  const settingsRef = useRef<HostSettings>(state?.settings ?? DEFAULT_HOST_SETTINGS);
 
   useEffect(() => {
     if (!quizId) {
@@ -37,6 +46,9 @@ function Host() {
         quizId,
         token: tokenRef.current,
         userId: user?.id,
+        randomizeQuestionOrder: settingsRef.current.randomizeQuestionOrder,
+        allowLateJoins: settingsRef.current.allowLateJoins,
+        showCorrectAnswers: settingsRef.current.showCorrectAnswers,
       });
       hasHostedRef.current = true;
     }
