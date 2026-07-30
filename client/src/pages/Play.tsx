@@ -37,6 +37,7 @@ import type {
 } from "../entities/socket";
 
 const ANSWER_OPTION_LABELS = ["A", "B", "C", "D"];
+const AUTO_ADVANCE_SECONDS = 10;
 
 interface PlayLocation {
   state?: {
@@ -87,6 +88,7 @@ function Play() {
   const [chatDisabled, setChatDisabled] = useState(false);
   const [showEndGameConfirm, setShowEndGameConfirm] = useState(false);
   const [showHostSummary, setShowHostSummary] = useState(false);
+  const [autoAdvanceRemaining, setAutoAdvanceRemaining] = useState(AUTO_ADVANCE_SECONDS);
   const attemptRef = useRef<"rejoin" | null>(null);
 
   const isHost = state?.isHost ?? session?.isHost ?? false;
@@ -268,6 +270,35 @@ function Play() {
     const interval = setInterval(update, 250);
     return () => clearInterval(interval);
   }, [question, startedAt, phase, showStartCountdown]);
+
+  useEffect(() => {
+    if (!isHost || !roomCode || (phase !== "result" && phase !== "leaderboard")) {
+      return;
+    }
+
+    const deadline = Date.now() + AUTO_ADVANCE_SECONDS * 1000;
+
+    const update = () => {
+      setAutoAdvanceRemaining(
+        Math.max(0, Math.ceil((deadline - Date.now()) / 1000)),
+      );
+    };
+
+    update();
+    const interval = setInterval(update, 250);
+    const timeout = setTimeout(() => {
+      if (phase === "result") {
+        socket.emit("show_leaderboard", { roomCode });
+      } else {
+        socket.emit("next_question", { roomCode });
+      }
+    }, AUTO_ADVANCE_SECONDS * 1000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [phase, isHost, socket, roomCode]);
 
   const leaderboardEntries = useMemo<LeaderboardRowEntry[]>(() => {
     if (!reveal) {
@@ -552,7 +583,13 @@ function Play() {
               </div>
 
               {isHost ? (
-                <div className="flex justify-center">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-40">
+                    <QuestionTimer
+                      remainingSeconds={autoAdvanceRemaining}
+                      totalSeconds={AUTO_ADVANCE_SECONDS}
+                    />
+                  </div>
                   <Button type="button" onClick={showLeaderboard}>
                     Show Leaderboard
                   </Button>
@@ -570,9 +607,17 @@ function Play() {
               <h2 className="text-2xl font-bold text-foreground">Leaderboard</h2>
               <Leaderboard entries={leaderboardEntries} currentPlayerId={session?.token} />
               {isHost && (
-                <Button type="button" onClick={nextQuestion}>
-                  {questionIndex + 1 >= totalQuestions ? "Finish game" : "Next question"}
-                </Button>
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-40">
+                    <QuestionTimer
+                      remainingSeconds={autoAdvanceRemaining}
+                      totalSeconds={AUTO_ADVANCE_SECONDS}
+                    />
+                  </div>
+                  <Button type="button" onClick={nextQuestion}>
+                    {questionIndex + 1 >= totalQuestions ? "Finish game" : "Next question"}
+                  </Button>
+                </div>
               )}
             </div>
           )}
