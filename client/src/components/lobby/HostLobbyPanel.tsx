@@ -9,6 +9,7 @@ interface HostLobbyPanelProps {
   players: LobbyPlayer[];
   onStartGame: () => void;
   onKick: (playerId: string) => void;
+  onSetMuted: (playerId: string, muted: boolean) => void;
 }
 
 const COPIED_RESET_MS = 2000;
@@ -18,6 +19,7 @@ function HostLobbyPanel({
   players,
   onStartGame,
   onKick,
+  onSetMuted,
 }: HostLobbyPanelProps) {
   const [copied, setCopied] = useState(false);
 
@@ -60,7 +62,7 @@ function HostLobbyPanel({
         </span>
       </div>
 
-      <PlayerRoster players={players} onKick={onKick} />
+      <PlayerRoster players={players} onKick={onKick} onSetMuted={onSetMuted} />
 
       <Button type="button" onClick={onStartGame} className="flex items-center gap-2">
         <FiPlay className="h-4 w-4" />

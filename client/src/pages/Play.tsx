@@ -5,6 +5,7 @@ import clsx from "clsx";
 import { quizCategoryLabels } from "shared";
 import Button from "../components/ui/Button";
 import Modal from "../components/ui/Modal";
+import ConfirmDialog from "../components/ui/ConfirmDialog";
 import AnswerButton from "../components/play/AnswerButton";
 import AnswerResultButton from "../components/play/AnswerResultButton";
 import Leaderboard, {
@@ -29,6 +30,7 @@ import type {
   PublicQuestion,
   QuestionRevealPayload,
   QuestionStartedPayload,
+  RoomSettingsPayload,
   RoomStatePayload,
 } from "../context/socket-context";
 
@@ -80,6 +82,8 @@ function Play() {
   const [roomNotFound, setRoomNotFound] = useState(false);
   const [players, setPlayers] = useState<LobbyPlayer[]>([]);
   const [showManagePlayers, setShowManagePlayers] = useState(false);
+  const [chatDisabled, setChatDisabled] = useState(false);
+  const [showEndGameConfirm, setShowEndGameConfirm] = useState(false);
   const attemptRef = useRef<"rejoin" | null>(null);
 
   const isHost = state?.isHost ?? session?.isHost ?? false;
@@ -141,6 +145,10 @@ function Play() {
       setPlayers(payload.players);
     }
 
+    function handleRoomSettings(payload: RoomSettingsPayload) {
+      setChatDisabled(payload.disableChat);
+    }
+
     function handlePlayerKicked() {
       if (roomCode) {
         clearSession(roomCode);
@@ -196,6 +204,7 @@ function Play() {
     socket.on("room_not_found", handleRoomNotFound);
     socket.on("room_state", handleRoomState);
     socket.on("lobby_players", handleLobbyPlayers);
+    socket.on("room_settings", handleRoomSettings);
     socket.on("player_kicked", handlePlayerKicked);
 
     return () => {
@@ -210,6 +219,7 @@ function Play() {
       socket.off("room_not_found", handleRoomNotFound);
       socket.off("room_state", handleRoomState);
       socket.off("lobby_players", handleLobbyPlayers);
+      socket.off("room_settings", handleRoomSettings);
       socket.off("player_kicked", handlePlayerKicked);
     };
   }, [socket, isHost, roomCode, navigate, session?.token]);
@@ -320,6 +330,19 @@ function Play() {
     socket.emit("kick_player", { roomCode, token: playerId });
   };
 
+  const handleSetMuted = (playerId: string, muted: boolean) => {
+    socket.emit("set_player_muted", { roomCode, token: playerId, muted });
+  };
+
+  const endQuestion = () => {
+    socket.emit("end_question", { roomCode });
+  };
+
+  const endGame = () => {
+    socket.emit("end_game", { roomCode });
+    setShowEndGameConfirm(false);
+  };
+
   if (phase === "ended") {
     if (!gameOver) {
       return (
@@ -366,6 +389,7 @@ function Play() {
   const categoryLabel = question.category
     ? quizCategoryLabels[question.category]
     : "Quiz";
+  const isMuted = players.find((p) => p.id === session?.token)?.muted ?? false;
 
   return (
     <div className="min-h-screen px-4 py-10">
@@ -375,7 +399,12 @@ function Play() {
         </p>
       )}
 
-      <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[1fr_320px]">
+      <div
+        className={clsx(
+          "mx-auto grid w-full max-w-5xl gap-6",
+          !chatDisabled && "lg:grid-cols-[1fr_320px]",
+        )}
+      >
         <div className="flex min-h-0 flex-col gap-6">
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-muted">
@@ -390,6 +419,24 @@ function Play() {
                 >
                   <FiUsers className="h-3.5 w-3.5" />
                   Manage players
+                </button>
+              )}
+              {isHost && phase === "question" && (
+                <button
+                  type="button"
+                  onClick={endQuestion}
+                  className="cursor-pointer rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:text-foreground"
+                >
+                  End question
+                </button>
+              )}
+              {isHost && (
+                <button
+                  type="button"
+                  onClick={() => setShowEndGameConfirm(true)}
+                  className="cursor-pointer rounded-full border border-danger/40 px-3 py-1.5 text-xs font-medium text-danger transition-colors hover:bg-danger/10"
+                >
+                  End game
                 </button>
               )}
               {phase === "question" && (
@@ -508,9 +555,15 @@ function Play() {
           )}
         </div>
 
-        <div className="h-[520px] lg:sticky lg:top-10">
-          <LobbyChat roomCode={roomCode} />
-        </div>
+        {!chatDisabled && (
+          <div className="h-[520px] lg:sticky lg:top-10">
+            <LobbyChat
+              roomCode={roomCode}
+              disabled={isMuted}
+              disabledReason={isMuted ? "You have been muted by the host." : undefined}
+            />
+          </div>
+        )}
       </div>
 
       {showManagePlayers && (
@@ -523,8 +576,19 @@ function Play() {
             players={players}
             currentPlayerId={session?.token}
             onKick={handleKickPlayer}
+            onSetMuted={handleSetMuted}
           />
         </Modal>
+      )}
+
+      {showEndGameConfirm && (
+        <ConfirmDialog
+          title="End game early?"
+          message="This will immediately end the game for all players and show the final leaderboard. This can't be undone."
+          confirmLabel="End game"
+          onConfirm={endGame}
+          onCancel={() => setShowEndGameConfirm(false)}
+        />
       )}
     </div>
   );

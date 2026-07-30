@@ -1,5 +1,6 @@
 import {
   roomsRepository,
+  DEFAULT_ROOM_SETTINGS,
   type RoomParticipant,
   type RoomRecord,
 } from "../repositories/rooms.repository.js";
@@ -9,11 +10,20 @@ const ROOM_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 export const RECONNECT_GRACE_MS = 30_000;
 
+interface HostGameSettingsInput {
+  randomizeQuestionOrder?: boolean | undefined;
+  allowLateJoins?: boolean | undefined;
+  showCorrectAnswers?: boolean | undefined;
+  disableChat?: boolean | undefined;
+  maxPlayers?: number | null | undefined;
+}
+
 interface HostGameParams {
   hostSocketId: string;
   quizId: string;
   token: string;
   userId?: string | undefined;
+  settings?: HostGameSettingsInput | undefined;
 }
 
 interface JoinRoomParams {
@@ -24,6 +34,10 @@ interface JoinRoomParams {
   token: string;
   userId?: string | undefined;
 }
+
+export type JoinRoomResult =
+  | { ok: true; room: RoomRecord }
+  | { ok: false; reason: "not_found" | "late_join_disabled" | "room_full" };
 
 interface RejoinParams {
   socketId: string;
@@ -53,7 +67,13 @@ function generateUniqueRoomCode(): string {
 }
 
 export const roomsService = {
-  hostGame({ hostSocketId, quizId, token, userId }: HostGameParams): RoomRecord {
+  hostGame({
+    hostSocketId,
+    quizId,
+    token,
+    userId,
+    settings,
+  }: HostGameParams): RoomRecord {
     const room: RoomRecord = {
       code: generateUniqueRoomCode(),
       hostToken: token,
@@ -63,9 +83,25 @@ export const roomsService = {
       quizId,
       createdAt: Date.now(),
       players: [],
+      settings: {
+        randomizeQuestionOrder:
+          settings?.randomizeQuestionOrder ??
+          DEFAULT_ROOM_SETTINGS.randomizeQuestionOrder,
+        allowLateJoins:
+          settings?.allowLateJoins ?? DEFAULT_ROOM_SETTINGS.allowLateJoins,
+        showCorrectAnswers:
+          settings?.showCorrectAnswers ??
+          DEFAULT_ROOM_SETTINGS.showCorrectAnswers,
+        disableChat: settings?.disableChat ?? DEFAULT_ROOM_SETTINGS.disableChat,
+        maxPlayers: settings?.maxPlayers ?? DEFAULT_ROOM_SETTINGS.maxPlayers,
+      },
     };
     roomsRepository.save(room);
     return room;
+  },
+
+  findRoom(roomCode: string): RoomRecord | undefined {
+    return roomsRepository.findByCode(roomCode);
   },
 
   rejoinAsHost({ socketId, roomCode, token }: RejoinParams): RoomRecord | undefined {
@@ -83,15 +119,48 @@ export const roomsService = {
     color,
     token,
     userId,
-  }: JoinRoomParams): RoomRecord | undefined {
-    return roomsRepository.addPlayer(roomCode, {
+  }: JoinRoomParams): JoinRoomResult {
+    const room = roomsRepository.findByCode(roomCode);
+    if (!room) {
+      return { ok: false, reason: "not_found" };
+    }
+
+    const isExistingPlayer = room.players.some((p) => p.token === token);
+
+    if (room.game && !room.settings.allowLateJoins && !isExistingPlayer) {
+      return { ok: false, reason: "late_join_disabled" };
+    }
+
+    if (
+      room.settings.maxPlayers != null &&
+      !isExistingPlayer &&
+      room.players.length >= room.settings.maxPlayers
+    ) {
+      return { ok: false, reason: "room_full" };
+    }
+
+    const updatedRoom = roomsRepository.addPlayer(roomCode, {
       token,
       socketId,
       connected: true,
       name,
       color,
       userId,
+      muted: false,
     });
+    if (!updatedRoom) {
+      return { ok: false, reason: "not_found" };
+    }
+
+    return { ok: true, room: updatedRoom };
+  },
+
+  setPlayerMuted(
+    roomCode: string,
+    token: string,
+    muted: boolean,
+  ): RoomRecord | undefined {
+    return roomsRepository.setPlayerMuted(roomCode, token, muted);
   },
 
   rejoinAsPlayer({ socketId, roomCode, token }: RejoinParams): RoomRecord | undefined {

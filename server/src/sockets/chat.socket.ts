@@ -16,6 +16,18 @@ export function registerChatHandlers(io: Server, socket: Socket) {
       return;
     }
 
+    const room = roomsService.findRoom(participant.roomCode);
+    if (!room || room.settings.disableChat) {
+      return;
+    }
+
+    if (!participant.isHost) {
+      const player = room.players.find((p) => p.token === participant.token);
+      if (player?.muted) {
+        return;
+      }
+    }
+
     io.to(participant.roomCode).emit("receive_message", {
       id: randomUUID(),
       senderId: participant.token,

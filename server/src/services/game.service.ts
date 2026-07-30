@@ -98,8 +98,11 @@ interface QuizWithQuestions {
   }[];
 }
 
-function toGameQuestions(quiz: QuizWithQuestions): GameQuestion[] {
-  return quiz.questions.map((question) => ({
+function toGameQuestions(
+  quiz: QuizWithQuestions,
+  randomizeOrder: boolean,
+): GameQuestion[] {
+  const questions = quiz.questions.map((question) => ({
     id: question.id,
     prompt: question.prompt,
     timeLimitSeconds: question.timeLimitSeconds,
@@ -108,6 +111,8 @@ function toGameQuestions(quiz: QuizWithQuestions): GameQuestion[] {
       question.answers.map(({ id, text, isCorrect }) => ({ id, text, isCorrect })),
     ),
   }));
+
+  return randomizeOrder ? shuffleArray(questions) : questions;
 }
 
 export function toPublicQuestion(
@@ -177,10 +182,23 @@ function buildRevealPayload(room: RoomRecord, game: GameState): QuestionRevealPa
 
   return {
     questionIndex: game.currentQuestionIndex,
-    correctAnswerIds: question.answers.filter((a) => a.isCorrect).map((a) => a.id),
+    correctAnswerIds: room.settings.showCorrectAnswers
+      ? question.answers.filter((a) => a.isCorrect).map((a) => a.id)
+      : [],
     results,
     leaderboard: buildLeaderboard(room, game),
   };
+}
+
+async function endGameSession(room: RoomRecord, game: GameState) {
+  game.phase = "ended";
+  const leaderboard = buildLeaderboard(room, game);
+  await Promise.all([
+    quizzesRepository.incrementPlayCount(room.quizId),
+    persistGameHistory(room, game, leaderboard),
+  ]);
+
+  return { leaderboard, totalQuestions: game.questions.length };
 }
 
 async function persistGameHistory(
@@ -238,7 +256,7 @@ export const gameService = {
     }
 
     const game: GameState = {
-      questions: toGameQuestions(quiz),
+      questions: toGameQuestions(quiz, room.settings.randomizeQuestionOrder),
       currentQuestionIndex: 0,
       phase: "question",
       questionStartedAt: Date.now(),
@@ -345,17 +363,8 @@ export const gameService = {
 
     const nextIndex = game.currentQuestionIndex + 1;
     if (nextIndex >= game.questions.length) {
-      game.phase = "ended";
-      const leaderboard = buildLeaderboard(room, game);
-      await Promise.all([
-        quizzesRepository.incrementPlayCount(room.quizId),
-        persistGameHistory(room, game, leaderboard),
-      ]);
-      return {
-        ended: true as const,
-        leaderboard,
-        totalQuestions: game.questions.length,
-      };
+      const { leaderboard, totalQuestions } = await endGameSession(room, game);
+      return { ended: true as const, leaderboard, totalQuestions };
     }
 
     game.currentQuestionIndex = nextIndex;
@@ -372,6 +381,21 @@ export const gameService = {
       startedAt: game.questionStartedAt,
       category: game.category,
     };
+  },
+
+  async endGame({ socketId, roomCode }: StartGameParams) {
+    const room = roomsRepository.findByCode(roomCode);
+    const game = room?.game;
+    if (
+      !room ||
+      !game ||
+      room.hostSocketId !== socketId ||
+      game.phase === "ended"
+    ) {
+      return undefined;
+    }
+
+    return endGameSession(room, game);
   },
 
   getRoomState(roomCode: string): RoomState | undefined {

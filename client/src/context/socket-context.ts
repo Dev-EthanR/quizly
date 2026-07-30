@@ -7,6 +7,7 @@ import type {
   QuizCategory,
   RejoinRoomInput,
   SendChatMessageInput,
+  SetPlayerMutedInput,
   StartGameInput,
   SubmitAnswerInput,
 } from "shared";
@@ -17,6 +18,16 @@ export interface RoomCreatedPayload {
 
 export interface RoomNotFoundPayload {
   roomCode: string;
+}
+
+export interface JoinRejectedPayload {
+  roomCode: string;
+  reason: "late_join_disabled" | "room_full";
+}
+
+export interface RoomSettingsPayload {
+  disableChat: boolean;
+  maxPlayers: number | null;
 }
 
 export interface HostDisconnectedPayload {
@@ -122,6 +133,7 @@ export interface LobbyPlayer {
   name: string;
   color?: string;
   connected: boolean;
+  muted: boolean;
 }
 
 export interface LobbyPlayersPayload {
@@ -143,6 +155,8 @@ export interface ChatMessage {
 export interface ServerToClientEvents {
   room_created: (payload: RoomCreatedPayload) => void;
   room_not_found: (payload: RoomNotFoundPayload) => void;
+  join_rejected: (payload: JoinRejectedPayload) => void;
+  room_settings: (payload: RoomSettingsPayload) => void;
   host_disconnected: (payload: HostDisconnectedPayload) => void;
   host_reconnecting: (payload: HostReconnectingPayload) => void;
   host_reconnected: (payload: HostReconnectedPayload) => void;
@@ -168,6 +182,9 @@ export interface ClientToServerEvents {
   show_leaderboard: (payload: StartGameInput) => void;
   next_question: (payload: StartGameInput) => void;
   kick_player: (payload: KickPlayerInput) => void;
+  set_player_muted: (payload: SetPlayerMutedInput) => void;
+  end_question: (payload: StartGameInput) => void;
+  end_game: (payload: StartGameInput) => void;
 }
 
 export type AppSocket = Socket<ServerToClientEvents, ClientToServerEvents>;

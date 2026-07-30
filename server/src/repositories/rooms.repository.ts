@@ -7,7 +7,24 @@ export interface PlayerRecord {
   name: string;
   color?: string | undefined;
   userId?: string | undefined;
+  muted: boolean;
 }
+
+export interface RoomSettings {
+  randomizeQuestionOrder: boolean;
+  allowLateJoins: boolean;
+  showCorrectAnswers: boolean;
+  disableChat: boolean;
+  maxPlayers: number | null;
+}
+
+export const DEFAULT_ROOM_SETTINGS: RoomSettings = {
+  randomizeQuestionOrder: false,
+  allowLateJoins: true,
+  showCorrectAnswers: true,
+  disableChat: false,
+  maxPlayers: null,
+};
 
 export interface GameAnswerOption {
   id: string;
@@ -55,6 +72,7 @@ export interface RoomRecord {
   createdAt: number;
   players: PlayerRecord[];
   game?: GameState | undefined;
+  settings: RoomSettings;
 }
 
 export interface RoomParticipant {
@@ -154,6 +172,20 @@ export const roomsRepository = {
     }
     player.socketId = socketId;
     player.connected = true;
+    return room;
+  },
+
+  setPlayerMuted(
+    code: string,
+    token: string,
+    muted: boolean,
+  ): RoomRecord | undefined {
+    const room = rooms.get(code);
+    const player = room?.players.find((p) => p.token === token);
+    if (!room || !player) {
+      return undefined;
+    }
+    player.muted = muted;
     return room;
   },
 

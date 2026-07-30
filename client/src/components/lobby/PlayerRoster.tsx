@@ -1,6 +1,6 @@
 import { useState } from "react";
 import clsx from "clsx";
-import { FiX } from "react-icons/fi";
+import { FiMic, FiMicOff, FiX } from "react-icons/fi";
 import Avatar from "../ui/Avatar";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import { AVATAR_COLORS } from "../../lib/avatarColors";
@@ -12,6 +12,7 @@ interface PlayerRosterProps {
   currentPlayerId?: string | undefined;
   emptyMessage?: string;
   onKick?: (playerId: string) => void;
+  onSetMuted?: (playerId: string, muted: boolean) => void;
 }
 
 function PlayerRoster({
@@ -19,6 +20,7 @@ function PlayerRoster({
   currentPlayerId,
   emptyMessage = "Waiting for players to join...",
   onKick,
+  onSetMuted,
 }: PlayerRosterProps) {
   const [pendingKick, setPendingKick] = useState<LobbyPlayer | null>(null);
 
@@ -35,6 +37,7 @@ function PlayerRoster({
             AVATAR_COLORS[0];
           const isYou = player.id === currentPlayerId;
           const canKick = !!onKick && !isYou;
+          const canMute = !!onSetMuted && !isYou;
 
           return (
             <div
@@ -67,6 +70,25 @@ function PlayerRoster({
                     className="absolute -top-1 -right-1 hidden h-5 w-5 cursor-pointer items-center justify-center rounded-full border-2 border-surface bg-danger text-white group-hover:flex"
                   >
                     <FiX className="h-3 w-3" />
+                  </button>
+                )}
+                {canMute && (
+                  <button
+                    type="button"
+                    aria-label={player.muted ? `Unmute ${player.name}` : `Mute ${player.name}`}
+                    onClick={() => onSetMuted?.(player.id, !player.muted)}
+                    className={clsx(
+                      "absolute -top-1 -left-1 h-5 w-5 cursor-pointer items-center justify-center rounded-full border-2 border-surface text-white",
+                      player.muted
+                        ? "flex bg-warning"
+                        : "hidden bg-muted group-hover:flex",
+                    )}
+                  >
+                    {player.muted ? (
+                      <FiMicOff className="h-3 w-3" />
+                    ) : (
+                      <FiMic className="h-3 w-3" />
+                    )}
                   </button>
                 )}
               </div>

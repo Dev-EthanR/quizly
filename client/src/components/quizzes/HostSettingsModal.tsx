@@ -2,15 +2,23 @@ import { useState } from "react";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import Switch from "../ui/Switch";
-import { DEFAULT_HOST_SETTINGS, type HostSettings } from "../../lib/hostSettings";
+import Input from "../ui/Input";
+import {
+  DEFAULT_HOST_SETTINGS,
+  MAX_PLAYERS_MAX,
+  MAX_PLAYERS_MIN,
+  type HostSettings,
+} from "../../lib/hostSettings";
 
 interface HostSettingsModalProps {
   onClose: () => void;
   onConfirm: (settings: HostSettings) => void;
 }
 
+type BooleanHostSettingKey = Exclude<keyof HostSettings, "maxPlayers">;
+
 interface HostSettingOption {
-  key: keyof HostSettings;
+  key: BooleanHostSettingKey;
   label: string;
   description: string;
 }
@@ -31,13 +39,31 @@ const HOST_SETTING_OPTIONS: HostSettingOption[] = [
     label: "Show correct answers",
     description: "Reveal the correct answer to players after each question.",
   },
+  {
+    key: "disableChat",
+    label: "Disable chat",
+    description: "Turn off chat for everyone, including you, for this game.",
+  },
 ];
 
 function HostSettingsModal({ onClose, onConfirm }: HostSettingsModalProps) {
   const [settings, setSettings] = useState<HostSettings>(DEFAULT_HOST_SETTINGS);
 
-  const handleToggle = (key: keyof HostSettings) => {
+  const handleToggle = (key: BooleanHostSettingKey) => {
     setSettings((current) => ({ ...current, [key]: !current[key] }));
+  };
+
+  const handleMaxPlayersChange = (value: string) => {
+    if (value === "") {
+      setSettings((current) => ({ ...current, maxPlayers: null }));
+      return;
+    }
+    const parsed = Math.round(Number(value));
+    if (Number.isNaN(parsed)) {
+      return;
+    }
+    const clamped = Math.min(MAX_PLAYERS_MAX, Math.max(MAX_PLAYERS_MIN, parsed));
+    setSettings((current) => ({ ...current, maxPlayers: clamped }));
   };
 
   return (
@@ -67,6 +93,19 @@ function HostSettingsModal({ onClose, onConfirm }: HostSettingsModalProps) {
             description={option.description}
           />
         ))}
+
+        <div className="flex flex-col gap-1">
+          <Input
+            type="number"
+            label="Max players"
+            min={MAX_PLAYERS_MIN}
+            max={MAX_PLAYERS_MAX}
+            placeholder="Unlimited"
+            value={settings.maxPlayers ?? ""}
+            onChange={(event) => handleMaxPlayersChange(event.target.value)}
+          />
+          <p className="text-sm text-muted">Leave blank for unlimited players.</p>
+        </div>
       </div>
     </Modal>
   );

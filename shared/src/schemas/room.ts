@@ -17,6 +17,8 @@ export const hostGameSchema = z.object({
   randomizeQuestionOrder: z.boolean().optional(),
   allowLateJoins: z.boolean().optional(),
   showCorrectAnswers: z.boolean().optional(),
+  disableChat: z.boolean().optional(),
+  maxPlayers: z.number().int().min(1).max(50).optional(),
 });
 
 export type HostGameInput = z.infer<typeof hostGameSchema>;
@@ -81,3 +83,11 @@ export const kickPlayerSchema = z.object({
 });
 
 export type KickPlayerInput = z.infer<typeof kickPlayerSchema>;
+
+export const setPlayerMutedSchema = z.object({
+  roomCode: roomCodeSchema,
+  token: sessionTokenSchema,
+  muted: z.boolean(),
+});
+
+export type SetPlayerMutedInput = z.infer<typeof setPlayerMutedSchema>;

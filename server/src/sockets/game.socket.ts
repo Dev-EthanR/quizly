@@ -4,6 +4,7 @@ import {
   joinRoomSchema,
   kickPlayerSchema,
   rejoinRoomSchema,
+  setPlayerMutedSchema,
   startGameSchema,
   submitAnswerSchema,
 } from "shared";
@@ -37,12 +38,20 @@ function clearPlayerDisconnectTimer(roomCode: string, token: string): void {
 
 function broadcastLobbyPlayers(io: Server, room: RoomRecord) {
   io.to(room.code).emit("lobby_players", {
-    players: room.players.map(({ token, name, color, connected }) => ({
+    players: room.players.map(({ token, name, color, connected, muted }) => ({
       id: token,
       name,
       color,
       connected,
+      muted,
     })),
+  });
+}
+
+function sendRoomSettings(socket: Socket, room: RoomRecord) {
+  socket.emit("room_settings", {
+    disableChat: room.settings.disableChat,
+    maxPlayers: room.settings.maxPlayers,
   });
 }
 
@@ -79,6 +88,13 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       quizId: parsed.data.quizId,
       token: parsed.data.token,
       userId: parsed.data.userId,
+      settings: {
+        randomizeQuestionOrder: parsed.data.randomizeQuestionOrder,
+        allowLateJoins: parsed.data.allowLateJoins,
+        showCorrectAnswers: parsed.data.showCorrectAnswers,
+        disableChat: parsed.data.disableChat,
+        maxPlayers: parsed.data.maxPlayers ?? null,
+      },
     });
 
     socket.join(room.code);
@@ -92,7 +108,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       return;
     }
 
-    const room = roomsService.joinRoom({
+    const result = roomsService.joinRoom({
       socketId: socket.id,
       roomCode: parsed.data.roomCode,
       name: parsed.data.name,
@@ -101,13 +117,22 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       userId: parsed.data.userId,
     });
 
-    if (!room) {
-      socket.emit("room_not_found", { roomCode: parsed.data.roomCode });
+    if (!result.ok) {
+      if (result.reason === "not_found") {
+        socket.emit("room_not_found", { roomCode: parsed.data.roomCode });
+      } else {
+        socket.emit("join_rejected", {
+          roomCode: parsed.data.roomCode,
+          reason: result.reason,
+        });
+      }
       return;
     }
 
+    const { room } = result;
     socket.join(room.code);
     broadcastLobbyPlayers(io, room);
+    sendRoomSettings(socket, room);
     sendRoomState(socket, room.code);
   });
 
@@ -126,6 +151,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       socket.join(roomCode);
       broadcastLobbyPlayers(io, hostRoom);
       io.to(roomCode).emit("host_reconnected", { roomCode });
+      sendRoomSettings(socket, hostRoom);
       sendRoomState(socket, roomCode);
       return;
     }
@@ -135,6 +161,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
       clearPlayerDisconnectTimer(roomCode, token);
       socket.join(roomCode);
       broadcastLobbyPlayers(io, playerRoom);
+      sendRoomSettings(socket, playerRoom);
       sendRoomState(socket, roomCode);
       return;
     }
@@ -169,6 +196,27 @@ export function registerGameHandlers(io: Server, socket: Socket) {
         kickedSocket.emit("player_kicked", { roomCode });
         kickedSocket.leave(roomCode);
       }
+    }
+
+    broadcastLobbyPlayers(io, room);
+  });
+
+  socket.on("set_player_muted", (payload) => {
+    const parsed = setPlayerMutedSchema.safeParse(payload);
+    if (!parsed.success) {
+      console.warn("Invalid set_player_muted payload", parsed.error.flatten());
+      return;
+    }
+
+    const { roomCode, token, muted } = parsed.data;
+
+    if (!roomsService.isHost({ socketId: socket.id, roomCode })) {
+      return;
+    }
+
+    const room = roomsService.setPlayerMuted(roomCode, token, muted);
+    if (!room) {
+      return;
     }
 
     broadcastLobbyPlayers(io, room);
@@ -276,6 +324,43 @@ export function registerGameHandlers(io: Server, socket: Socket) {
     });
 
     scheduleReveal(io, parsed.data.roomCode, next.question.timeLimitSeconds);
+  });
+
+  socket.on("end_question", (payload) => {
+    const parsed = startGameSchema.safeParse(payload);
+    if (!parsed.success) {
+      console.warn("Invalid end_question payload", parsed.error.flatten());
+      return;
+    }
+
+    if (!roomsService.isHost({ socketId: socket.id, roomCode: parsed.data.roomCode })) {
+      return;
+    }
+
+    // A stale scheduleReveal timeout may still fire after this — revealQuestion's
+    // phase guard makes that a harmless no-op, so no timer cancellation is needed.
+    broadcastReveal(io, parsed.data.roomCode);
+  });
+
+  socket.on("end_game", async (payload) => {
+    const parsed = startGameSchema.safeParse(payload);
+    if (!parsed.success) {
+      console.warn("Invalid end_game payload", parsed.error.flatten());
+      return;
+    }
+
+    const ended = await gameService.endGame({
+      socketId: socket.id,
+      roomCode: parsed.data.roomCode,
+    });
+    if (!ended) {
+      return;
+    }
+
+    io.to(parsed.data.roomCode).emit("game_over", {
+      leaderboard: ended.leaderboard,
+      totalQuestions: ended.totalQuestions,
+    });
   });
 
   socket.on("disconnect", () => {

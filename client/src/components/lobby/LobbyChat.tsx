@@ -8,9 +8,11 @@ import { loadSession } from "../../lib/session";
 
 interface LobbyChatProps {
   roomCode: string;
+  disabled?: boolean;
+  disabledReason?: string;
 }
 
-function LobbyChat({ roomCode }: LobbyChatProps) {
+function LobbyChat({ roomCode, disabled = false, disabledReason }: LobbyChatProps) {
   const { status } = useSocket();
   const { messages, sendMessage, enterRoom } = useChat();
   const [draft, setDraft] = useState("");
@@ -27,6 +29,9 @@ function LobbyChat({ roomCode }: LobbyChatProps) {
 
   const handleSendMessage = (event: FormEvent) => {
     event.preventDefault();
+    if (disabled) {
+      return;
+    }
     const trimmed = draft.trim();
     if (!trimmed || status !== "connected") {
       return;
@@ -88,13 +93,14 @@ function LobbyChat({ roomCode }: LobbyChatProps) {
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           maxLength={CHAT_MESSAGE_MAX_LENGTH}
-          placeholder="Type a message..."
+          placeholder={disabled ? (disabledReason ?? "Chat is disabled") : "Type a message..."}
           aria-label="Chat message"
-          className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+          disabled={disabled}
+          className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary disabled:cursor-not-allowed disabled:opacity-50"
         />
         <button
           type="submit"
-          disabled={!draft.trim() || status !== "connected"}
+          disabled={disabled || !draft.trim() || status !== "connected"}
           aria-label="Send message"
           className="cursor-pointer rounded-lg bg-primary p-2 text-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
         >

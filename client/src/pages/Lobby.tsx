@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+import clsx from "clsx";
 import { ROOM_CODE_REGEX } from "shared";
 import RoomNotFound from "../components/lobby/RoomNotFound";
 import HostDisconnected from "../components/lobby/HostDisconnected";
@@ -13,8 +14,10 @@ import { useSocket } from "../context/useSocket";
 import { clearSession, loadSession, saveSession, type RoomSession } from "../lib/session";
 import type {
   GameStartedPayload,
+  JoinRejectedPayload,
   LobbyPlayer,
   LobbyPlayersPayload,
+  RoomSettingsPayload,
   RoomStatePayload,
 } from "../context/socket-context";
 
@@ -59,8 +62,12 @@ function Lobby() {
     return null;
   });
   const [roomNotFound, setRoomNotFound] = useState(false);
+  const [joinRejection, setJoinRejection] = useState<
+    JoinRejectedPayload["reason"] | null
+  >(null);
   const [hostDisconnected, setHostDisconnected] = useState(false);
   const [hostReconnecting, setHostReconnecting] = useState(false);
+  const [chatDisabled, setChatDisabled] = useState(false);
   const attemptRef = useRef<"rejoin" | "join" | null>(null);
 
   const isValidRoomCode =
@@ -132,8 +139,20 @@ function Lobby() {
       navigate("/removed", { replace: true });
     }
 
+    function handleJoinRejected(payload: JoinRejectedPayload) {
+      if (payload.roomCode === roomCode) {
+        setJoinRejection(payload.reason);
+      }
+    }
+
+    function handleRoomSettings(payload: RoomSettingsPayload) {
+      setChatDisabled(payload.disableChat);
+    }
+
     socket.on("lobby_players", handleLobbyPlayers);
     socket.on("room_not_found", handleRoomNotFound);
+    socket.on("join_rejected", handleJoinRejected);
+    socket.on("room_settings", handleRoomSettings);
     socket.on("room_state", handleRoomState);
     socket.on("host_reconnecting", handleHostReconnecting);
     socket.on("host_reconnected", handleHostReconnected);
@@ -142,6 +161,8 @@ function Lobby() {
     return () => {
       socket.off("lobby_players", handleLobbyPlayers);
       socket.off("room_not_found", handleRoomNotFound);
+      socket.off("join_rejected", handleJoinRejected);
+      socket.off("room_settings", handleRoomSettings);
       socket.off("room_state", handleRoomState);
       socket.off("host_reconnecting", handleHostReconnecting);
       socket.off("host_reconnected", handleHostReconnected);
@@ -230,8 +251,35 @@ function Lobby() {
     socket.emit("kick_player", { roomCode, token: playerId });
   };
 
+  const handleSetMuted = (playerId: string, muted: boolean) => {
+    if (!roomCode) {
+      return;
+    }
+    socket.emit("set_player_muted", { roomCode, token: playerId, muted });
+  };
+
   if (!isValidRoomCode || roomNotFound || !session) {
     return <RoomNotFound roomCode={roomCode} />;
+  }
+
+  if (joinRejection === "room_full") {
+    return (
+      <RoomNotFound
+        roomCode={roomCode}
+        title="Room is full"
+        message="This room has reached its player limit."
+      />
+    );
+  }
+
+  if (joinRejection === "late_join_disabled") {
+    return (
+      <RoomNotFound
+        roomCode={roomCode}
+        title="Game already in progress"
+        message="This game has already started and isn't accepting new players."
+      />
+    );
   }
 
   if (hostDisconnected) {
@@ -241,6 +289,7 @@ function Lobby() {
   const isHost = state?.isHost ?? session?.isHost ?? false;
   const displayName = state?.name ?? session?.name ?? "Guest";
   const displayColor = state?.color ?? session?.color;
+  const isMuted = players.find((p) => p.id === session?.token)?.muted ?? false;
 
   return (
     <div className="min-h-screen px-4 py-10">
@@ -256,7 +305,12 @@ function Lobby() {
         </p>
       )}
 
-      <div className="mx-auto grid w-full max-w-5xl gap-6 lg:grid-cols-[1fr_320px]">
+      <div
+        className={clsx(
+          "mx-auto grid w-full max-w-5xl gap-6",
+          !chatDisabled && "lg:grid-cols-[1fr_320px]",
+        )}
+      >
         <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-surface/40 px-6 py-10">
           {isHost ? (
             <HostLobbyPanel
@@ -264,6 +318,7 @@ function Lobby() {
               players={players}
               onStartGame={handleStartGame}
               onKick={handleKickPlayer}
+              onSetMuted={handleSetMuted}
             />
           ) : (
             <ParticipantLobbyPanel
@@ -276,9 +331,15 @@ function Lobby() {
           )}
         </div>
 
-        <div className="h-[520px] lg:sticky lg:top-10">
-          <LobbyChat roomCode={roomCode} />
-        </div>
+        {!chatDisabled && (
+          <div className="h-[520px] lg:sticky lg:top-10">
+            <LobbyChat
+              roomCode={roomCode}
+              disabled={isMuted}
+              disabledReason={isMuted ? "You have been muted by the host." : undefined}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

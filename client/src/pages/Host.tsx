@@ -49,6 +49,8 @@ function Host() {
         randomizeQuestionOrder: settingsRef.current.randomizeQuestionOrder,
         allowLateJoins: settingsRef.current.allowLateJoins,
         showCorrectAnswers: settingsRef.current.showCorrectAnswers,
+        disableChat: settingsRef.current.disableChat,
+        maxPlayers: settingsRef.current.maxPlayers ?? undefined,
       });
       hasHostedRef.current = true;
     }
