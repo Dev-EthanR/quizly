@@ -1,5 +1,7 @@
 import type { QuizCategory } from "./quiz";
 
+export type GamePhase = "question" | "result" | "leaderboard" | "ended";
+
 export interface RoomCreatedPayload {
   roomCode: string;
 }

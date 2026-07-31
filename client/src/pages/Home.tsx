@@ -63,6 +63,7 @@ function Home() {
             maxLength={20}
             error={errors.name?.message}
             className=" caret-primary"
+            autoComplete="off"
             {...register("name")}
           />
 
@@ -71,6 +72,7 @@ function Home() {
             placeholder="X9L2P3"
             maxLength={6}
             autoFocus
+            autoComplete="off"
             className="border-2 py-4 text-center text-3xl font-semibold uppercase tracking-[0.3em] caret-primary"
             error={errors.roomCode?.message}
             {...register("roomCode")}

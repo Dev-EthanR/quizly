@@ -5,6 +5,7 @@ import { ROOM_CODE_REGEX } from "shared";
 import RoomNotFound from "../components/lobby/RoomNotFound";
 import HostDisconnected from "../components/lobby/HostDisconnected";
 import ReconnectingOverlay from "../components/lobby/ReconnectingOverlay";
+import HostReconnectingBanner from "../components/lobby/HostReconnectingBanner";
 import HostLobbyPanel from "../components/lobby/HostLobbyPanel";
 import ParticipantLobbyPanel from "../components/lobby/ParticipantLobbyPanel";
 import ChatPanel from "../components/lobby/ChatPanel";
@@ -300,11 +301,7 @@ function Lobby() {
         Quiz<span className="text-primary">zly</span>
       </h1>
 
-      {hostReconnecting && !isHost && (
-        <p className="mx-auto mb-6 w-fit rounded-full border border-warning/30 bg-warning/10 px-4 py-2 text-center text-sm font-medium text-warning">
-          Host disconnected — waiting for them to reconnect...
-        </p>
-      )}
+      <HostReconnectingBanner show={hostReconnecting && !isHost} />
 
       <div
         className={clsx(

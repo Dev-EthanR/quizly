@@ -1,25 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { FiUsers } from "react-icons/fi";
 import clsx from "clsx";
 import { quizCategoryLabels } from "shared";
-import Button from "../components/ui/Button";
 import Modal from "../components/ui/Modal";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
-import AnswerButton from "../components/play/AnswerButton";
-import AnswerResultButton from "../components/play/AnswerResultButton";
-import Leaderboard, {
-  type LeaderboardRankChange,
-  type LeaderboardRowEntry,
-} from "../components/play/Leaderboard";
+import { type LeaderboardRankChange, type LeaderboardRowEntry } from "../components/play/Leaderboard";
 import GameCountdown from "../components/play/GameCountdown";
-import QuestionTimer from "../components/play/QuestionTimer";
+import PlayToolbar from "../components/play/PlayToolbar";
+import QuestionPromptHeader from "../components/play/QuestionPromptHeader";
+import QuestionPhaseView from "../components/play/QuestionPhaseView";
+import ResultPhaseView from "../components/play/ResultPhaseView";
+import LeaderboardPhaseView from "../components/play/LeaderboardPhaseView";
 import PodiumScreen from "../components/play/PodiumScreen";
 import HostSummaryScreen from "../components/play/HostSummaryScreen";
 import PlayerResultScreen from "../components/play/PlayerResultScreen";
 import ChatPanel from "../components/lobby/ChatPanel";
 import PlayerRoster from "../components/lobby/PlayerRoster";
 import HostDisconnected from "../components/lobby/HostDisconnected";
+import HostReconnectingBanner from "../components/lobby/HostReconnectingBanner";
 import RoomNotFound from "../components/lobby/RoomNotFound";
 import { useSocket } from "../context/useSocket";
 import { clearSession, loadSession } from "../lib/session";
@@ -27,6 +25,7 @@ import type { RoomSession } from "../entities/session";
 import type {
   AnswerProgressPayload,
   GameOverPayload,
+  GamePhase,
   LobbyPlayer,
   LobbyPlayersPayload,
   PublicQuestion,
@@ -36,7 +35,6 @@ import type {
   RoomStatePayload,
 } from "../entities/socket";
 
-const ANSWER_OPTION_LABELS = ["A", "B", "C", "D"];
 const AUTO_ADVANCE_SECONDS = 10;
 
 interface PlayLocation {
@@ -48,8 +46,6 @@ interface PlayLocation {
     startedAt?: number;
   };
 }
-
-type GamePhase = "question" | "result" | "leaderboard" | "ended";
 
 function Play() {
   const { roomCode } = useParams();
@@ -447,11 +443,7 @@ function Play() {
 
   return (
     <div className="min-h-screen px-4 py-10">
-      {hostReconnecting && !isHost && (
-        <p className="mx-auto mb-6 w-fit rounded-full border border-warning/30 bg-warning/10 px-4 py-2 text-center text-sm font-medium text-warning">
-          Host disconnected — waiting for them to reconnect...
-        </p>
-      )}
+      <HostReconnectingBanner show={hostReconnecting && !isHost} />
 
       <div
         className={clsx(
@@ -460,166 +452,60 @@ function Play() {
         )}
       >
         <div className="flex min-h-0 flex-col gap-6">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-muted">
-              Question {questionIndex + 1} of {totalQuestions}
-            </span>
-            <div className="flex items-center gap-3">
-              {isHost && (
-                <button
-                  type="button"
-                  onClick={() => setShowManagePlayers(true)}
-                  className="flex cursor-pointer items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:text-foreground"
-                >
-                  <FiUsers className="h-3.5 w-3.5" />
-                  Manage players
-                </button>
-              )}
-              {isHost && phase === "question" && (
-                <button
-                  type="button"
-                  onClick={endQuestion}
-                  className="cursor-pointer rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors hover:text-foreground"
-                >
-                  End question
-                </button>
-              )}
-              {isHost && (
-                <button
-                  type="button"
-                  onClick={() => setShowEndGameConfirm(true)}
-                  className="cursor-pointer rounded-full border border-danger/40 px-3 py-1.5 text-xs font-medium text-danger transition-colors hover:bg-danger/10"
-                >
-                  End game
-                </button>
-              )}
-              {phase === "question" && (
-                <div className="w-40">
-                  <QuestionTimer
-                    remainingSeconds={remainingSeconds}
-                    totalSeconds={question.timeLimitSeconds}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
+          <PlayToolbar
+            questionIndex={questionIndex}
+            totalQuestions={totalQuestions}
+            isHost={isHost}
+            phase={phase}
+            remainingSeconds={remainingSeconds}
+            timeLimitSeconds={question.timeLimitSeconds}
+            onManagePlayers={() => setShowManagePlayers(true)}
+            onEndQuestion={endQuestion}
+            onEndGame={() => setShowEndGameConfirm(true)}
+          />
 
           {(phase === "question" || phase === "result") && (
-            <div className="flex flex-col items-center gap-2 text-center">
-              <span className="text-sm font-semibold text-primary">
-                {categoryLabel} &middot; {question.points} pts
-              </span>
-              <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
-                {question.prompt}
-              </h1>
-            </div>
+            <QuestionPromptHeader
+              categoryLabel={categoryLabel}
+              points={question.points}
+              prompt={question.prompt}
+            />
           )}
 
           {phase === "question" && (
-            <div className="flex items-center justify-center gap-2 text-sm text-muted">
-              <FiUsers className="h-4 w-4" />
-              <span>
-                {answerProgress
-                  ? `${answerProgress.answered}/${answerProgress.total}`
-                  : "0"}{" "}
-                answered
-              </span>
-            </div>
+            <QuestionPhaseView
+              answerProgress={answerProgress}
+              answers={question.answers}
+              isHost={isHost}
+              selectedAnswerId={selectedAnswerId}
+              onSubmitAnswer={submitAnswer}
+            />
           )}
 
           {phase === "result" && reveal && (
-            <p
-              className={clsx(
-                "text-center text-lg font-bold",
-                isHost
-                  ? "text-muted"
-                  : ownResult?.correct
-                    ? "text-secondary"
-                    : "text-danger",
-              )}
-            >
-              {isHost
-                ? `${correctAnswersCount} of ${reveal.results.length} answered correctly`
-                : ownResult?.correct
-                  ? `Correct! +${ownResult.pointsAwarded} points`
-                  : "Incorrect — +0 points"}
-            </p>
-          )}
-
-          {phase === "question" && (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {question.answers.map((answer, index) => (
-                <AnswerButton
-                  key={answer.id}
-                  text={answer.text}
-                  optionLabel={
-                    ANSWER_OPTION_LABELS[index % ANSWER_OPTION_LABELS.length]!
-                  }
-                  disabled={isHost || !!selectedAnswerId}
-                  isSelected={selectedAnswerId === answer.id}
-                  onClick={() => submitAnswer(answer.id)}
-                />
-              ))}
-            </div>
-          )}
-
-          {phase === "result" && reveal && (
-            <>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                {question.answers.map((answer) => (
-                  <AnswerResultButton
-                    key={answer.id}
-                    text={answer.text}
-                    isCorrect={reveal.correctAnswerIds.includes(answer.id)}
-                    isOwnAnswer={selectedAnswerId === answer.id}
-                    count={
-                      reveal.results.filter(
-                        (result) => result.answerId === answer.id,
-                      ).length
-                    }
-                    totalResponses={reveal.results.length}
-                  />
-                ))}
-              </div>
-
-              {isHost ? (
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-40">
-                    <QuestionTimer
-                      remainingSeconds={autoAdvanceRemaining}
-                      totalSeconds={AUTO_ADVANCE_SECONDS}
-                    />
-                  </div>
-                  <Button type="button" onClick={showLeaderboard}>
-                    Show Leaderboard
-                  </Button>
-                </div>
-              ) : (
-                <p className="text-center text-sm text-muted">
-                  Waiting for host...
-                </p>
-              )}
-            </>
+            <ResultPhaseView
+              isHost={isHost}
+              reveal={reveal}
+              ownResult={ownResult}
+              correctAnswersCount={correctAnswersCount}
+              answers={question.answers}
+              selectedAnswerId={selectedAnswerId}
+              autoAdvanceRemaining={autoAdvanceRemaining}
+              autoAdvanceTotalSeconds={AUTO_ADVANCE_SECONDS}
+              onShowLeaderboard={showLeaderboard}
+            />
           )}
 
           {phase === "leaderboard" && reveal && (
-            <div className="flex flex-1 flex-col items-center justify-center gap-4 py-6">
-              <h2 className="text-2xl font-bold text-foreground">Leaderboard</h2>
-              <Leaderboard entries={leaderboardEntries} currentPlayerId={session?.token} />
-              {isHost && (
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-40">
-                    <QuestionTimer
-                      remainingSeconds={autoAdvanceRemaining}
-                      totalSeconds={AUTO_ADVANCE_SECONDS}
-                    />
-                  </div>
-                  <Button type="button" onClick={nextQuestion}>
-                    {questionIndex + 1 >= totalQuestions ? "Finish game" : "Next question"}
-                  </Button>
-                </div>
-              )}
-            </div>
+            <LeaderboardPhaseView
+              entries={leaderboardEntries}
+              currentPlayerId={session?.token}
+              isHost={isHost}
+              isFinalQuestion={questionIndex + 1 >= totalQuestions}
+              autoAdvanceRemaining={autoAdvanceRemaining}
+              autoAdvanceTotalSeconds={AUTO_ADVANCE_SECONDS}
+              onNextQuestion={nextQuestion}
+            />
           )}
         </div>
 
