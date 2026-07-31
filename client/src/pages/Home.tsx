@@ -5,6 +5,7 @@ import { joinRoomSchema } from "shared";
 import type { z } from "zod";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
+import Avatar from "../components/ui/Avatar";
 import AvatarColorField from "../components/ui/AvatarColorField";
 import { getRandomUsername } from "../lib/usernames";
 import { getInitials } from "../lib/initials";
@@ -28,6 +29,9 @@ function Home() {
   });
 
   const name = useWatch({ control, name: "name" });
+  const color = useWatch({ control, name: "color" }) ?? AVATAR_COLORS[0].id;
+  const selectedColor =
+    AVATAR_COLORS.find((c) => c.id === color) ?? AVATAR_COLORS[0];
 
   const onSubmit = (values: HomeJoinFormValues) => {
     const resolvedName = values.name || getRandomUsername();
@@ -46,7 +50,7 @@ function Home() {
         Quiz<span className="text-primary">zly</span>
       </h1>
 
-      <div className="card flex w-fit max-w-full flex-col gap-4 p-6">
+      <div className="card flex w-full max-w-md flex-col gap-4 p-6">
         <div className="text-center">
           <h2 className="heading text-2xl">Join a game</h2>
           <p className="mt-1 text-muted">Enter a room code to join a game</p>
@@ -57,15 +61,22 @@ function Home() {
           noValidate
           className="flex flex-col gap-4"
         >
-          <Input
-            label="Username"
-            placeholder="NovaFox"
-            maxLength={20}
-            error={errors.name?.message}
-            className=" caret-primary"
-            autoComplete="off"
-            {...register("name")}
-          />
+          <div className="flex items-end gap-3">
+            <div className="flex-1">
+              <Input
+                label="Username"
+                placeholder="NovaFox"
+                maxLength={20}
+                error={errors.name?.message}
+                className=" caret-primary"
+                autoComplete="off"
+                {...register("name")}
+              />
+            </div>
+            <div className="sm:hidden">
+              <Avatar initials={getInitials(name)} bgClass={selectedColor.bgClass} />
+            </div>
+          </div>
 
           <Input
             label="Room code"
