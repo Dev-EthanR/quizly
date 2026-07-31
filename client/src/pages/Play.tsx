@@ -1,39 +1,28 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useParams } from "react-router-dom";
 import clsx from "clsx";
 import { quizCategoryLabels } from "shared";
 import Modal from "../components/ui/Modal";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
-import { type LeaderboardRankChange, type LeaderboardRowEntry } from "../components/play/Leaderboard";
 import GameCountdown from "../components/play/GameCountdown";
 import PlayToolbar from "../components/play/PlayToolbar";
 import QuestionPromptHeader from "../components/play/QuestionPromptHeader";
 import QuestionPhaseView from "../components/play/QuestionPhaseView";
 import ResultPhaseView from "../components/play/ResultPhaseView";
 import LeaderboardPhaseView from "../components/play/LeaderboardPhaseView";
-import PodiumScreen from "../components/play/PodiumScreen";
-import HostSummaryScreen from "../components/play/HostSummaryScreen";
-import PlayerResultScreen from "../components/play/PlayerResultScreen";
+import PlayEndedView from "../components/play/PlayEndedView";
 import ChatPanel from "../components/lobby/ChatPanel";
 import PlayerRoster from "../components/lobby/PlayerRoster";
 import HostDisconnected from "../components/lobby/HostDisconnected";
 import HostReconnectingBanner from "../components/lobby/HostReconnectingBanner";
 import RoomNotFound from "../components/lobby/RoomNotFound";
 import { useSocket } from "../context/useSocket";
-import { clearSession, loadSession } from "../lib/session";
+import { usePlayRoomEvents } from "../hooks/usePlayRoomEvents";
+import { useCountdown } from "../hooks/useCountdown";
+import { loadSession } from "../lib/session";
+import { computeLeaderboardEntries } from "../lib/leaderboard";
 import type { RoomSession } from "../entities/session";
-import type {
-  AnswerProgressPayload,
-  GameOverPayload,
-  GamePhase,
-  LobbyPlayer,
-  LobbyPlayersPayload,
-  PublicQuestion,
-  QuestionRevealPayload,
-  QuestionStartedPayload,
-  RoomSettingsPayload,
-  RoomStatePayload,
-} from "../entities/socket";
+import type { PublicQuestion } from "../entities/socket";
 
 const AUTO_ADVANCE_SECONDS = 10;
 
@@ -49,191 +38,54 @@ interface PlayLocation {
 
 function Play() {
   const { roomCode } = useParams();
-  const { state } = useLocation() as PlayLocation;
-  const navigate = useNavigate();
+  const { state: locationState } = useLocation() as PlayLocation;
   const { socket, status } = useSocket();
 
   const [session] = useState<RoomSession | null>(() =>
     roomCode ? loadSession(roomCode) : null,
   );
-  const [phase, setPhase] = useState<GamePhase>("question");
-  const [question, setQuestion] = useState<PublicQuestion | null>(
-    state?.question ?? null,
-  );
-  const [questionIndex, setQuestionIndex] = useState(state?.questionIndex ?? 0);
-  const [totalQuestions, setTotalQuestions] = useState(
-    state?.totalQuestions ?? 0,
-  );
-  const [startedAt, setStartedAt] = useState(() => state?.startedAt ?? Date.now());
-  const [selectedAnswerId, setSelectedAnswerId] = useState<string | null>(null);
-  const [answerProgress, setAnswerProgress] =
-    useState<AnswerProgressPayload | null>(null);
-  const [reveal, setReveal] = useState<QuestionRevealPayload | null>(null);
-  const [gameOver, setGameOver] = useState<GameOverPayload | null>(null);
-  const [remainingSeconds, setRemainingSeconds] = useState(
-    question?.timeLimitSeconds ?? 0,
-  );
+  const [initialStartedAt] = useState(() => locationState?.startedAt ?? Date.now());
   const [showStartCountdown, setShowStartCountdown] = useState(
-    !!state?.question && (state?.questionIndex ?? 0) === 0,
+    !!locationState?.question && (locationState?.questionIndex ?? 0) === 0,
   );
-  const [hostDisconnected, setHostDisconnected] = useState(false);
-  const [hostReconnecting, setHostReconnecting] = useState(false);
-  const [roomNotFound, setRoomNotFound] = useState(false);
-  const [players, setPlayers] = useState<LobbyPlayer[]>([]);
   const [showManagePlayers, setShowManagePlayers] = useState(false);
-  const [chatDisabled, setChatDisabled] = useState(false);
   const [showEndGameConfirm, setShowEndGameConfirm] = useState(false);
   const [showHostSummary, setShowHostSummary] = useState(false);
-  const [autoAdvanceRemaining, setAutoAdvanceRemaining] = useState(AUTO_ADVANCE_SECONDS);
   const attemptRef = useRef<"rejoin" | null>(null);
 
-  const isHost = state?.isHost ?? session?.isHost ?? false;
+  const isHost = locationState?.isHost ?? session?.isHost ?? false;
 
-  useEffect(() => {
-    function handleQuestionStarted(payload: QuestionStartedPayload) {
-      setQuestion(payload.question);
-      setQuestionIndex(payload.questionIndex);
-      setTotalQuestions(payload.totalQuestions);
-      setStartedAt(payload.startedAt);
-      setSelectedAnswerId(null);
-      setAnswerProgress(null);
-      setReveal(null);
-      setShowStartCountdown(false);
-      setPhase("question");
-    }
+  const dismissStartCountdown = useCallback(() => {
+    setShowStartCountdown(false);
+  }, []);
 
-    function handleAnswerProgress(payload: AnswerProgressPayload) {
-      setAnswerProgress(payload);
-    }
+  const { state, dispatch } = usePlayRoomEvents({
+    roomCode,
+    isHost,
+    sessionToken: session?.token,
+    initialQuestion: locationState?.question ?? null,
+    initialQuestionIndex: locationState?.questionIndex ?? 0,
+    initialTotalQuestions: locationState?.totalQuestions ?? 0,
+    initialStartedAt,
+    onRoomProgress: dismissStartCountdown,
+  });
 
-    function handleQuestionReveal(payload: QuestionRevealPayload) {
-      setReveal(payload);
-      setPhase("result");
-    }
-
-    function handleLeaderboardShown() {
-      setPhase("leaderboard");
-    }
-
-    function handleGameOver(payload: GameOverPayload) {
-      setGameOver(payload);
-      setTotalQuestions(payload.totalQuestions);
-      setPhase("ended");
-    }
-
-    function handleHostReconnecting() {
-      setHostReconnecting(true);
-    }
-
-    function handleHostReconnected() {
-      setHostReconnecting(false);
-    }
-
-    function handleHostDisconnected() {
-      if (!isHost) {
-        setHostDisconnected(true);
-      }
-    }
-
-    function handleRoomNotFound() {
-      if (roomCode) {
-        clearSession(roomCode);
-      }
-      setRoomNotFound(true);
-    }
-
-    function handleLobbyPlayers(payload: LobbyPlayersPayload) {
-      setPlayers(payload.players);
-    }
-
-    function handleRoomSettings(payload: RoomSettingsPayload) {
-      setChatDisabled(payload.disableChat);
-    }
-
-    function handlePlayerKicked() {
-      if (roomCode) {
-        clearSession(roomCode);
-      }
-      navigate("/removed", { replace: true });
-    }
-
-    function handleRoomState(payload: RoomStatePayload) {
-      if (payload.phase === "lobby") {
-        if (roomCode) {
-          navigate(`/lobby/${roomCode}`, { replace: true });
-        }
-        return;
-      }
-
-      if (payload.phase === "ended") {
-        setGameOver({
-          leaderboard: payload.leaderboard,
-          totalQuestions: payload.totalQuestions,
-          totalPlayers: payload.totalPlayers,
-          averageAccuracy: payload.averageAccuracy,
-          averageResponseMs: payload.averageResponseMs,
-          completionRate: payload.completionRate,
-          questionBreakdown: payload.questionBreakdown,
-          fastestPlayer: payload.fastestPlayer,
-          hardestQuestion: payload.hardestQuestion,
-        });
-        setTotalQuestions(payload.totalQuestions);
-        setPhase("ended");
-        return;
-      }
-
-      setQuestion(payload.question);
-      setQuestionIndex(payload.questionIndex);
-      setTotalQuestions(payload.totalQuestions);
-      setStartedAt(payload.startedAt);
-      setShowStartCountdown(false);
-
-      if (payload.phase === "question") {
-        setSelectedAnswerId(null);
-        setAnswerProgress(null);
-        setReveal(null);
-        setPhase("question");
-        return;
-      }
-
-      setReveal(payload.reveal);
-      const ownResult = payload.reveal.results.find(
-        (result) => result.playerId === session?.token,
-      );
-      setSelectedAnswerId(ownResult?.answerId ?? null);
-      setPhase(payload.phase);
-    }
-
-    socket.on("question_started", handleQuestionStarted);
-    socket.on("answer_progress", handleAnswerProgress);
-    socket.on("question_reveal", handleQuestionReveal);
-    socket.on("leaderboard_shown", handleLeaderboardShown);
-    socket.on("game_over", handleGameOver);
-    socket.on("host_reconnecting", handleHostReconnecting);
-    socket.on("host_reconnected", handleHostReconnected);
-    socket.on("host_disconnected", handleHostDisconnected);
-    socket.on("room_not_found", handleRoomNotFound);
-    socket.on("room_state", handleRoomState);
-    socket.on("lobby_players", handleLobbyPlayers);
-    socket.on("room_settings", handleRoomSettings);
-    socket.on("player_kicked", handlePlayerKicked);
-
-    return () => {
-      socket.off("question_started", handleQuestionStarted);
-      socket.off("answer_progress", handleAnswerProgress);
-      socket.off("question_reveal", handleQuestionReveal);
-      socket.off("leaderboard_shown", handleLeaderboardShown);
-      socket.off("game_over", handleGameOver);
-      socket.off("host_reconnecting", handleHostReconnecting);
-      socket.off("host_reconnected", handleHostReconnected);
-      socket.off("host_disconnected", handleHostDisconnected);
-      socket.off("room_not_found", handleRoomNotFound);
-      socket.off("room_state", handleRoomState);
-      socket.off("lobby_players", handleLobbyPlayers);
-      socket.off("room_settings", handleRoomSettings);
-      socket.off("player_kicked", handlePlayerKicked);
-    };
-  }, [socket, isHost, roomCode, navigate, session?.token]);
+  const {
+    phase,
+    question,
+    questionIndex,
+    totalQuestions,
+    startedAt,
+    reveal,
+    gameOver,
+    hostDisconnected,
+    hostReconnecting,
+    roomNotFound,
+    players,
+    chatDisabled,
+    selectedAnswerId,
+    answerProgress,
+  } = state;
 
   useEffect(() => {
     if (status === "disconnected") {
@@ -250,38 +102,33 @@ function Play() {
     socket.emit("rejoin_room", { roomCode, token: session.token });
   }, [roomCode, session, status, socket]);
 
+  const questionDeadline =
+    question && phase === "question" && !showStartCountdown
+      ? startedAt + question.timeLimitSeconds * 1000
+      : null;
+  const remainingSeconds = useCountdown(
+    questionDeadline,
+    question?.timeLimitSeconds ?? 0,
+  );
+
+  const [autoAdvanceDeadline, setAutoAdvanceDeadline] = useState<number | null>(null);
+
   useEffect(() => {
-    if (!question || phase !== "question" || showStartCountdown) {
+    function activate() {
+      if (!isHost || !roomCode || (phase !== "result" && phase !== "leaderboard")) {
+        setAutoAdvanceDeadline(null);
+        return null;
+      }
+      const deadline = Date.now() + AUTO_ADVANCE_SECONDS * 1000;
+      setAutoAdvanceDeadline(deadline);
+      return deadline;
+    }
+
+    const deadline = activate();
+    if (deadline === null || !roomCode) {
       return;
     }
 
-    const update = () => {
-      const elapsedSeconds = (Date.now() - startedAt) / 1000;
-      setRemainingSeconds(
-        Math.max(0, Math.ceil(question.timeLimitSeconds - elapsedSeconds)),
-      );
-    };
-
-    update();
-    const interval = setInterval(update, 250);
-    return () => clearInterval(interval);
-  }, [question, startedAt, phase, showStartCountdown]);
-
-  useEffect(() => {
-    if (!isHost || !roomCode || (phase !== "result" && phase !== "leaderboard")) {
-      return;
-    }
-
-    const deadline = Date.now() + AUTO_ADVANCE_SECONDS * 1000;
-
-    const update = () => {
-      setAutoAdvanceRemaining(
-        Math.max(0, Math.ceil((deadline - Date.now()) / 1000)),
-      );
-    };
-
-    update();
-    const interval = setInterval(update, 250);
     const timeout = setTimeout(() => {
       if (phase === "result") {
         socket.emit("show_leaderboard", { roomCode });
@@ -290,48 +137,15 @@ function Play() {
       }
     }, AUTO_ADVANCE_SECONDS * 1000);
 
-    return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-    };
-  }, [phase, isHost, socket, roomCode]);
+    return () => clearTimeout(timeout);
+  }, [isHost, roomCode, phase, socket]);
 
-  const leaderboardEntries = useMemo<LeaderboardRowEntry[]>(() => {
-    if (!reveal) {
-      return [];
-    }
+  const autoAdvanceRemaining = useCountdown(autoAdvanceDeadline, AUTO_ADVANCE_SECONDS);
 
-    const previousScoreByPlayer = new Map<string, number>();
-    reveal.results.forEach((result) => {
-      previousScoreByPlayer.set(result.playerId, result.totalScore - result.pointsAwarded);
-    });
-
-    const previousRankByPlayer = new Map<string, number>();
-    if (questionIndex > 0) {
-      [...reveal.leaderboard]
-        .sort(
-          (a, b) =>
-            (previousScoreByPlayer.get(b.playerId) ?? 0) -
-            (previousScoreByPlayer.get(a.playerId) ?? 0),
-        )
-        .forEach((entry, index) => previousRankByPlayer.set(entry.playerId, index));
-    }
-
-    return reveal.leaderboard.map((entry, index) => {
-      const pointsGained = reveal.results.find(
-        (result) => result.playerId === entry.playerId,
-      )?.pointsAwarded ?? 0;
-
-      let rankChange: LeaderboardRankChange = "same";
-      const previousRank = previousRankByPlayer.get(entry.playerId);
-      if (previousRank !== undefined) {
-        if (index < previousRank) rankChange = "up";
-        else if (index > previousRank) rankChange = "down";
-      }
-
-      return { ...entry, pointsGained, rankChange };
-    });
-  }, [reveal, questionIndex]);
+  const leaderboardEntries = useMemo(
+    () => computeLeaderboardEntries(reveal, questionIndex),
+    [reveal, questionIndex],
+  );
 
   if (!roomCode) {
     return null;
@@ -354,7 +168,7 @@ function Play() {
     ) {
       return;
     }
-    setSelectedAnswerId(answerId);
+    dispatch({ type: "SELECT_ANSWER", answerId });
     socket.emit("submit_answer", { roomCode, questionIndex, answerId });
   };
 
@@ -384,40 +198,13 @@ function Play() {
   };
 
   if (phase === "ended") {
-    if (!gameOver) {
-      return (
-        <div className="page-shell flex items-center justify-center px-4 text-center">
-          <p className="text-muted">Tallying final results...</p>
-        </div>
-      );
-    }
-
-    if (isHost) {
-      if (showHostSummary) {
-        return (
-          <HostSummaryScreen summary={gameOver} onBack={() => setShowHostSummary(false)} />
-        );
-      }
-      return (
-        <PodiumScreen
-          leaderboard={gameOver.leaderboard}
-          onViewSummary={() => setShowHostSummary(true)}
-        />
-      );
-    }
-
-    const ownRank = gameOver.leaderboard.findIndex(
-      (entry) => entry.playerId === session?.token,
-    );
-    const ownEntry = ownRank === -1 ? undefined : gameOver.leaderboard[ownRank];
-
     return (
-      <PlayerResultScreen
-        score={ownEntry?.score ?? 0}
-        correctCount={ownEntry?.correctCount ?? 0}
-        totalQuestions={totalQuestions}
-        rank={ownRank === -1 ? gameOver.leaderboard.length : ownRank + 1}
-        totalPlayers={gameOver.leaderboard.length}
+      <PlayEndedView
+        gameOver={gameOver}
+        isHost={isHost}
+        session={session}
+        showHostSummary={showHostSummary}
+        setShowHostSummary={setShowHostSummary}
       />
     );
   }
