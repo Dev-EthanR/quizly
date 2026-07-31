@@ -1,5 +1,6 @@
 import { getSession } from "@auth/express";
 import type { NextFunction, Request, RequestHandler, Response } from "express";
+import type { ZodType } from "zod";
 import { authConfig } from "./auth.config";
 
 export function asyncHandler(
@@ -38,4 +39,17 @@ export async function requireAuth(
   } else {
     res.redirect("/");
   }
+}
+
+export function validateBody<T>(schema: ZodType<T>): RequestHandler {
+  return (req, res, next) => {
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: parsed.error.flatten() });
+      return;
+    }
+
+    req.body = parsed.data;
+    next();
+  };
 }

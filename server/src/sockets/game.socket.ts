@@ -1,4 +1,5 @@
 import type { Server, Socket } from "socket.io";
+import type { ZodType } from "zod";
 import {
   hostGameSchema,
   joinRoomSchema,
@@ -36,6 +37,20 @@ function clearPlayerDisconnectTimer(roomCode: string, token: string): void {
   }
 }
 
+function parseOrWarn<T>(
+  schema: ZodType<T>,
+  payload: unknown,
+  eventName: string,
+): T | undefined {
+  const parsed = schema.safeParse(payload);
+  if (!parsed.success) {
+    console.warn(`Invalid ${eventName} payload`, parsed.error.flatten());
+    return undefined;
+  }
+
+  return parsed.data;
+}
+
 function broadcastLobbyPlayers(io: Server, room: RoomRecord) {
   io.to(room.code).emit("lobby_players", {
     players: room.players.map(({ token, name, color, connected, muted }) => ({
@@ -55,6 +70,19 @@ function sendRoomSettings(socket: Socket, room: RoomRecord) {
   });
 }
 
+function sendRoomState(socket: Socket, roomCode: string) {
+  const roomState = gameService.getRoomState(roomCode);
+  if (roomState) {
+    socket.emit("room_state", roomState);
+  }
+}
+
+function syncClientIntoRoom(io: Server, socket: Socket, room: RoomRecord) {
+  broadcastLobbyPlayers(io, room);
+  sendRoomSettings(socket, room);
+  sendRoomState(socket, room.code);
+}
+
 function broadcastReveal(io: Server, roomCode: string) {
   const reveal = gameService.revealQuestion(roomCode);
   if (!reveal) {
@@ -68,32 +96,24 @@ function scheduleReveal(io: Server, roomCode: string, timeLimitSeconds: number) 
   setTimeout(() => broadcastReveal(io, roomCode), timeLimitSeconds * 1000);
 }
 
-function sendRoomState(socket: Socket, roomCode: string) {
-  const roomState = gameService.getRoomState(roomCode);
-  if (roomState) {
-    socket.emit("room_state", roomState);
-  }
-}
-
 export function registerGameHandlers(io: Server, socket: Socket) {
   socket.on("host_game", (payload) => {
-    const parsed = hostGameSchema.safeParse(payload);
-    if (!parsed.success) {
-      console.warn("Invalid host_game payload", parsed.error.flatten());
+    const parsed = parseOrWarn(hostGameSchema, payload, "host_game");
+    if (!parsed) {
       return;
     }
 
     const room = roomsService.hostGame({
       hostSocketId: socket.id,
-      quizId: parsed.data.quizId,
-      token: parsed.data.token,
-      userId: parsed.data.userId,
+      quizId: parsed.quizId,
+      token: parsed.token,
+      userId: parsed.userId,
       settings: {
-        randomizeQuestionOrder: parsed.data.randomizeQuestionOrder,
-        allowLateJoins: parsed.data.allowLateJoins,
-        showCorrectAnswers: parsed.data.showCorrectAnswers,
-        disableChat: parsed.data.disableChat,
-        maxPlayers: parsed.data.maxPlayers ?? null,
+        randomizeQuestionOrder: parsed.randomizeQuestionOrder,
+        allowLateJoins: parsed.allowLateJoins,
+        showCorrectAnswers: parsed.showCorrectAnswers,
+        disableChat: parsed.disableChat,
+        maxPlayers: parsed.maxPlayers ?? null,
       },
     });
 
@@ -102,27 +122,26 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   });
 
   socket.on("join_room", (payload) => {
-    const parsed = joinRoomSchema.safeParse(payload);
-    if (!parsed.success) {
-      console.warn("Invalid join_room payload", parsed.error.flatten());
+    const parsed = parseOrWarn(joinRoomSchema, payload, "join_room");
+    if (!parsed) {
       return;
     }
 
     const result = roomsService.joinRoom({
       socketId: socket.id,
-      roomCode: parsed.data.roomCode,
-      name: parsed.data.name,
-      color: parsed.data.color,
-      token: parsed.data.token,
-      userId: parsed.data.userId,
+      roomCode: parsed.roomCode,
+      name: parsed.name,
+      color: parsed.color,
+      token: parsed.token,
+      userId: parsed.userId,
     });
 
     if (!result.ok) {
       if (result.reason === "not_found") {
-        socket.emit("room_not_found", { roomCode: parsed.data.roomCode });
+        socket.emit("room_not_found", { roomCode: parsed.roomCode });
       } else {
         socket.emit("join_rejected", {
-          roomCode: parsed.data.roomCode,
+          roomCode: parsed.roomCode,
           reason: result.reason,
         });
       }
@@ -131,28 +150,23 @@ export function registerGameHandlers(io: Server, socket: Socket) {
 
     const { room } = result;
     socket.join(room.code);
-    broadcastLobbyPlayers(io, room);
-    sendRoomSettings(socket, room);
-    sendRoomState(socket, room.code);
+    syncClientIntoRoom(io, socket, room);
   });
 
   socket.on("rejoin_room", (payload) => {
-    const parsed = rejoinRoomSchema.safeParse(payload);
-    if (!parsed.success) {
-      console.warn("Invalid rejoin_room payload", parsed.error.flatten());
+    const parsed = parseOrWarn(rejoinRoomSchema, payload, "rejoin_room");
+    if (!parsed) {
       return;
     }
 
-    const { roomCode, token } = parsed.data;
+    const { roomCode, token } = parsed;
 
     const hostRoom = roomsService.rejoinAsHost({ socketId: socket.id, roomCode, token });
     if (hostRoom) {
       clearHostDisconnectTimer(roomCode);
       socket.join(roomCode);
-      broadcastLobbyPlayers(io, hostRoom);
       io.to(roomCode).emit("host_reconnected", { roomCode });
-      sendRoomSettings(socket, hostRoom);
-      sendRoomState(socket, roomCode);
+      syncClientIntoRoom(io, socket, hostRoom);
       return;
     }
 
@@ -160,9 +174,7 @@ export function registerGameHandlers(io: Server, socket: Socket) {
     if (playerRoom) {
       clearPlayerDisconnectTimer(roomCode, token);
       socket.join(roomCode);
-      broadcastLobbyPlayers(io, playerRoom);
-      sendRoomSettings(socket, playerRoom);
-      sendRoomState(socket, roomCode);
+      syncClientIntoRoom(io, socket, playerRoom);
       return;
     }
 
@@ -170,13 +182,12 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   });
 
   socket.on("kick_player", (payload) => {
-    const parsed = kickPlayerSchema.safeParse(payload);
-    if (!parsed.success) {
-      console.warn("Invalid kick_player payload", parsed.error.flatten());
+    const parsed = parseOrWarn(kickPlayerSchema, payload, "kick_player");
+    if (!parsed) {
       return;
     }
 
-    const { roomCode, token } = parsed.data;
+    const { roomCode, token } = parsed;
 
     if (!roomsService.isHost({ socketId: socket.id, roomCode })) {
       return;
@@ -202,13 +213,12 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   });
 
   socket.on("set_player_muted", (payload) => {
-    const parsed = setPlayerMutedSchema.safeParse(payload);
-    if (!parsed.success) {
-      console.warn("Invalid set_player_muted payload", parsed.error.flatten());
+    const parsed = parseOrWarn(setPlayerMutedSchema, payload, "set_player_muted");
+    if (!parsed) {
       return;
     }
 
-    const { roomCode, token, muted } = parsed.data;
+    const { roomCode, token, muted } = parsed;
 
     if (!roomsService.isHost({ socketId: socket.id, roomCode })) {
       return;
@@ -223,138 +233,132 @@ export function registerGameHandlers(io: Server, socket: Socket) {
   });
 
   socket.on("start_game", async (payload) => {
-    const parsed = startGameSchema.safeParse(payload);
-    if (!parsed.success) {
-      console.warn("Invalid start_game payload", parsed.error.flatten());
+    const parsed = parseOrWarn(startGameSchema, payload, "start_game");
+    if (!parsed) {
       return;
     }
 
     const started = await gameService.startGame({
       socketId: socket.id,
-      roomCode: parsed.data.roomCode,
+      roomCode: parsed.roomCode,
     });
     if (!started) {
       return;
     }
 
-    io.to(parsed.data.roomCode).emit("game_started", {
-      roomCode: parsed.data.roomCode,
+    io.to(parsed.roomCode).emit("game_started", {
+      roomCode: parsed.roomCode,
       questionIndex: started.questionIndex,
       totalQuestions: started.totalQuestions,
       question: toPublicQuestion(started.question, started.category),
       startedAt: started.startedAt,
     });
 
-    scheduleReveal(io, parsed.data.roomCode, started.question.timeLimitSeconds);
+    scheduleReveal(io, parsed.roomCode, started.question.timeLimitSeconds);
   });
 
   socket.on("submit_answer", (payload) => {
-    const parsed = submitAnswerSchema.safeParse(payload);
-    if (!parsed.success) {
-      console.warn("Invalid submit_answer payload", parsed.error.flatten());
+    const parsed = parseOrWarn(submitAnswerSchema, payload, "submit_answer");
+    if (!parsed) {
       return;
     }
 
     const result = gameService.submitAnswer({
       socketId: socket.id,
-      roomCode: parsed.data.roomCode,
-      questionIndex: parsed.data.questionIndex,
-      answerId: parsed.data.answerId,
+      roomCode: parsed.roomCode,
+      questionIndex: parsed.questionIndex,
+      answerId: parsed.answerId,
     });
     if (!result) {
       return;
     }
 
-    io.to(parsed.data.roomCode).emit("answer_progress", {
+    io.to(parsed.roomCode).emit("answer_progress", {
       answered: result.answeredCount,
       total: result.totalPlayers,
     });
 
     if (result.allAnswered) {
-      broadcastReveal(io, parsed.data.roomCode);
+      broadcastReveal(io, parsed.roomCode);
     }
   });
 
   socket.on("show_leaderboard", (payload) => {
-    const parsed = startGameSchema.safeParse(payload);
-    if (!parsed.success) {
-      console.warn("Invalid show_leaderboard payload", parsed.error.flatten());
+    const parsed = parseOrWarn(startGameSchema, payload, "show_leaderboard");
+    if (!parsed) {
       return;
     }
 
     const shown = gameService.markLeaderboardShown({
       socketId: socket.id,
-      roomCode: parsed.data.roomCode,
+      roomCode: parsed.roomCode,
     });
     if (!shown) {
       return;
     }
 
-    io.to(parsed.data.roomCode).emit("leaderboard_shown");
+    io.to(parsed.roomCode).emit("leaderboard_shown");
   });
 
   socket.on("next_question", async (payload) => {
-    const parsed = startGameSchema.safeParse(payload);
-    if (!parsed.success) {
-      console.warn("Invalid next_question payload", parsed.error.flatten());
+    const parsed = parseOrWarn(startGameSchema, payload, "next_question");
+    if (!parsed) {
       return;
     }
 
     const next = await gameService.nextQuestion({
       socketId: socket.id,
-      roomCode: parsed.data.roomCode,
+      roomCode: parsed.roomCode,
     });
     if (!next) {
       return;
     }
 
     if (next.ended) {
-      io.to(parsed.data.roomCode).emit("game_over", next.summary);
+      io.to(parsed.roomCode).emit("game_over", next.summary);
       return;
     }
 
-    io.to(parsed.data.roomCode).emit("question_started", {
+    io.to(parsed.roomCode).emit("question_started", {
       questionIndex: next.questionIndex,
       totalQuestions: next.totalQuestions,
       question: toPublicQuestion(next.question, next.category),
       startedAt: next.startedAt,
     });
 
-    scheduleReveal(io, parsed.data.roomCode, next.question.timeLimitSeconds);
+    scheduleReveal(io, parsed.roomCode, next.question.timeLimitSeconds);
   });
 
   socket.on("end_question", (payload) => {
-    const parsed = startGameSchema.safeParse(payload);
-    if (!parsed.success) {
-      console.warn("Invalid end_question payload", parsed.error.flatten());
+    const parsed = parseOrWarn(startGameSchema, payload, "end_question");
+    if (!parsed) {
       return;
     }
 
-    if (!roomsService.isHost({ socketId: socket.id, roomCode: parsed.data.roomCode })) {
+    if (!roomsService.isHost({ socketId: socket.id, roomCode: parsed.roomCode })) {
       return;
     }
 
     // A stale scheduleReveal timeout may still fire after this — revealQuestion's
     // phase guard makes that a harmless no-op, so no timer cancellation is needed.
-    broadcastReveal(io, parsed.data.roomCode);
+    broadcastReveal(io, parsed.roomCode);
   });
 
   socket.on("end_game", async (payload) => {
-    const parsed = startGameSchema.safeParse(payload);
-    if (!parsed.success) {
-      console.warn("Invalid end_game payload", parsed.error.flatten());
+    const parsed = parseOrWarn(startGameSchema, payload, "end_game");
+    if (!parsed) {
       return;
     }
 
     const ended = await gameService.endGame({
       socketId: socket.id,
-      roomCode: parsed.data.roomCode,
+      roomCode: parsed.roomCode,
     });
     if (!ended) {
       return;
     }
 
-    io.to(parsed.data.roomCode).emit("game_over", ended);
+    io.to(parsed.roomCode).emit("game_over", ended);
   });
 
   socket.on("disconnect", () => {

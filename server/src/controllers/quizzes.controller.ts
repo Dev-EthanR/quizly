@@ -7,6 +7,8 @@ import {
   quizCategoryLabels,
   quizCategorySchema,
   saveQuizDraftSchema,
+  type PublishQuizInput,
+  type SaveQuizDraftInput,
 } from "shared";
 import { authConfig } from "../auth.config.js";
 import { quizzesService } from "../services/quizzes.service.js";
@@ -45,14 +47,9 @@ export const quizzesController = {
   },
 
   async saveQuiz(req: Request, res: Response) {
-    const session = await getSession(req, authConfig);
-    if (!session?.user?.id) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-
     const result = await quizzesService.saveQuiz({
       id: req.params.id as string,
-      userId: session.user.id,
+      userId: req.userId,
     });
 
     if (result.status === "not_found") {
@@ -63,26 +60,16 @@ export const quizzesController = {
   },
 
   async unsaveQuiz(req: Request, res: Response) {
-    const session = await getSession(req, authConfig);
-    if (!session?.user?.id) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-
     await quizzesService.unsaveQuiz({
       id: req.params.id as string,
-      userId: session.user.id,
+      userId: req.userId,
     });
 
     res.status(204).send();
   },
 
   async listSavedQuizzes(req: Request, res: Response) {
-    const session = await getSession(req, authConfig);
-    if (!session?.user?.id) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-
-    const quizzes = await quizzesService.listSavedQuizzes(session.user.id);
+    const quizzes = await quizzesService.listSavedQuizzes(req.userId);
     res.json(quizzes);
   },
 
@@ -92,13 +79,8 @@ export const quizzesController = {
       return res.status(400).json({ error: parsed.error.flatten() });
     }
 
-    const session = await getSession(req, authConfig);
-    if (!session?.user?.id) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-
     const quizzes = await quizzesService.listMyQuizzes({
-      ownerId: session.user.id,
+      ownerId: req.userId,
       status: parsed.data.status,
     });
 
@@ -106,11 +88,6 @@ export const quizzesController = {
   },
 
   async createQuiz(req: Request, res: Response) {
-    const session = await getSession(req, authConfig);
-    if (!session?.user?.id) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-
     if (req.body?.status === "published") {
       const parsed = publishQuizSchema.safeParse(req.body);
       if (!parsed.success) {
@@ -118,7 +95,7 @@ export const quizzesController = {
       }
 
       const quiz = await quizzesService.createPublishedQuiz({
-        ownerId: session.user.id,
+        ownerId: req.userId,
         input: parsed.data,
       });
 
@@ -131,7 +108,7 @@ export const quizzesController = {
     }
 
     const quiz = await quizzesService.createQuiz({
-      ownerId: session.user.id,
+      ownerId: req.userId,
       draft: parsed.data,
     });
 
@@ -139,14 +116,9 @@ export const quizzesController = {
   },
 
   async getQuiz(req: Request, res: Response) {
-    const session = await getSession(req, authConfig);
-    if (!session?.user?.id) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
-
     const result = await quizzesService.getQuizForOwner({
       id: req.params.id as string,
-      ownerId: session.user.id,
+      ownerId: req.userId,
     });
 
     if (result.status === "not_found") {
@@ -160,20 +132,12 @@ export const quizzesController = {
   },
 
   async updateQuizDraft(req: Request, res: Response) {
-    const parsed = saveQuizDraftSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return res.status(400).json({ error: parsed.error.flatten() });
-    }
-
-    const session = await getSession(req, authConfig);
-    if (!session?.user?.id) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    const draft = req.body as SaveQuizDraftInput;
 
     const result = await quizzesService.updateQuizDraft({
       id: req.params.id as string,
-      ownerId: session.user.id,
-      draft: parsed.data,
+      ownerId: req.userId,
+      draft,
     });
 
     if (result.status === "not_found") {
@@ -187,20 +151,12 @@ export const quizzesController = {
   },
 
   async publishQuiz(req: Request, res: Response) {
-    const parsed = publishQuizSchema.safeParse(req.body);
-    if (!parsed.success) {
-      return res.status(400).json({ error: parsed.error.flatten() });
-    }
-
-    const session = await getSession(req, authConfig);
-    if (!session?.user?.id) {
-      return res.status(401).json({ error: "Unauthorized" });
-    }
+    const input = req.body as PublishQuizInput;
 
     const result = await quizzesService.publishQuiz({
       id: req.params.id as string,
-      ownerId: session.user.id,
-      input: parsed.data,
+      ownerId: req.userId,
+      input,
     });
 
     if (result.status === "not_found") {

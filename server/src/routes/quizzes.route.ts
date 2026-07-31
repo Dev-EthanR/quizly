@@ -1,5 +1,7 @@
 import { Router } from "express";
-import { asyncHandler, requireAuth } from "../middleware.js";
+import { publishQuizSchema, saveQuizDraftSchema } from "shared";
+import { asyncHandler, validateBody } from "../middleware.js";
+import { requireAuth } from "../middleware/requireAuth.js";
 import { quizzesController } from "../controllers/quizzes.controller.js";
 
 const router = Router();
@@ -40,12 +42,14 @@ router.get(
 router.patch(
   "/quizzes/:id",
   requireAuth,
+  validateBody(saveQuizDraftSchema),
   asyncHandler(quizzesController.updateQuizDraft),
 );
 
 router.post(
   "/quizzes/:id/publish",
   requireAuth,
+  validateBody(publishQuizSchema),
   asyncHandler(quizzesController.publishQuiz),
 );
 
