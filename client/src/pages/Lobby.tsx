@@ -1,18 +1,18 @@
 import { useLocation, useParams } from "react-router-dom";
-import clsx from "clsx";
-import { ROOM_CODE_REGEX } from "shared";
 import RoomNotFound from "../components/lobby/RoomNotFound";
 import HostDisconnected from "../components/lobby/HostDisconnected";
 import ReconnectingOverlay from "../components/lobby/ReconnectingOverlay";
 import HostReconnectingBanner from "../components/lobby/HostReconnectingBanner";
 import HostLobbyPanel from "../components/lobby/HostLobbyPanel";
 import ParticipantLobbyPanel from "../components/lobby/ParticipantLobbyPanel";
-import ChatPanel from "../components/lobby/ChatPanel";
+import RoomChatLayout from "../components/lobby/RoomChatLayout";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { useSocket } from "../context/useSocket";
 import { usePlayJoinFlow, type LobbyLocationState } from "../hooks/usePlayJoinFlow";
 import { useRoomPresence } from "../hooks/useRoomPresence";
+import { useRoomModerationActions } from "../hooks/useRoomModerationActions";
 import { resolveLobbyBlockingState } from "../lib/resolveLobbyBlockingState";
+import { isValidRoomCode } from "../lib/roomCode";
 
 interface LobbyLocation {
   state?: LobbyLocationState;
@@ -23,13 +23,12 @@ function Lobby() {
   const { state } = useLocation() as LobbyLocation;
   const { socket } = useSocket();
 
-  const isValidRoomCode =
-    !!roomCode && ROOM_CODE_REGEX.test(roomCode.toUpperCase());
+  const roomCodeValid = isValidRoomCode(roomCode);
   const isOnline = useOnlineStatus();
 
   const { session, players, roomNotFound, joinRejection } = usePlayJoinFlow({
     roomCode,
-    isValidRoomCode,
+    isValidRoomCode: roomCodeValid,
     state,
   });
 
@@ -40,6 +39,8 @@ function Lobby() {
     isHost,
   });
 
+  const { kickPlayer, setPlayerMuted } = useRoomModerationActions(roomCode);
+
   const handleStartGame = () => {
     if (!roomCode) {
       return;
@@ -47,22 +48,8 @@ function Lobby() {
     socket.emit("start_game", { roomCode });
   };
 
-  const handleKickPlayer = (playerId: string) => {
-    if (!roomCode) {
-      return;
-    }
-    socket.emit("kick_player", { roomCode, token: playerId });
-  };
-
-  const handleSetMuted = (playerId: string, muted: boolean) => {
-    if (!roomCode) {
-      return;
-    }
-    socket.emit("set_player_muted", { roomCode, token: playerId, muted });
-  };
-
   const blockingState = resolveLobbyBlockingState({
-    isValidRoomCode,
+    isValidRoomCode: roomCodeValid,
     roomNotFound,
     session,
     joinRejection,
@@ -100,7 +87,6 @@ function Lobby() {
 
   const displayName = state?.name ?? session?.name ?? "Guest";
   const displayColor = state?.color ?? session?.color;
-  const isMuted = players.find((p) => p.id === session?.token)?.muted ?? false;
 
   return (
     <div className="page-shell px-4 py-10">
@@ -112,11 +98,11 @@ function Lobby() {
 
       <HostReconnectingBanner show={hostReconnecting && !isHost} />
 
-      <div
-        className={clsx(
-          "mx-auto grid w-full max-w-5xl gap-6",
-          !chatDisabled && "lg:grid-cols-[1fr_320px]",
-        )}
+      <RoomChatLayout
+        roomCode={roomCode}
+        chatDisabled={chatDisabled}
+        players={players}
+        currentPlayerId={session?.token}
       >
         <div className="card-lg flex flex-col items-center justify-center bg-surface/40 px-6 py-10">
           {isHost ? (
@@ -124,8 +110,8 @@ function Lobby() {
               roomCode={roomCode}
               players={players}
               onStartGame={handleStartGame}
-              onKick={handleKickPlayer}
-              onSetMuted={handleSetMuted}
+              onKick={kickPlayer}
+              onSetMuted={setPlayerMuted}
             />
           ) : (
             <ParticipantLobbyPanel
@@ -137,15 +123,7 @@ function Lobby() {
             />
           )}
         </div>
-
-        {!chatDisabled && (
-          <ChatPanel
-            roomCode={roomCode}
-            disabled={isMuted}
-            disabledReason={isMuted ? "You have been muted by the host." : undefined}
-          />
-        )}
-      </div>
+      </RoomChatLayout>
     </div>
   );
 }

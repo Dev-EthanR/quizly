@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ROOM_CODE_REGEX } from "shared";
 import { useSocket } from "../context/useSocket";
 import { clearSession } from "../lib/session";
+import { isValidRoomCode as checkValidRoomCode } from "../lib/roomCode";
 import type { RoomSettingsPayload } from "../entities/socket";
 
 export interface UseRoomPresenceParams {
@@ -26,11 +26,10 @@ export function useRoomPresence({
   const [hostReconnecting, setHostReconnecting] = useState(false);
   const [chatDisabled, setChatDisabled] = useState(false);
 
-  const isValidRoomCode =
-    !!roomCode && ROOM_CODE_REGEX.test(roomCode.toUpperCase());
+  const roomCodeValid = checkValidRoomCode(roomCode);
 
   useEffect(() => {
-    if (!isValidRoomCode) {
+    if (!roomCodeValid) {
       return;
     }
 
@@ -71,7 +70,7 @@ export function useRoomPresence({
       socket.off("player_kicked", handlePlayerKicked);
       socket.off("room_settings", handleRoomSettings);
     };
-  }, [isValidRoomCode, socket, isHost, roomCode, navigate]);
+  }, [roomCodeValid, socket, isHost, roomCode, navigate]);
 
   return { hostDisconnected, hostReconnecting, chatDisabled };
 }

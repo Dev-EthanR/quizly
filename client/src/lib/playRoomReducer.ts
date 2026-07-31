@@ -7,7 +7,6 @@ import type {
   PublicQuestion,
   QuestionRevealPayload,
   QuestionStartedPayload,
-  RoomSettingsPayload,
   RoomStatePayload,
 } from "../entities/socket";
 
@@ -19,12 +18,8 @@ export interface PlayRoomState {
   startedAt: number;
   reveal: QuestionRevealPayload | null;
   gameOver: GameOverPayload | null;
-  hostDisconnected: boolean;
-  hostReconnecting: boolean;
   roomNotFound: boolean;
-  kicked: boolean;
   players: LobbyPlayer[];
-  chatDisabled: boolean;
   selectedAnswerId: string | null;
   answerProgress: AnswerProgressPayload | null;
 }
@@ -35,14 +30,9 @@ export type PlayRoomAction =
   | { type: "QUESTION_REVEAL"; payload: QuestionRevealPayload }
   | { type: "LEADERBOARD_SHOWN" }
   | { type: "GAME_OVER"; payload: GameOverPayload }
-  | { type: "HOST_RECONNECTING" }
-  | { type: "HOST_RECONNECTED" }
-  | { type: "HOST_DISCONNECTED"; isHost: boolean }
   | { type: "ROOM_NOT_FOUND" }
   | { type: "ROOM_STATE"; payload: RoomStatePayload; sessionToken: string | undefined }
   | { type: "LOBBY_PLAYERS"; payload: LobbyPlayersPayload }
-  | { type: "ROOM_SETTINGS"; payload: RoomSettingsPayload }
-  | { type: "PLAYER_KICKED" }
   | { type: "SELECT_ANSWER"; answerId: string };
 
 function applyRoomState(
@@ -133,22 +123,12 @@ export function playRoomReducer(
         totalQuestions: action.payload.totalQuestions,
         phase: "ended",
       };
-    case "HOST_RECONNECTING":
-      return { ...state, hostReconnecting: true };
-    case "HOST_RECONNECTED":
-      return { ...state, hostReconnecting: false };
-    case "HOST_DISCONNECTED":
-      return action.isHost ? state : { ...state, hostDisconnected: true };
     case "ROOM_NOT_FOUND":
       return { ...state, roomNotFound: true };
     case "ROOM_STATE":
       return applyRoomState(state, action.payload, action.sessionToken);
     case "LOBBY_PLAYERS":
       return { ...state, players: action.payload.players };
-    case "ROOM_SETTINGS":
-      return { ...state, chatDisabled: action.payload.disableChat };
-    case "PLAYER_KICKED":
-      return { ...state, kicked: true };
     case "SELECT_ANSWER":
       return { ...state, selectedAnswerId: action.answerId };
     default:

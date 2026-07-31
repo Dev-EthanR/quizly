@@ -20,10 +20,10 @@ import QuestionBreakdownRow from "./QuestionBreakdownRow";
 import { AVATAR_COLORS } from "../../lib/avatarColors";
 import { getInitials } from "../../lib/initials";
 import { formatResponseTime } from "../../lib/format";
-import type { HostSummaryData } from "../../entities/hostSummary";
+import type { GameOverPayload } from "../../entities/socket";
 
 interface HostSummaryScreenProps {
-  summary: HostSummaryData;
+  summary: GameOverPayload;
   onBack?: () => void;
   heading?: string;
   subheading?: ReactNode;

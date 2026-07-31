@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import clsx from "clsx";
 import { quizCategoryLabels } from "shared";
 import Modal from "../components/ui/Modal";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
@@ -11,13 +10,15 @@ import QuestionPhaseView from "../components/play/QuestionPhaseView";
 import ResultPhaseView from "../components/play/ResultPhaseView";
 import LeaderboardPhaseView from "../components/play/LeaderboardPhaseView";
 import PlayEndedView from "../components/play/PlayEndedView";
-import ChatPanel from "../components/lobby/ChatPanel";
+import RoomChatLayout from "../components/lobby/RoomChatLayout";
 import PlayerRoster from "../components/lobby/PlayerRoster";
 import HostDisconnected from "../components/lobby/HostDisconnected";
 import HostReconnectingBanner from "../components/lobby/HostReconnectingBanner";
 import RoomNotFound from "../components/lobby/RoomNotFound";
 import { useSocket } from "../context/useSocket";
 import { usePlayRoomEvents } from "../hooks/usePlayRoomEvents";
+import { useRoomPresence } from "../hooks/useRoomPresence";
+import { useRoomModerationActions } from "../hooks/useRoomModerationActions";
 import { useCountdown } from "../hooks/useCountdown";
 import { loadSession } from "../lib/session";
 import { computeLeaderboardEntries } from "../lib/leaderboard";
@@ -61,7 +62,6 @@ function Play() {
 
   const { state, dispatch } = usePlayRoomEvents({
     roomCode,
-    isHost,
     sessionToken: session?.token,
     initialQuestion: locationState?.question ?? null,
     initialQuestionIndex: locationState?.questionIndex ?? 0,
@@ -78,14 +78,18 @@ function Play() {
     startedAt,
     reveal,
     gameOver,
-    hostDisconnected,
-    hostReconnecting,
     roomNotFound,
     players,
-    chatDisabled,
     selectedAnswerId,
     answerProgress,
   } = state;
+
+  const { hostDisconnected, hostReconnecting, chatDisabled } = useRoomPresence({
+    roomCode,
+    isHost,
+  });
+
+  const { kickPlayer, setPlayerMuted } = useRoomModerationActions(roomCode);
 
   useEffect(() => {
     if (status === "disconnected") {
@@ -180,14 +184,6 @@ function Play() {
     socket.emit("next_question", { roomCode });
   };
 
-  const handleKickPlayer = (playerId: string) => {
-    socket.emit("kick_player", { roomCode, token: playerId });
-  };
-
-  const handleSetMuted = (playerId: string, muted: boolean) => {
-    socket.emit("set_player_muted", { roomCode, token: playerId, muted });
-  };
-
   const endQuestion = () => {
     socket.emit("end_question", { roomCode });
   };
@@ -226,17 +222,16 @@ function Play() {
   const categoryLabel = question.category
     ? quizCategoryLabels[question.category]
     : "Quiz";
-  const isMuted = players.find((p) => p.id === session?.token)?.muted ?? false;
 
   return (
     <div className="page-shell px-4 py-10">
       <HostReconnectingBanner show={hostReconnecting && !isHost} />
 
-      <div
-        className={clsx(
-          "mx-auto grid w-full max-w-5xl gap-6",
-          !chatDisabled && "lg:grid-cols-[1fr_320px]",
-        )}
+      <RoomChatLayout
+        roomCode={roomCode}
+        chatDisabled={chatDisabled}
+        players={players}
+        currentPlayerId={session?.token}
       >
         <div className="flex min-h-0 flex-col gap-6">
           <PlayToolbar
@@ -295,15 +290,7 @@ function Play() {
             />
           )}
         </div>
-
-        {!chatDisabled && (
-          <ChatPanel
-            roomCode={roomCode}
-            disabled={isMuted}
-            disabledReason={isMuted ? "You have been muted by the host." : undefined}
-          />
-        )}
-      </div>
+      </RoomChatLayout>
 
       {showManagePlayers && (
         <Modal
@@ -314,8 +301,8 @@ function Play() {
           <PlayerRoster
             players={players}
             currentPlayerId={session?.token}
-            onKick={handleKickPlayer}
-            onSetMuted={handleSetMuted}
+            onKick={kickPlayer}
+            onSetMuted={setPlayerMuted}
           />
         </Modal>
       )}
