@@ -1,27 +1,21 @@
 import "dotenv/config";
 import type { ExpressAuthConfig } from "@auth/express";
 import Google from "@auth/express/providers/google";
-import { prisma } from "./lib/prisma";
+import { prisma } from "./lib/prisma.js";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import Credentials from "@auth/express/providers/credentials";
 import bcrypt from "bcrypt";
-import type { User } from "./generated/prisma/browser";
+import type { User } from "./generated/prisma/browser.js";
+import { requireEnv } from "./lib/env.js";
 
-const secret = process.env.AUTH_SECRET;
-if (!secret) {
-  throw new Error("Missing AUTH_SECRET environment variable");
-}
-
-const frontendUrl = process.env.PUBLIC_FRONTEND_URL;
-if (!frontendUrl) {
-  throw new Error("Missing PUBLIC_FRONTEND_URL environment variable");
-}
+const secret = requireEnv("AUTH_SECRET");
+const frontendUrl = requireEnv("PUBLIC_FRONTEND_URL");
 
 export const authConfig: ExpressAuthConfig = {
   providers: [
     Google({
-      clientId: process.env.AUTH_GOOGLE_ID!,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+      clientId: requireEnv("AUTH_GOOGLE_ID"),
+      clientSecret: requireEnv("AUTH_GOOGLE_SECRET"),
       allowDangerousEmailAccountLinking: true,
     }),
     Credentials({

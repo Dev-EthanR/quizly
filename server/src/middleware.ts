@@ -1,7 +1,7 @@
 import { getSession } from "@auth/express";
 import type { NextFunction, Request, RequestHandler, Response } from "express";
 import type { ZodType } from "zod";
-import { authConfig } from "./auth.config";
+import { authConfig } from "./auth.config.js";
 
 export function asyncHandler(
   handler: (

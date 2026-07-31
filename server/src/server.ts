@@ -1,23 +1,25 @@
 import type { Request, Response } from "express";
 import express from "express";
 import cors from "cors";
-import { errorHandler, requireAuth } from "./middleware";
-import { authHandler } from "./routes/auth.route";
-import registerRouter from "./routes/register.route";
-import quizzesRouter from "./routes/quizzes.route";
-import usersRouter from "./routes/users.route";
-import statsRouter from "./routes/stats.route";
+import { errorHandler, requireAuth } from "./middleware.js";
+import { authHandler } from "./routes/auth.route.js";
+import registerRouter from "./routes/register.route.js";
+import quizzesRouter from "./routes/quizzes.route.js";
+import usersRouter from "./routes/users.route.js";
+import statsRouter from "./routes/stats.route.js";
 import { Server } from "socket.io";
 import { createServer } from "node:http";
 import { registerGameHandlers } from "./sockets/game.socket.js";
 import { registerChatHandlers } from "./sockets/chat.socket.js";
+import { requireEnv } from "./lib/env.js";
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
+const frontendUrl = requireEnv("PUBLIC_FRONTEND_URL");
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.PUBLIC_FRONTEND_URL ?? "http://localhost:5173",
+    origin: frontendUrl,
     credentials: true,
   },
 });
@@ -25,7 +27,7 @@ const io = new Server(server, {
 app.set("trust proxy", true);
 app.use(
   cors({
-    origin: process.env.PUBLIC_FRONTEND_URL ?? "http://localhost:5173",
+    origin: frontendUrl,
     credentials: true,
   }),
 );
@@ -63,5 +65,5 @@ io.on("connection", (socket) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { emailSchema } from "./auth";
+import { emailSchema } from "./auth.js";
 
 export const AVATAR_COLOR_IDS = [
   "violet",
