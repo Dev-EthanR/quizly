@@ -5,7 +5,7 @@ import GoogleSignInButton from "../components/auth/GoogleSignInButton";
 import SignInForm from "../components/auth/SignInForm";
 import SignUpForm from "../components/auth/SignUpForm";
 
-const HOST_PATH = "/host";
+const HOST_PATH = "/dashboard";
 
 interface SignInLocation {
   state?: {
