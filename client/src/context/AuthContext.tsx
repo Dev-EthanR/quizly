@@ -72,6 +72,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
     ) => {
       await signInWithCredentials(payload, callbackUrl);
       await queryClient.invalidateQueries({ queryKey: ["session"] });
+      const refreshed = queryClient.getQueryData(["session"]) as
+        | { user: AuthState["user"] }
+        | null
+        | undefined;
+      dispatch({ type: "SESSION_RESOLVED", user: refreshed?.user ?? null });
     },
     [queryClient],
   );
