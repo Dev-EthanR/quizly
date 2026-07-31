@@ -12,6 +12,7 @@ import MyQuizzes from "./pages/MyQuizzes";
 import QuizBuilder from "./pages/QuizBuilder";
 import Settings from "./pages/Settings";
 import HostedSessionSummary from "./pages/HostedSessionSummary";
+import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 function App() {
@@ -33,6 +34,7 @@ function App() {
         <Route path="/quizzes/:quizId/edit" element={<QuizBuilder />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }
