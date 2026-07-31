@@ -14,6 +14,7 @@ import RoomChatLayout from "../components/lobby/RoomChatLayout";
 import PlayerRoster from "../components/lobby/PlayerRoster";
 import HostDisconnected from "../components/lobby/HostDisconnected";
 import HostReconnectingBanner from "../components/lobby/HostReconnectingBanner";
+import ReconnectingOverlay from "../components/lobby/ReconnectingOverlay";
 import RoomNotFound from "../components/lobby/RoomNotFound";
 import { useSocket } from "../context/useSocket";
 import { usePlayRoomEvents } from "../hooks/usePlayRoomEvents";
@@ -225,6 +226,8 @@ function Play() {
 
   return (
     <div className="page-shell px-4 py-10">
+      {status !== "connected" && <ReconnectingOverlay />}
+
       <HostReconnectingBanner show={hostReconnecting && !isHost} />
 
       <RoomChatLayout

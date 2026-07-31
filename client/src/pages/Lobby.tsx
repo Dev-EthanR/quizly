@@ -21,10 +21,11 @@ interface LobbyLocation {
 function Lobby() {
   const { roomCode } = useParams();
   const { state } = useLocation() as LobbyLocation;
-  const { socket } = useSocket();
+  const { socket, status } = useSocket();
 
   const roomCodeValid = isValidRoomCode(roomCode);
   const isOnline = useOnlineStatus();
+  const isReconnecting = !isOnline || status !== "connected";
 
   const { session, players, roomNotFound, joinRejection } = usePlayJoinFlow({
     roomCode,
@@ -90,7 +91,7 @@ function Lobby() {
 
   return (
     <div className="page-shell px-4 py-10">
-      {!isOnline && <ReconnectingOverlay />}
+      {isReconnecting && <ReconnectingOverlay />}
 
       <h1 className="heading mb-8 text-center text-2xl">
         Quiz<span className="text-primary">zly</span>
