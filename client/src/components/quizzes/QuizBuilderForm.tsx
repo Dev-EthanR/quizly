@@ -29,7 +29,7 @@ function QuizBuilderForm({ quizId, quiz }: QuizBuilderFormProps) {
   const { state, dispatch } = useQuizBuilder();
   const isPublished = quiz?.status === "published";
   const [isGenerateQuizModalOpen, setIsGenerateQuizModalOpen] = useState(false);
-  const generation = useGenerateQuiz(state.title);
+  const generation = useGenerateQuiz(state.title, state.questions);
 
   const handleAddGeneratedQuestions = () => {
     const accepted = (generation.suggestions ?? []).filter((question) =>

@@ -27,13 +27,17 @@ export interface UseGenerateQuizResult {
   reset: () => void;
 }
 
-export function useGenerateQuiz(title: string): UseGenerateQuizResult {
+export function useGenerateQuiz(
+  title: string,
+  existingQuestions: QuizQuestionDraft[] = [],
+): UseGenerateQuizResult {
   const [questionCount, setQuestionCount] = useState(DEFAULT_QUESTION_COUNT);
   const [allowTrueFalse, setAllowTrueFalse] = useState(false);
   const [allowMultipleAnswers, setAllowMultipleAnswers] = useState(false);
   const [suggestions, setSuggestions] = useState<QuizQuestionDraft[] | null>(null);
   const [includedIds, setIncludedIds] = useState<Set<string>>(new Set());
   const [attempts, setAttempts] = useState(0);
+  const [priorPrompts, setPriorPrompts] = useState<string[]>([]);
 
   const mutation = useMutation({
     mutationFn: () =>
@@ -42,10 +46,18 @@ export function useGenerateQuiz(title: string): UseGenerateQuizResult {
         questionCount,
         allowTrueFalse,
         allowMultipleAnswers,
+        excludeQuestionPrompts: [
+          ...existingQuestions.map((question) => question.prompt),
+          ...priorPrompts,
+        ],
       }),
     onSuccess: (result) => {
       setSuggestions(result.questions);
       setIncludedIds(new Set(result.questions.map((question) => question.id)));
+      setPriorPrompts((prompts) => [
+        ...prompts,
+        ...result.questions.map((question) => question.prompt),
+      ]);
       setAttempts((count) => count + 1);
     },
   });
@@ -92,6 +104,7 @@ export function useGenerateQuiz(title: string): UseGenerateQuizResult {
       setSuggestions(null);
       setIncludedIds(new Set());
       setAttempts(0);
+      setPriorPrompts([]);
       mutation.reset();
     },
   };

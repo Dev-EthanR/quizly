@@ -54,6 +54,7 @@ interface GenerateQuizFromTitleParams {
   questionCount: number;
   allowTrueFalse: boolean;
   allowMultipleAnswers: boolean;
+  excludeQuestionPrompts: string[];
 }
 
 export interface GeneratedAnswers {
@@ -158,12 +159,14 @@ export async function generateQuizFromTitle({
   questionCount,
   allowTrueFalse,
   allowMultipleAnswers,
+  excludeQuestionPrompts,
 }: GenerateQuizFromTitleParams): Promise<GeneratedQuiz> {
   const { data } = await api.post<GeneratedQuiz>("/api/quizzes/generate", {
     title,
     questionCount,
     allowTrueFalse,
     allowMultipleAnswers,
+    excludeQuestionPrompts,
   });
   return data;
 }

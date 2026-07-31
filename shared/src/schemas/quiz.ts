@@ -152,6 +152,7 @@ export const generateQuizSchema = z.object({
     .max(GENERATE_QUIZ_QUESTION_COUNT_BOUNDS.max),
   allowTrueFalse: z.boolean().default(false),
   allowMultipleAnswers: z.boolean().default(false),
+  excludeQuestionPrompts: z.array(z.string().trim().min(1)).max(200).default([]),
 });
 
 export type GenerateQuizInput = z.infer<typeof generateQuizSchema>;

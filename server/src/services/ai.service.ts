@@ -11,6 +11,7 @@ interface GenerateQuizParams {
   questionCount: number;
   allowTrueFalse: boolean;
   allowMultipleAnswers: boolean;
+  excludeQuestionPrompts: string[];
 }
 
 interface GenerateAnswersParams {
@@ -88,6 +89,7 @@ export const aiService = {
     questionCount,
     allowTrueFalse,
     allowMultipleAnswers,
+    excludeQuestionPrompts,
   }: GenerateQuizParams) {
     const questionTypeInstructions = [
       allowTrueFalse
@@ -100,13 +102,23 @@ export const aiService = {
         : "Every question must have exactly one correct answer.",
     ].join(" ");
 
+    const avoidDuplicatesInstructions =
+      excludeQuestionPrompts.length > 0
+        ? " This quiz already has these questions — do not repeat them or write close " +
+          "rephrasings of them: " +
+          excludeQuestionPrompts.map((prompt) => `"${prompt}"`).join("; ") +
+          "."
+        : "";
+
     const raw = await createStructuredCompletion({
       schemaName: "quiz_generation",
       schema: quizGenerationJsonSchema,
       systemPrompt:
         "You are a trivia quiz writer for a live multiplayer quiz game called Quizzly. " +
         `Write engaging, factually accurate, unambiguous trivia questions. ${questionTypeInstructions}`,
-      userPrompt: `Generate exactly ${questionCount} trivia questions for a quiz titled "${title}".`,
+      userPrompt:
+        `Generate exactly ${questionCount} trivia questions for a quiz titled "${title}".` +
+        avoidDuplicatesInstructions,
     });
 
     const parsed = aiQuizResponseSchema.safeParse(raw);

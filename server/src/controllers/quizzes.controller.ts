@@ -189,7 +189,7 @@ export const quizzesController = {
   },
 
   async generateQuiz(req: Request, res: Response) {
-    const { title, questionCount, allowTrueFalse, allowMultipleAnswers } =
+    const { title, questionCount, allowTrueFalse, allowMultipleAnswers, excludeQuestionPrompts } =
       req.body as GenerateQuizInput;
 
     const result = await aiService.generateQuiz({
@@ -197,6 +197,7 @@ export const quizzesController = {
       questionCount,
       allowTrueFalse,
       allowMultipleAnswers,
+      excludeQuestionPrompts,
     });
     res.json(result);
   },
