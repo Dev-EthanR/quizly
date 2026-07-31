@@ -88,7 +88,7 @@ function PlayerResultScreen({
 
           {status === "authenticated" ? (
             <Link
-              to="/host"
+              to="/dashboard"
               className="text-sm font-semibold text-primary hover:underline"
             >
               Go to Dashboard
