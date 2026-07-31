@@ -42,7 +42,7 @@ function ProfileAvatarField({
 
   return (
     <div>
-      <p className="mb-2 text-sm font-medium text-muted">Avatar</p>
+      <p className="field-label mb-2">Avatar</p>
       <div className="flex items-end gap-4">
         <div className="relative">
           {image ? (
@@ -89,7 +89,7 @@ function ProfileAvatarField({
         </div>
 
         <div>
-          <p className="mb-2 text-sm font-medium text-muted">
+          <p className="field-label mb-2">
             Or pick a color
           </p>
           <ColorSwatchPicker value={avatarColor} onChange={onColorChange} />

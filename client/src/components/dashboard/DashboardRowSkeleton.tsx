@@ -2,7 +2,7 @@ import Skeleton from "../ui/Skeleton";
 
 function DashboardRowSkeleton() {
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 sm:flex-row sm:items-center">
+    <div className="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
       <Skeleton className="h-16 w-24 shrink-0 rounded-lg" />
 
       <div className="flex flex-1 flex-col gap-2">

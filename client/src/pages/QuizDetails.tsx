@@ -23,10 +23,10 @@ function QuizDetails() {
   const notFound = isAxiosError(error) && error.response?.status === 404;
 
   return (
-    <div className="min-h-screen">
+    <div className="page-shell">
       <Navbar />
 
-      <div className="mx-auto max-w-5xl px-4 py-10">
+      <div className="page-container max-w-5xl">
         <Link
           to="/discovery"
           className="mb-6 flex w-fit items-center gap-2 text-sm font-semibold text-muted hover:text-foreground"

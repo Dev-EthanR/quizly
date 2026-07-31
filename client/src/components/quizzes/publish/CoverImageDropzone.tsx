@@ -21,7 +21,7 @@ function CoverImageDropzone({ dropzone }: CoverImageDropzoneProps) {
 
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-sm font-medium text-muted">Cover thumbnail</span>
+      <span className="field-label">Cover thumbnail</span>
       <div
         role="button"
         tabIndex={0}
@@ -60,7 +60,7 @@ function CoverImageDropzone({ dropzone }: CoverImageDropzoneProps) {
           </>
         ) : (
           <div className="flex flex-col items-center gap-1 text-center">
-            <span className="text-sm font-medium text-muted">
+            <span className="field-label">
               Click or drag an image here
             </span>
             <span className="text-xs text-muted">16:9 recommended</span>

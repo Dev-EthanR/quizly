@@ -23,7 +23,7 @@ function LeaderboardPhaseView({
 }: LeaderboardPhaseViewProps) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center gap-4 py-6">
-      <h2 className="text-2xl font-bold text-foreground">Leaderboard</h2>
+      <h2 className="heading text-2xl">Leaderboard</h2>
       <Leaderboard entries={entries} currentPlayerId={currentPlayerId} />
       {isHost && (
         <div className="flex flex-col items-center gap-3">

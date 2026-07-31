@@ -36,7 +36,7 @@ function Modal({
         aria-modal="true"
         aria-label={ariaLabel}
         className={clsx(
-          "flex max-h-[90vh] w-full flex-col overflow-hidden rounded-xl border border-border bg-surface",
+          "card flex max-h-[90vh] w-full flex-col overflow-hidden",
           maxWidthClassName,
         )}
       >

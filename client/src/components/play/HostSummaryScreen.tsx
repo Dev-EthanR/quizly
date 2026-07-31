@@ -49,9 +49,9 @@ function HostSummaryScreen({ summary, onBack, heading, subheading }: HostSummary
   const [winner, ...rest] = leaderboard;
 
   return (
-    <div className="flex min-h-screen flex-col items-center gap-8 px-4 py-16">
+    <div className="page-shell flex flex-col items-center gap-8 px-4 py-16">
       <div className="flex flex-col items-center gap-1 text-center">
-        <h1 className="text-3xl font-bold text-foreground">{heading ?? "Game Summary"}</h1>
+        <h1 className="heading text-3xl">{heading ?? "Game Summary"}</h1>
         {subheading && <p className="text-sm text-muted">{subheading}</p>}
       </div>
 

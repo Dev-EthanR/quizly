@@ -10,9 +10,9 @@ interface QuestionPreviewPanelProps {
 function QuestionPreviewPanel({ question, index }: QuestionPreviewPanelProps) {
   return (
     <div className="flex h-full flex-col gap-4">
-      <h2 className="text-lg font-semibold text-foreground">Player preview</h2>
+      <h2 className="section-title">Player preview</h2>
 
-      <div className="flex flex-1 flex-col gap-4 rounded-xl border border-border bg-background p-5">
+      <div className="card flex flex-1 flex-col gap-4 bg-background p-5">
         {question ? (
           <>
             <div className="flex items-center justify-between">

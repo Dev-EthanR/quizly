@@ -21,7 +21,7 @@ interface DifficultySelectProps {
 function DifficultySelect({ value, onChange, error }: DifficultySelectProps) {
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-sm font-medium text-muted">Difficulty</span>
+      <span className="field-label">Difficulty</span>
       <SegmentedControl
         options={DIFFICULTY_OPTIONS}
         value={value}

@@ -21,7 +21,7 @@ function HostedSessionRow({ session }: HostedSessionRowProps) {
           navigate(`/dashboard/hosted/${session.id}`);
         }
       }}
-      className="flex cursor-pointer flex-col gap-4 rounded-xl border border-border bg-surface p-4 transition-colors hover:border-primary/40 sm:flex-row sm:items-center"
+      className="card flex cursor-pointer flex-col gap-4 p-4 transition-colors hover:border-primary/40 sm:flex-row sm:items-center"
     >
       <ImageFallback
         src={session.quizCoverImage}
@@ -30,7 +30,7 @@ function HostedSessionRow({ session }: HostedSessionRowProps) {
       />
 
       <div className="flex min-w-0 flex-1 flex-col gap-2">
-        <h3 className="truncate font-semibold text-foreground">
+        <h3 className="truncate-title">
           {session.quizTitle}
         </h3>
 

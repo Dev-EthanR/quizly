@@ -124,7 +124,7 @@ function AchievementCard({ achievement }: AchievementCardProps) {
   return (
     <div
       className={clsx(
-        "flex flex-col items-center gap-3 rounded-xl border bg-surface p-4 text-center transition-colors",
+        "card flex flex-col items-center gap-3 p-4 text-center transition-colors",
         achievement.unlocked ? style.cardBorder : "border-border opacity-50",
       )}
     >

@@ -294,10 +294,10 @@ function Lobby() {
   const isMuted = players.find((p) => p.id === session?.token)?.muted ?? false;
 
   return (
-    <div className="min-h-screen px-4 py-10">
+    <div className="page-shell px-4 py-10">
       {!isOnline && <ReconnectingOverlay />}
 
-      <h1 className="mb-8 text-center text-2xl font-bold text-foreground">
+      <h1 className="heading mb-8 text-center text-2xl">
         Quiz<span className="text-primary">zly</span>
       </h1>
 
@@ -309,7 +309,7 @@ function Lobby() {
           !chatDisabled && "lg:grid-cols-[1fr_320px]",
         )}
       >
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-border bg-surface/40 px-6 py-10">
+        <div className="card-lg flex flex-col items-center justify-center bg-surface/40 px-6 py-10">
           {isHost ? (
             <HostLobbyPanel
               roomCode={roomCode}

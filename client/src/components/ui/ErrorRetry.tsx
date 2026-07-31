@@ -9,7 +9,7 @@ interface ErrorRetryProps {
 
 function ErrorRetry({ message, onRetry, children }: ErrorRetryProps) {
   return (
-    <div className="flex flex-col items-center gap-3 py-24 text-center">
+    <div className="empty-state">
       <p className="text-danger">{message}</p>
       <div className="flex gap-3">
         <Button type="button" variant="secondary" onClick={onRetry}>

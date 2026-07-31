@@ -14,7 +14,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="flex flex-col gap-1">
         {label && (
-          <label htmlFor={inputId} className="text-sm font-medium text-muted">
+          <label htmlFor={inputId} className="field-label">
             {label}
           </label>
         )}
@@ -22,8 +22,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           id={inputId}
           className={clsx(
-            "rounded-lg border bg-background px-4 py-3 text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary",
-            error ? "border-danger" : "border-border",
+            "field-input placeholder:text-muted",
+            error && "border-danger",
             className,
           )}
           {...props}

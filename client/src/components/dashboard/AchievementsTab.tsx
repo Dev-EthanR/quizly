@@ -25,7 +25,7 @@ function AchievementsTab({
         {Array.from({ length: ACHIEVEMENT_SKELETON_COUNT }).map((_, index) => (
           <div
             key={index}
-            className="h-28 animate-pulse rounded-xl border border-border bg-surface"
+            className="card h-28 animate-pulse"
           />
         ))}
       </div>

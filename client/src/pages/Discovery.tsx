@@ -20,12 +20,12 @@ function Discovery() {
   const [tab, setTab] = useState<DiscoveryTab>("browse");
 
   return (
-    <div className="min-h-screen">
+    <div className="page-shell">
       <Navbar />
 
-      <div className="mx-auto max-w-360 px-4 py-10">
+      <div className="page-container max-w-360">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-3xl font-bold text-foreground">Discover Quizzes</h1>
+          <h1 className="heading text-3xl">Discover Quizzes</h1>
 
           <PillTabs options={TAB_OPTIONS} value={tab} onChange={setTab} />
         </div>

@@ -13,7 +13,7 @@ function TagsInput({ state, maxTags, error }: TagsInputProps) {
 
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor="quiz-tags" className="text-sm font-medium text-muted">
+      <label htmlFor="quiz-tags" className="field-label">
         Tags
       </label>
       <div

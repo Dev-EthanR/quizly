@@ -43,11 +43,11 @@ function Settings() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="page-shell">
       <Navbar />
 
-      <div className="mx-auto max-w-2xl px-4 py-10">
-        <h1 className="text-3xl font-bold text-foreground">Settings</h1>
+      <div className="page-container max-w-2xl">
+        <h1 className="heading text-3xl">Settings</h1>
 
         <div className="mt-8">
           {isLoading && (
@@ -69,8 +69,8 @@ function Settings() {
               noValidate
               className="flex flex-col gap-8"
             >
-              <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-6">
-                <h2 className="text-lg font-semibold text-foreground">
+              <div className="card flex flex-col gap-4 p-6">
+                <h2 className="section-title">
                   Profile
                 </h2>
 
@@ -107,8 +107,8 @@ function Settings() {
                 />
               </div>
 
-              <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-6">
-                <h2 className="text-lg font-semibold text-foreground">
+              <div className="card flex flex-col gap-4 p-6">
+                <h2 className="section-title">
                   Connected accounts
                 </h2>
                 <GoogleConnectionCard

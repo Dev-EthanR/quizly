@@ -37,7 +37,7 @@ function PodiumPlace({ place, entry }: PodiumPlaceProps) {
   return (
     <div className="flex flex-1 flex-col items-center gap-2">
       <FiAward className={clsx("h-8 w-8", PODIUM_ICON_COLOR_CLASSES[place])} />
-      <span className="max-w-[7rem] truncate font-semibold text-foreground">
+      <span className="truncate-title max-w-[7rem]">
         {entry.name}
       </span>
       <span className="text-sm font-bold text-primary">{entry.score} pts</span>
@@ -58,8 +58,8 @@ function PodiumScreen({ leaderboard, onViewSummary }: PodiumScreenProps) {
   const [first, second, third, ...rest] = leaderboard;
 
   return (
-    <div className="flex min-h-screen flex-col items-center gap-10 px-4 py-16">
-      <h1 className="text-3xl font-bold text-foreground">Final Results</h1>
+    <div className="page-shell flex flex-col items-center gap-10 px-4 py-16">
+      <h1 className="heading text-3xl">Final Results</h1>
 
       <div className="flex w-full max-w-2xl items-end justify-center gap-4">
         {second && <PodiumPlace place={2} entry={second} />}

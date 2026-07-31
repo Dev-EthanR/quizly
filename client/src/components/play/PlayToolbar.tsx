@@ -27,7 +27,7 @@ function PlayToolbar({
 }: PlayToolbarProps) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-sm font-medium text-muted">
+      <span className="field-label">
         Question {questionIndex + 1} of {totalQuestions}
       </span>
       <div className="flex items-center gap-3">

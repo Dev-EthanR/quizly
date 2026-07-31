@@ -18,7 +18,7 @@ function AvatarColorField({
 
   return (
     <div>
-      <p className="mb-2 text-sm font-medium text-muted">Pick your color</p>
+      <p className="field-label mb-2">Pick your color</p>
       <div className="flex items-end gap-3">
         <ColorSwatchPicker value={value} onChange={onChange} />
         <Avatar initials={initials} bgClass={selectedColor.bgClass} />

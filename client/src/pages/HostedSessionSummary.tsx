@@ -9,7 +9,7 @@ function HostedSessionSummary() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4 text-center">
+      <div className="page-shell flex items-center justify-center px-4 text-center">
         <p className="text-muted">Loading game summary...</p>
       </div>
     );
@@ -17,7 +17,7 @@ function HostedSessionSummary() {
 
   if (isError || !data) {
     return (
-      <div className="flex min-h-screen items-center justify-center px-4">
+      <div className="page-shell flex items-center justify-center px-4">
         <ErrorRetry
           message="Couldn't load this game's summary."
           onRetry={() => refetch()}

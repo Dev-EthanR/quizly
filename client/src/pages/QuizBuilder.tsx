@@ -57,7 +57,7 @@ function QuizBuilder() {
   const { quizId } = useParams<QuizBuilderRouteParams>();
 
   return (
-    <div className="min-h-screen">
+    <div className="page-shell">
       <Navbar />
       {quizId ? (
         <QuizBuilderEditLoader quizId={quizId} />

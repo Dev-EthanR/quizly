@@ -14,7 +14,7 @@ function QuestionPromptHeader({
       <span className="text-sm font-semibold text-primary">
         {categoryLabel} &middot; {points} pts
       </span>
-      <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
+      <h1 className="heading text-2xl sm:text-3xl">
         {prompt}
       </h1>
     </div>

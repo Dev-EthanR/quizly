@@ -13,7 +13,7 @@ function CategorySelect({ value, onChange, error }: CategorySelectProps) {
 
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor="quiz-category" className="text-sm font-medium text-muted">
+      <label htmlFor="quiz-category" className="field-label">
         Category
       </label>
       <select
@@ -23,10 +23,7 @@ function CategorySelect({ value, onChange, error }: CategorySelectProps) {
           onChange(event.target.value as QuizCategory | "")
         }
         disabled={categoriesQuery.isLoading}
-        className={clsx(
-          "rounded-lg border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary",
-          error ? "border-danger" : "border-border",
-        )}
+        className={clsx("field-input", error && "border-danger")}
       >
         <option value="">
           {categoriesQuery.isLoading ? "Loading categories..." : "Select a category"}

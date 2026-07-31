@@ -386,7 +386,7 @@ function Play() {
   if (phase === "ended") {
     if (!gameOver) {
       return (
-        <div className="flex min-h-screen items-center justify-center px-4 text-center">
+        <div className="page-shell flex items-center justify-center px-4 text-center">
           <p className="text-muted">Tallying final results...</p>
         </div>
       );
@@ -442,7 +442,7 @@ function Play() {
   const isMuted = players.find((p) => p.id === session?.token)?.muted ?? false;
 
   return (
-    <div className="min-h-screen px-4 py-10">
+    <div className="page-shell px-4 py-10">
       <HostReconnectingBanner show={hostReconnecting && !isHost} />
 
       <div

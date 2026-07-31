@@ -47,7 +47,7 @@ function VisibilitySelect({ value, onChange, compact = false }: VisibilitySelect
 
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-sm font-medium text-muted">Visibility</span>
+      <span className="field-label">Visibility</span>
       <div className="flex flex-col gap-3">
         {VISIBILITY_OPTIONS.map((option) => {
           const isSelected = value === option.value;

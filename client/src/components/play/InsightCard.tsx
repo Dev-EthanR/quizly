@@ -10,7 +10,7 @@ interface InsightCardProps {
 
 function InsightCard({ icon, tone, label, value }: InsightCardProps) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4">
+    <div className="card flex items-center gap-3 p-4">
       <span
         className={clsx(
           "flex h-10 w-10 shrink-0 items-center justify-center rounded-full",
@@ -23,7 +23,7 @@ function InsightCard({ icon, tone, label, value }: InsightCardProps) {
       </span>
       <div className="flex min-w-0 flex-col">
         <span className="text-xs text-muted">{label}</span>
-        <span className="truncate font-semibold text-foreground">{value}</span>
+        <span className="truncate-title">{value}</span>
       </div>
     </div>
   );

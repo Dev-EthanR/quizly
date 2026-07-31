@@ -4,11 +4,11 @@ import Button from "../ui/Button";
 
 function QuizNotFoundState() {
   return (
-    <div className="flex flex-col items-center gap-3 py-24 text-center">
+    <div className="empty-state">
       <div className="flex h-16 w-16 items-center justify-center rounded-full border border-danger/40 bg-danger/10 text-danger">
         <FiAlertTriangle size={28} />
       </div>
-      <h1 className="text-2xl font-bold text-foreground">Quiz not found</h1>
+      <h1 className="heading text-2xl">Quiz not found</h1>
       <p className="text-muted">
         This quiz may have been unpublished or made private.
       </p>

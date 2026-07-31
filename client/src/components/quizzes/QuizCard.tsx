@@ -11,7 +11,7 @@ interface QuizCardProps {
 
 function QuizCard({ quiz }: QuizCardProps) {
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 transition-colors hover:border-primary sm:flex-row sm:items-center">
+    <div className="card flex flex-col gap-4 p-4 transition-colors hover:border-primary sm:flex-row sm:items-center">
       <Link
         to={`/quizzes/${quiz.id}/edit`}
         className="flex min-w-0 flex-1 items-center gap-4"
@@ -24,7 +24,7 @@ function QuizCard({ quiz }: QuizCardProps) {
 
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <div className="flex min-w-0 items-center gap-2">
-            <h3 className="truncate font-semibold text-foreground">
+            <h3 className="truncate-title">
               {quiz.title}
             </h3>
             <QuizStatusBadge status={quiz.status} />

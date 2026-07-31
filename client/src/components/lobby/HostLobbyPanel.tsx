@@ -24,11 +24,11 @@ function HostLobbyPanel({
   return (
     <div className="flex w-full flex-col items-center gap-6 text-center">
       <div className="flex flex-col items-center gap-1">
-        <h1 className="text-2xl font-bold text-foreground">You're hosting</h1>
+        <h1 className="heading text-2xl">You're hosting</h1>
         <p className="text-muted">Players can join with this code</p>
       </div>
 
-      <div className="flex items-center gap-3 rounded-2xl border border-border bg-surface px-8 py-6">
+      <div className="card-lg flex items-center gap-3 px-8 py-6">
         <span className="text-5xl font-bold tracking-[0.3em] text-primary">
           {roomCode}
         </span>
@@ -46,7 +46,7 @@ function HostLobbyPanel({
         </button>
       </div>
 
-      <div className="flex items-center gap-2 text-sm font-medium text-muted">
+      <div className="field-label flex items-center gap-2">
         <FiUsers className="h-4 w-4" />
         <span>
           {players.length} {players.length === 1 ? "player" : "players"}{" "}

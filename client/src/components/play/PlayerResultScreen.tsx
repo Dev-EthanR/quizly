@@ -26,8 +26,8 @@ function PlayerResultScreen({
   const isTopThree = totalPlayers > 0 && rank <= 3;
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-16 text-center">
-      <div className="flex w-full max-w-md flex-col items-center gap-6 rounded-2xl border border-border bg-surface p-8">
+    <div className="page-shell flex flex-col items-center justify-center gap-6 px-4 py-16 text-center">
+      <div className="card-lg flex w-full max-w-md flex-col items-center gap-6 p-8">
         <div className="flex flex-col items-center gap-3">
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary">
             <FiAward className="h-7 w-7" />
@@ -51,7 +51,7 @@ function PlayerResultScreen({
           )}
         </div>
 
-        <div className="h-px w-full bg-border" />
+        <div className="divider w-full" />
 
         <div
           className={clsx(
@@ -76,7 +76,7 @@ function PlayerResultScreen({
           )}
         </div>
 
-        <div className="h-px w-full bg-border" />
+        <div className="divider w-full" />
 
         <div className="flex w-full flex-col items-center gap-3">
           <Link to="/" className="w-full">

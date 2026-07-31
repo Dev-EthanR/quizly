@@ -48,7 +48,7 @@ function QuestionCard({
       onClick={onSelect}
       onKeyDown={handleKeyDown}
       className={clsx(
-        "flex cursor-pointer items-center gap-3 rounded-xl border bg-surface p-4 transition-colors",
+        "card flex cursor-pointer items-center gap-3 p-4 transition-colors",
         isSelected
           ? "border-primary ring-1 ring-primary/40"
           : "border-border hover:border-primary/40",

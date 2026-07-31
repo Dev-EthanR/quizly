@@ -64,7 +64,7 @@ function Host() {
 
   if (!quizId) {
     return (
-      <div className="min-h-screen">
+      <div className="page-shell">
         <Navbar />
         <FullScreenStatus
           variant="inline"
@@ -88,7 +88,7 @@ function Host() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="page-shell">
       <Navbar />
       <div className="flex flex-col items-center justify-center gap-6 px-4 py-24 text-center">
         {status !== "connected" ? (

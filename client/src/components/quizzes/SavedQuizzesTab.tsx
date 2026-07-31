@@ -35,7 +35,7 @@ function SavedQuizzesTab() {
       )}
 
       {!isLoading && !isError && quizzes && quizzes.length === 0 && (
-        <div className="flex flex-col items-center gap-3 py-24 text-center">
+        <div className="empty-state">
           <p className="text-muted">
             You haven't saved any quizzes yet.
           </p>

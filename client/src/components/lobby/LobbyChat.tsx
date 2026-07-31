@@ -42,7 +42,7 @@ function LobbyChat({ roomCode, disabled = false, disabledReason }: LobbyChatProp
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col rounded-xl border border-border bg-surface">
+    <div className="card flex h-full min-h-0 flex-col">
       <div className="border-b border-border px-4 py-3">
         <h2 className="font-semibold text-foreground">Lobby chat</h2>
       </div>

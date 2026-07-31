@@ -16,7 +16,7 @@ function FullScreenStatus({
   icon,
   tone = "danger",
   title,
-  titleClassName = "text-2xl font-bold text-foreground",
+  titleClassName = "heading text-2xl",
   message,
   secondaryMessage,
   children,

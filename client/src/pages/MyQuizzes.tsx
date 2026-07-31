@@ -43,12 +43,12 @@ function MyQuizzes() {
   });
 
   return (
-    <div className="min-h-screen">
+    <div className="page-shell">
       <Navbar />
 
-      <div className="mx-auto max-w-6xl px-4 py-10">
+      <div className="page-container max-w-6xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-3xl font-bold text-foreground">My Quizzes</h1>
+          <h1 className="heading text-3xl">My Quizzes</h1>
           <Link to="/quizzes/new">
             <Button>Create Quiz</Button>
           </Link>
@@ -79,7 +79,7 @@ function MyQuizzes() {
           )}
 
           {!isLoading && !isError && quizzes && quizzes.length === 0 && (
-            <div className="flex flex-col items-center gap-3 py-24 text-center">
+            <div className="empty-state">
               <p className="text-muted">{EMPTY_MESSAGE[filter]}</p>
               <Link to="/quizzes/new">
                 <Button>Create your first quiz</Button>

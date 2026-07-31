@@ -83,7 +83,7 @@ function QuizDetailsContent({
           )}
         </div>
 
-        <h1 className="text-3xl font-bold text-foreground">{quiz.title}</h1>
+        <h1 className="heading text-3xl">{quiz.title}</h1>
 
         <div className="flex items-center gap-2 text-sm text-muted">
           <ImageFallback
@@ -144,7 +144,7 @@ function QuizDetailsContent({
         <hr className="border-border" />
 
         <div className="flex flex-col gap-3">
-          <h2 className="text-lg font-semibold text-foreground">Questions</h2>
+          <h2 className="section-title">Questions</h2>
 
           <ol className="flex flex-col gap-2">
             {quiz.questions.map((question, index) => (

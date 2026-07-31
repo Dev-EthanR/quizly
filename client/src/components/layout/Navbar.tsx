@@ -26,7 +26,7 @@ function Navbar() {
   return (
     <header className="sticky top-0 z-10 border-b border-border bg-surface">
       <div className="mx-auto flex h-16 max-w-360 items-center justify-between gap-4 px-4">
-        <Link to="/" className="shrink-0 text-xl font-bold text-foreground">
+        <Link to="/" className="heading shrink-0 text-xl">
           Quiz<span className="text-primary">zly</span>
         </Link>
 

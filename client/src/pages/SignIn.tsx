@@ -29,16 +29,16 @@ function SignIn() {
   const handleSuccess = () => navigate(HOST_PATH, { replace: true });
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4">
-      <h1 className="text-4xl font-bold text-foreground">
+    <div className="page-shell flex flex-col items-center justify-center gap-6 px-4">
+      <h1 className="heading text-4xl">
         Quiz<span className="text-primary">zly</span>
       </h1>
 
-      <div className="flex w-full max-w-sm flex-col gap-4 rounded-xl border border-border bg-surface p-6">
+      <div className="card flex w-full max-w-sm flex-col gap-4 p-6">
         <AuthModeTabs mode={mode} onChange={switchMode} />
 
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-foreground">
+          <h2 className="heading text-2xl">
             {mode === "signin" ? "Welcome back" : "Create an account"}
           </h2>
           <p className="mt-1 text-muted">
@@ -51,9 +51,9 @@ function SignIn() {
         <GoogleSignInButton callbackUrl={callbackUrl} />
 
         <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-border" />
+          <div className="divider flex-1" />
           <span className="text-sm text-muted">or</span>
-          <div className="h-px flex-1 bg-border" />
+          <div className="divider flex-1" />
         </div>
 
         {formError && (

@@ -2,7 +2,7 @@ import Skeleton from "../ui/Skeleton";
 
 function DiscoveryQuizCardSkeleton() {
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface">
+    <div className="card flex flex-col overflow-hidden">
       <Skeleton className="h-36" />
 
       <div className="flex flex-col gap-3 p-4">

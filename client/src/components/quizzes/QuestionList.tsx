@@ -58,7 +58,7 @@ function QuestionList({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-foreground">Questions</h2>
+        <h2 className="section-title">Questions</h2>
         <Button type="button" variant="secondary" onClick={handleAddQuestion}>
           + Add question
         </Button>

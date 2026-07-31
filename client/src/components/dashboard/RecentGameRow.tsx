@@ -8,7 +8,7 @@ interface RecentGameRowProps {
 
 function RecentGameRow({ game }: RecentGameRowProps) {
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 sm:flex-row sm:items-center">
+    <div className="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
       <ImageFallback
         src={game.quizCoverImage}
         fallbackText={game.quizTitle}
@@ -17,7 +17,7 @@ function RecentGameRow({ game }: RecentGameRowProps) {
 
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <h3 className="truncate font-semibold text-foreground">
+          <h3 className="truncate-title">
             {game.quizTitle}
           </h3>
           {game.won && (

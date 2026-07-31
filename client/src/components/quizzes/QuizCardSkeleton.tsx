@@ -2,7 +2,7 @@ import Skeleton from "../ui/Skeleton";
 
 function QuizCardSkeleton() {
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-border bg-surface p-4 sm:flex-row sm:items-center">
+    <div className="card flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
       <div className="flex items-center gap-4">
         <Skeleton className="h-16 w-24 shrink-0 rounded-lg" />
 

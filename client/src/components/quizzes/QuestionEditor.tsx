@@ -36,7 +36,7 @@ function QuestionEditor({ question, errors }: QuestionEditorProps) {
       />
 
       <div className="flex items-baseline gap-2">
-        <span className="text-sm font-medium text-muted">Answer options</span>
+        <span className="field-label">Answer options</span>
         <span className="text-xs text-muted">
           Tap the circle to mark the correct answer(s).
         </span>

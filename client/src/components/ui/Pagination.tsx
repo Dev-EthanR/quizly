@@ -18,7 +18,7 @@ function Pagination({ page, totalPages, onPageChange }: PaginationProps) {
         onClick={() => onPageChange(page - 1)}
         disabled={page <= 1}
         aria-label="Previous page"
-        className="cursor-pointer rounded-lg border border-border bg-background p-2 text-foreground transition-colors hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50"
+        className="icon-btn"
       >
         <FiChevronLeft className="size-5" />
       </button>
@@ -32,7 +32,7 @@ function Pagination({ page, totalPages, onPageChange }: PaginationProps) {
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages}
         aria-label="Next page"
-        className="cursor-pointer rounded-lg border border-border bg-background p-2 text-foreground transition-colors hover:bg-surface disabled:cursor-not-allowed disabled:opacity-50"
+        className="icon-btn"
       >
         <FiChevronRight className="size-5" />
       </button>

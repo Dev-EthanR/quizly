@@ -71,7 +71,7 @@ function BrowseQuizzesTab() {
           value={searchInput}
           onChange={(event) => setSearchInput(event.target.value)}
           placeholder="Search by title or tag..."
-          className="min-w-48 flex-1 rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+          className="field-input min-w-48 flex-1 placeholder:text-muted"
         />
 
         <select
@@ -79,7 +79,7 @@ function BrowseQuizzesTab() {
           onChange={(event) =>
             setCategory(event.target.value as QuizCategory | "")
           }
-          className="rounded-lg border border-border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          className="field-input"
         >
           <option value="">All categories</option>
           {categoriesQuery.data?.map((option) => (
@@ -94,7 +94,7 @@ function BrowseQuizzesTab() {
           onChange={(event) =>
             setDifficulty(event.target.value as QuizDifficulty | "")
           }
-          className="rounded-lg border border-border bg-background px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          className="field-input"
         >
           <option value="">All difficulties</option>
           {DIFFICULTY_OPTIONS.map((option) => (
@@ -122,7 +122,7 @@ function BrowseQuizzesTab() {
         )}
 
         {!isLoading && !isError && quizzes && quizzes.length === 0 && (
-          <div className="flex flex-col items-center gap-3 py-24 text-center">
+          <div className="empty-state">
             <p className="text-muted">No quizzes found.</p>
           </div>
         )}

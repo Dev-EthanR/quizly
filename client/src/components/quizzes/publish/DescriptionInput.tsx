@@ -9,7 +9,7 @@ const MAX_DESCRIPTION_LENGTH = 500;
 function DescriptionInput({ value, onChange, error }: DescriptionInputProps) {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor="quiz-description" className="text-sm font-medium text-muted">
+      <label htmlFor="quiz-description" className="field-label">
         Description
       </label>
       <textarea
@@ -19,7 +19,7 @@ function DescriptionInput({ value, onChange, error }: DescriptionInputProps) {
         maxLength={MAX_DESCRIPTION_LENGTH}
         rows={3}
         placeholder="What's this quiz about?"
-        className="resize-none rounded-lg border border-border bg-background px-4 py-3 text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+        className="field-input resize-none placeholder:text-muted"
       />
       <div className="flex items-center justify-between">
         {error ? (

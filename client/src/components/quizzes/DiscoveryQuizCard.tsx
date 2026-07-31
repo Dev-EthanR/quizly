@@ -19,7 +19,7 @@ const DIFFICULTY_BADGE_CLASS: Record<QuizDifficulty, string> = {
 
 function DiscoveryQuizCard({ quiz }: DiscoveryQuizCardProps) {
   return (
-    <div className="flex flex-col overflow-hidden rounded-xl border border-border bg-surface transition-colors hover:border-primary">
+    <div className="card flex flex-col overflow-hidden transition-colors hover:border-primary">
       <Link to={`/discovery/${quiz.id}`} className="relative block h-36">
         <ImageFallback
           src={quiz.coverImage}
