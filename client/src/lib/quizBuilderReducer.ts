@@ -1,10 +1,11 @@
+import { ANSWER_COUNT_BOUNDS } from "shared";
 import type { QuizDetail, QuizQuestionDraft } from "../entities/quiz";
 import type {
   QuizBuilderAction,
   QuizBuilderState,
 } from "../context/quiz-builder-context";
 
-export const ANSWER_BOUNDS = { min: 2, max: 4 };
+export const ANSWER_BOUNDS = ANSWER_COUNT_BOUNDS;
 
 function createId(): string {
   return crypto.randomUUID();

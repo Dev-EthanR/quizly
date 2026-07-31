@@ -51,6 +51,9 @@ export interface GeneratedQuiz {
 
 interface GenerateQuizFromTitleParams {
   title: string;
+  questionCount: number;
+  allowTrueFalse: boolean;
+  allowMultipleAnswers: boolean;
 }
 
 export interface GeneratedAnswers {
@@ -61,6 +64,7 @@ export interface GeneratedAnswers {
 interface GenerateAnswersParams {
   quizTitle: string;
   prompt: string;
+  answerCount: number;
 }
 
 export async function fetchMyQuizzes({
@@ -147,9 +151,15 @@ export async function fetchQuizCategories(): Promise<QuizCategoryOption[]> {
 
 export async function generateQuizFromTitle({
   title,
+  questionCount,
+  allowTrueFalse,
+  allowMultipleAnswers,
 }: GenerateQuizFromTitleParams): Promise<GeneratedQuiz> {
   const { data } = await api.post<GeneratedQuiz>("/api/quizzes/generate", {
     title,
+    questionCount,
+    allowTrueFalse,
+    allowMultipleAnswers,
   });
   return data;
 }
@@ -157,10 +167,11 @@ export async function generateQuizFromTitle({
 export async function generateAnswersForQuestion({
   quizTitle,
   prompt,
+  answerCount,
 }: GenerateAnswersParams): Promise<GeneratedAnswers> {
   const { data } = await api.post<GeneratedAnswers>(
     "/api/quizzes/generate-answers",
-    { quizTitle, prompt },
+    { quizTitle, prompt, answerCount },
   );
   return data;
 }

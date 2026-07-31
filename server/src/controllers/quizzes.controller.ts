@@ -7,10 +7,13 @@ import {
   quizCategoryLabels,
   quizCategorySchema,
   saveQuizDraftSchema,
+  type GenerateAnswersInput,
+  type GenerateQuizInput,
   type PublishQuizInput,
   type SaveQuizDraftInput,
 } from "shared";
 import { authConfig } from "../auth.config.js";
+import { aiService } from "../services/ai.service.js";
 import { quizzesService } from "../services/quizzes.service.js";
 
 export const quizzesController = {
@@ -167,5 +170,25 @@ export const quizzesController = {
     }
 
     res.json(result.quiz);
+  },
+
+  async generateQuiz(req: Request, res: Response) {
+    const { title, questionCount, allowTrueFalse, allowMultipleAnswers } =
+      req.body as GenerateQuizInput;
+
+    const result = await aiService.generateQuiz({
+      title,
+      questionCount,
+      allowTrueFalse,
+      allowMultipleAnswers,
+    });
+    res.json(result);
+  },
+
+  async generateAnswers(req: Request, res: Response) {
+    const { quizTitle, prompt, answerCount } = req.body as GenerateAnswersInput;
+
+    const result = await aiService.generateAnswers({ quizTitle, prompt, answerCount });
+    res.json(result);
   },
 };

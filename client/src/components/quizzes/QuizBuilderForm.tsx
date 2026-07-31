@@ -1,12 +1,16 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import Input from "../ui/Input";
+import AiBadgeButton from "../ui/AiBadgeButton";
 import QuestionList from "./QuestionList";
 import QuestionPreviewPanel from "./QuestionPreviewPanel";
 import PublishQuizModal, { MAX_TAGS } from "./PublishQuizModal";
 import PublishMetadataFields from "./PublishMetadataFields";
 import QuizBuilderActionBar from "./QuizBuilderActionBar";
+import GenerateQuizModal from "./GenerateQuizModal";
 import CoverImageDropzone from "./publish/CoverImageDropzone";
 import { useQuizBuilder } from "../../context/useQuizBuilder";
+import { useGenerateQuiz } from "../../hooks/useGenerateQuiz";
 import { usePublishMetadataForm } from "../../hooks/usePublishMetadataForm";
 import { useQuestionPreviewSelection } from "../../hooks/useQuestionPreviewSelection";
 import { useQuizBuilderSave } from "../../hooks/useQuizBuilderSave";
@@ -24,6 +28,20 @@ interface QuizBuilderFormProps {
 function QuizBuilderForm({ quizId, quiz }: QuizBuilderFormProps) {
   const { state, dispatch } = useQuizBuilder();
   const isPublished = quiz?.status === "published";
+  const [isGenerateQuizModalOpen, setIsGenerateQuizModalOpen] = useState(false);
+  const generation = useGenerateQuiz(state.title);
+
+  const handleAddGeneratedQuestions = () => {
+    const accepted = (generation.suggestions ?? []).filter((question) =>
+      generation.includedIds.has(question.id),
+    );
+    dispatch({
+      type: "APPLY_GENERATED_QUESTIONS",
+      questions: [...state.questions, ...accepted],
+    });
+    generation.reset();
+    setIsGenerateQuizModalOpen(false);
+  };
 
   const {
     category,
@@ -104,15 +122,28 @@ function QuizBuilderForm({ quizId, quiz }: QuizBuilderFormProps) {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
         <div className="flex flex-col gap-8">
-          <Input
-            label="Quiz title"
-            placeholder="e.g. Capital Cities of the World"
-            value={state.title}
-            onChange={(event) =>
-              dispatch({ type: "SET_TITLE", title: event.target.value })
-            }
-            className="w-full"
-          />
+          <div className="flex flex-col gap-2">
+            <Input
+              label="Quiz title"
+              placeholder="e.g. Capital Cities of the World"
+              value={state.title}
+              onChange={(event) =>
+                dispatch({ type: "SET_TITLE", title: event.target.value })
+              }
+              className="w-full"
+            />
+            <AiBadgeButton
+              disabled={state.title.trim().length < 3}
+              title={
+                state.title.trim().length < 3
+                  ? "Enter a quiz title first"
+                  : undefined
+              }
+              onClick={() => setIsGenerateQuizModalOpen(true)}
+            >
+              Generate with AI
+            </AiBadgeButton>
+          </div>
 
           {isPublished && (
             <PublishMetadataFields
@@ -169,6 +200,15 @@ function QuizBuilderForm({ quizId, quiz }: QuizBuilderFormProps) {
           onClose={closePublishModal}
           onConfirm={handleConfirmPublish}
           isSubmitting={isSaving}
+        />
+      )}
+
+      {isGenerateQuizModalOpen && (
+        <GenerateQuizModal
+          title={state.title}
+          generation={generation}
+          onAdd={handleAddGeneratedQuestions}
+          onClose={() => setIsGenerateQuizModalOpen(false)}
         />
       )}
     </div>

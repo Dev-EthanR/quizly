@@ -5,10 +5,13 @@ import { ANSWER_BOUNDS } from "../../lib/quizBuilderReducer";
 import Input from "../ui/Input";
 import SegmentedControl from "../ui/SegmentedControl";
 import AnswerRow from "./AnswerRow";
+import GenerateAnswersPanel from "./GenerateAnswersPanel";
 
 interface QuestionEditorProps {
   question: QuizQuestionDraft;
   errors: QuestionValidationErrors | null;
+  answerGenerationAttempts: number;
+  onAnswersGenerated: () => void;
 }
 
 const TIME_LIMIT_OPTIONS = [10, 20, 30].map((seconds) => ({
@@ -16,8 +19,13 @@ const TIME_LIMIT_OPTIONS = [10, 20, 30].map((seconds) => ({
   label: `${seconds}s`,
 }));
 
-function QuestionEditor({ question, errors }: QuestionEditorProps) {
-  const { dispatch } = useQuizBuilder();
+function QuestionEditor({
+  question,
+  errors,
+  answerGenerationAttempts,
+  onAnswersGenerated,
+}: QuestionEditorProps) {
+  const { state, dispatch } = useQuizBuilder();
 
   return (
     <div className="flex flex-col gap-4">
@@ -41,6 +49,13 @@ function QuestionEditor({ question, errors }: QuestionEditorProps) {
           Tap the circle to mark the correct answer(s).
         </span>
       </div>
+
+      <GenerateAnswersPanel
+        quizTitle={state.title}
+        question={question}
+        attempts={answerGenerationAttempts}
+        onGenerated={onAnswersGenerated}
+      />
 
       {errors?.correctAnswerIds && (
         <p className="text-sm text-danger">{errors.correctAnswerIds}</p>

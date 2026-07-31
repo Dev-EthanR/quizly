@@ -1,5 +1,10 @@
 import { Router } from "express";
-import { publishQuizSchema, saveQuizDraftSchema } from "shared";
+import {
+  generateAnswersSchema,
+  generateQuizSchema,
+  publishQuizSchema,
+  saveQuizDraftSchema,
+} from "shared";
 import { asyncHandler, validateBody } from "../middleware.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 import { quizzesController } from "../controllers/quizzes.controller.js";
@@ -25,6 +30,20 @@ router.post(
   "/quizzes",
   requireAuth,
   asyncHandler(quizzesController.createQuiz),
+);
+
+router.post(
+  "/quizzes/generate",
+  requireAuth,
+  validateBody(generateQuizSchema),
+  asyncHandler(quizzesController.generateQuiz),
+);
+
+router.post(
+  "/quizzes/generate-answers",
+  requireAuth,
+  validateBody(generateAnswersSchema),
+  asyncHandler(quizzesController.generateAnswers),
 );
 
 router.get(

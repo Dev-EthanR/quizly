@@ -10,6 +10,8 @@ export const listQuizzesQuerySchema = z.object({
 
 export type ListQuizzesQuery = z.infer<typeof listQuizzesQuerySchema>;
 
+export const ANSWER_COUNT_BOUNDS = { min: 2, max: 4 } as const;
+
 export const quizAnswerSchema = z.object({
   id: z.string(),
   text: z.string().trim().min(1, "Answer text is required").max(120),
@@ -45,7 +47,11 @@ const quizQuestionDraftSchema = z.object({
 });
 
 export const saveQuizDraftSchema = z.object({
-  title: z.string().trim().min(3, "Title must be at least 3 characters").max(80),
+  title: z
+    .string()
+    .trim()
+    .min(3, "Title must be at least 3 characters")
+    .max(80),
   questions: z.array(quizQuestionDraftSchema),
 });
 
@@ -110,7 +116,9 @@ export const publishQuizMetadataSchema = z.object({
   description: z.string().trim().max(500).optional(),
 });
 
-export type PublishQuizMetadataInput = z.infer<typeof publishQuizMetadataSchema>;
+export type PublishQuizMetadataInput = z.infer<
+  typeof publishQuizMetadataSchema
+>;
 
 export const publishQuizSchema = publishQuizContentSchema.extend(
   publishQuizMetadataSchema.shape,
@@ -129,8 +137,21 @@ export const discoverQuizzesQuerySchema = z.object({
 
 export type DiscoverQuizzesQuery = z.infer<typeof discoverQuizzesQuerySchema>;
 
+export const GENERATE_QUIZ_QUESTION_COUNT_BOUNDS = { min: 1, max: 30 } as const;
+
 export const generateQuizSchema = z.object({
-  title: z.string().trim().min(3, "Title must be at least 3 characters").max(80),
+  title: z
+    .string()
+    .trim()
+    .min(3, "Title must be at least 3 characters")
+    .max(80),
+  questionCount: z
+    .number()
+    .int()
+    .min(GENERATE_QUIZ_QUESTION_COUNT_BOUNDS.min)
+    .max(GENERATE_QUIZ_QUESTION_COUNT_BOUNDS.max),
+  allowTrueFalse: z.boolean().default(false),
+  allowMultipleAnswers: z.boolean().default(false),
 });
 
 export type GenerateQuizInput = z.infer<typeof generateQuizSchema>;
@@ -138,6 +159,11 @@ export type GenerateQuizInput = z.infer<typeof generateQuizSchema>;
 export const generateAnswersSchema = z.object({
   quizTitle: z.string().trim().min(1),
   prompt: z.string().trim().min(1, "Question is required"),
+  answerCount: z
+    .number()
+    .int()
+    .min(ANSWER_COUNT_BOUNDS.min)
+    .max(ANSWER_COUNT_BOUNDS.max),
 });
 
 export type GenerateAnswersInput = z.infer<typeof generateAnswersSchema>;

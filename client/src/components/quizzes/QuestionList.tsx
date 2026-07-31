@@ -25,6 +25,9 @@ function QuestionList({
 }: QuestionListProps) {
   const { state, dispatch } = useQuizBuilder();
   const [editing, setEditing] = useState<EditingQuestion | null>(null);
+  const [answerGenerationAttempts, setAnswerGenerationAttempts] = useState<
+    Record<string, number>
+  >({});
 
   const editingIndex = state.questions.findIndex(
     (question) => question.id === editing?.questionId,
@@ -41,7 +44,19 @@ function QuestionList({
   const handleRemoveQuestion = (questionId: string) => {
     dispatch({ type: "REMOVE_QUESTION", questionId });
     if (editing?.questionId === questionId) setEditing(null);
+    setAnswerGenerationAttempts((current) =>
+      Object.fromEntries(
+        Object.entries(current).filter(([id]) => id !== questionId),
+      ),
+    );
     onQuestionRemoved(questionId);
+  };
+
+  const handleAnswersGenerated = (questionId: string) => {
+    setAnswerGenerationAttempts((current) => ({
+      ...current,
+      [questionId]: (current[questionId] ?? 0) + 1,
+    }));
   };
 
   const handleDiscardEdit = () => {
@@ -104,6 +119,8 @@ function QuestionList({
           question={editingQuestion}
           index={editingIndex}
           isNew={editing?.isNew ?? false}
+          answerGenerationAttempts={answerGenerationAttempts[editingQuestion.id] ?? 0}
+          onAnswersGenerated={() => handleAnswersGenerated(editingQuestion.id)}
           onDelete={() => handleRemoveQuestion(editingQuestion.id)}
           onDiscard={handleDiscardEdit}
           onClose={handleCloseModal}

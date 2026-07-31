@@ -10,6 +10,8 @@ interface QuestionModalProps {
   question: QuizQuestionDraft;
   index: number;
   isNew: boolean;
+  answerGenerationAttempts: number;
+  onAnswersGenerated: () => void;
   onDelete: () => void;
   onDiscard: () => void;
   onClose: () => void;
@@ -19,6 +21,8 @@ function QuestionModal({
   question,
   index,
   isNew,
+  answerGenerationAttempts,
+  onAnswersGenerated,
   onDelete,
   onDiscard,
   onClose,
@@ -66,7 +70,12 @@ function QuestionModal({
         </>
       }
     >
-      <QuestionEditor question={question} errors={errors} />
+      <QuestionEditor
+        question={question}
+        errors={errors}
+        answerGenerationAttempts={answerGenerationAttempts}
+        onAnswersGenerated={onAnswersGenerated}
+      />
     </Modal>
   );
 }
