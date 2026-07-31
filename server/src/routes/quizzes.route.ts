@@ -65,6 +65,12 @@ router.patch(
   asyncHandler(quizzesController.updateQuizDraft),
 );
 
+router.delete(
+  "/quizzes/:id",
+  requireAuth,
+  asyncHandler(quizzesController.deleteQuiz),
+);
+
 router.post(
   "/quizzes/:id/publish",
   requireAuth,

@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { FiTrash2 } from "react-icons/fi";
 import QuizStatusBadge from "./QuizStatusBadge";
 import HostQuizButton from "./HostQuizButton";
 import ImageFallback from "../ui/ImageFallback";
 import TagPill from "../ui/TagPill";
+import ConfirmDialog from "../ui/ConfirmDialog";
+import { useDeleteQuizMutation } from "../../hooks/useDeleteQuizMutation";
 import type { Quiz } from "../../entities/quiz";
 
 interface QuizCardProps {
@@ -10,6 +14,9 @@ interface QuizCardProps {
 }
 
 function QuizCard({ quiz }: QuizCardProps) {
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const deleteQuizMutation = useDeleteQuizMutation();
+
   return (
     <div className="card flex flex-col gap-4 p-4 transition-colors hover:border-primary sm:flex-row sm:items-center">
       <Link
@@ -50,13 +57,44 @@ function QuizCard({ quiz }: QuizCardProps) {
               ))}
             </div>
           )}
+
+          {deleteQuizMutation.isError && (
+            <p className="text-sm text-red-500">
+              Couldn't delete this quiz. Please try again.
+            </p>
+          )}
         </div>
       </Link>
 
-      <HostQuizButton
-        quizId={quiz.id}
-        className="flex w-full items-center justify-center gap-2 shrink-0 sm:w-auto"
-      />
+      <div className="flex w-full shrink-0 items-center gap-2 sm:w-auto">
+        <HostQuizButton
+          quizId={quiz.id}
+          className="flex w-full items-center justify-center gap-2 sm:w-auto"
+        />
+
+        <button
+          type="button"
+          aria-label="Delete quiz"
+          disabled={deleteQuizMutation.isPending}
+          className="cursor-pointer rounded-lg border border-border p-3 text-muted transition-colors hover:border-red-500 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={() => setIsConfirmingDelete(true)}
+        >
+          <FiTrash2 className="h-4 w-4" />
+        </button>
+      </div>
+
+      {isConfirmingDelete && (
+        <ConfirmDialog
+          title="Delete quiz?"
+          message={`This will permanently delete "${quiz.title}" and all of its questions. This can't be undone.`}
+          confirmLabel="Delete"
+          onConfirm={() => {
+            setIsConfirmingDelete(false);
+            deleteQuizMutation.mutate(quiz.id);
+          }}
+          onCancel={() => setIsConfirmingDelete(false)}
+        />
+      )}
     </div>
   );
 }

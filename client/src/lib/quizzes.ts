@@ -110,6 +110,10 @@ export async function publishQuiz({
   return data;
 }
 
+export async function deleteQuiz(id: string): Promise<void> {
+  await api.delete(`/api/quizzes/${id}`);
+}
+
 export async function fetchDiscoverQuizzes(
   params: DiscoverQuizzesParams,
 ): Promise<DiscoverQuizzesResult> {

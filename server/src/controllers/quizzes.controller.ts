@@ -172,6 +172,22 @@ export const quizzesController = {
     res.json(result.quiz);
   },
 
+  async deleteQuiz(req: Request, res: Response) {
+    const result = await quizzesService.deleteQuiz({
+      id: req.params.id as string,
+      ownerId: req.userId,
+    });
+
+    if (result.status === "not_found") {
+      return res.status(404).json({ error: "Quiz not found" });
+    }
+    if (result.status === "forbidden") {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    res.status(204).send();
+  },
+
   async generateQuiz(req: Request, res: Response) {
     const { title, questionCount, allowTrueFalse, allowMultipleAnswers } =
       req.body as GenerateQuizInput;

@@ -92,6 +92,13 @@ interface SaveQuizParams {
   userId: string;
 }
 
+interface DeleteQuizParams {
+  id: string;
+  ownerId: string;
+}
+
+type QuizDeleteResult = { status: "ok" } | { status: "not_found" } | { status: "forbidden" };
+
 export const quizzesService = {
   listMyQuizzes({ ownerId, status }: ListMyQuizzesParams) {
     return quizzesRepository.findManyByOwner({ ownerId, status });
@@ -288,5 +295,18 @@ export const quizzesService = {
     });
 
     return { status: "ok", quiz };
+  },
+
+  async deleteQuiz({ id, ownerId }: DeleteQuizParams): Promise<QuizDeleteResult> {
+    const existing = await quizzesRepository.findById(id);
+    if (!existing) {
+      return { status: "not_found" };
+    }
+    if (existing.ownerId !== ownerId) {
+      return { status: "forbidden" };
+    }
+
+    await quizzesRepository.deleteById(id);
+    return { status: "ok" };
   },
 };

@@ -276,6 +276,10 @@ export const quizzesRepository = {
     });
   },
 
+  deleteById(id: string) {
+    return prisma.quiz.delete({ where: { id } });
+  },
+
   findSavedQuiz({ userId, quizId }: SavedQuizParams) {
     return prisma.savedQuiz.findUnique({
       where: { userId_quizId: { userId, quizId } },
