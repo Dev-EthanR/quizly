@@ -49,7 +49,7 @@ function LobbyChat({ roomCode, disabled = false, disabledReason }: LobbyChatProp
 
       <div
         ref={listRef}
-        className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 py-3"
+        className="scrollbar-theme flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto px-4 py-3"
       >
         {messages.length === 0 ? (
           <p className="text-sm text-muted">No messages yet. Say hi!</p>
