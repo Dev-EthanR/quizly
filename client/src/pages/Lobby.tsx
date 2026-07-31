@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import clsx from "clsx";
 import { ROOM_CODE_REGEX } from "shared";
 import RoomNotFound from "../components/lobby/RoomNotFound";
@@ -10,234 +9,36 @@ import HostLobbyPanel from "../components/lobby/HostLobbyPanel";
 import ParticipantLobbyPanel from "../components/lobby/ParticipantLobbyPanel";
 import ChatPanel from "../components/lobby/ChatPanel";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
-import { useAuth } from "../context/useAuth";
 import { useSocket } from "../context/useSocket";
-import { clearSession, loadSession, saveSession } from "../lib/session";
-import type { RoomSession } from "../entities/session";
-import type {
-  GameStartedPayload,
-  JoinRejectedPayload,
-  LobbyPlayer,
-  LobbyPlayersPayload,
-  RoomSettingsPayload,
-  RoomStatePayload,
-} from "../entities/socket";
+import { usePlayJoinFlow, type LobbyLocationState } from "../hooks/usePlayJoinFlow";
+import { useRoomPresence } from "../hooks/useRoomPresence";
+import { resolveLobbyBlockingState } from "../lib/resolveLobbyBlockingState";
 
 interface LobbyLocation {
-  state?: {
-    name?: string;
-    color?: string;
-    token?: string;
-    isHost?: boolean;
-  };
+  state?: LobbyLocationState;
 }
 
 function Lobby() {
   const { roomCode } = useParams();
   const { state } = useLocation() as LobbyLocation;
-  const navigate = useNavigate();
-  const { socket, status } = useSocket();
-  const { user } = useAuth();
-  const [players, setPlayers] = useState<LobbyPlayer[]>([]);
-  const hadExistingSessionRef = useRef<boolean>(
-    !!(roomCode && loadSession(roomCode)),
-  );
-  const [session, setSession] = useState<RoomSession | null>(() => {
-    if (!roomCode) {
-      return null;
-    }
-    const existing = loadSession(roomCode);
-    if (existing) {
-      return existing;
-    }
-    if (!state?.isHost && state?.name && state?.token) {
-      const fresh: RoomSession = {
-        roomCode,
-        token: state.token,
-        isHost: false,
-        name: state.name,
-        color: state.color,
-      };
-      saveSession(fresh);
-      return fresh;
-    }
-    return null;
-  });
-  const [roomNotFound, setRoomNotFound] = useState(false);
-  const [joinRejection, setJoinRejection] = useState<
-    JoinRejectedPayload["reason"] | null
-  >(null);
-  const [hostDisconnected, setHostDisconnected] = useState(false);
-  const [hostReconnecting, setHostReconnecting] = useState(false);
-  const [chatDisabled, setChatDisabled] = useState(false);
-  const attemptRef = useRef<"rejoin" | "join" | null>(null);
+  const { socket } = useSocket();
 
   const isValidRoomCode =
     !!roomCode && ROOM_CODE_REGEX.test(roomCode.toUpperCase());
   const isOnline = useOnlineStatus();
 
-  useEffect(() => {
-    if (!isValidRoomCode) {
-      return;
-    }
-
-    function handleLobbyPlayers(payload: LobbyPlayersPayload) {
-      setPlayers(payload.players);
-    }
-
-    function handleRoomNotFound() {
-      const canFallbackToFreshJoin =
-        attemptRef.current === "rejoin" &&
-        !state?.isHost &&
-        !!state?.name &&
-        !!state?.token;
-
-      if (attemptRef.current === "rejoin" && roomCode) {
-        clearSession(roomCode);
-      }
-
-      if (canFallbackToFreshJoin && roomCode && state?.name && state?.token) {
-        const fresh: RoomSession = {
-          roomCode,
-          token: state.token,
-          isHost: false,
-          name: state.name,
-          color: state.color,
-        };
-        saveSession(fresh);
-        hadExistingSessionRef.current = false;
-        attemptRef.current = null;
-        setSession(fresh);
-        return;
-      }
-
-      setRoomNotFound(true);
-    }
-
-    function handleRoomState(payload: RoomStatePayload) {
-      if (payload.phase !== "lobby" && roomCode) {
-        navigate(`/play/${roomCode}`, { replace: true });
-      }
-    }
-
-    function handleHostReconnecting() {
-      setHostReconnecting(true);
-    }
-
-    function handleHostReconnected() {
-      setHostReconnecting(false);
-    }
-
-    function handleHostDisconnected() {
-      if (!state?.isHost) {
-        setHostDisconnected(true);
-      }
-    }
-
-    function handlePlayerKicked() {
-      if (roomCode) {
-        clearSession(roomCode);
-      }
-      navigate("/removed", { replace: true });
-    }
-
-    function handleJoinRejected(payload: JoinRejectedPayload) {
-      if (payload.roomCode === roomCode) {
-        setJoinRejection(payload.reason);
-      }
-    }
-
-    function handleRoomSettings(payload: RoomSettingsPayload) {
-      setChatDisabled(payload.disableChat);
-    }
-
-    socket.on("lobby_players", handleLobbyPlayers);
-    socket.on("room_not_found", handleRoomNotFound);
-    socket.on("join_rejected", handleJoinRejected);
-    socket.on("room_settings", handleRoomSettings);
-    socket.on("room_state", handleRoomState);
-    socket.on("host_reconnecting", handleHostReconnecting);
-    socket.on("host_reconnected", handleHostReconnected);
-    socket.on("host_disconnected", handleHostDisconnected);
-    socket.on("player_kicked", handlePlayerKicked);
-    return () => {
-      socket.off("lobby_players", handleLobbyPlayers);
-      socket.off("room_not_found", handleRoomNotFound);
-      socket.off("join_rejected", handleJoinRejected);
-      socket.off("room_settings", handleRoomSettings);
-      socket.off("room_state", handleRoomState);
-      socket.off("host_reconnecting", handleHostReconnecting);
-      socket.off("host_reconnected", handleHostReconnected);
-      socket.off("host_disconnected", handleHostDisconnected);
-      socket.off("player_kicked", handlePlayerKicked);
-    };
-  }, [
-    isValidRoomCode,
-    socket,
-    state?.isHost,
-    state?.name,
-    state?.token,
-    state?.color,
+  const { session, players, roomNotFound, joinRejection } = usePlayJoinFlow({
     roomCode,
-    navigate,
-  ]);
+    isValidRoomCode,
+    state,
+  });
 
-  useEffect(() => {
-    if (status === "disconnected") {
-      attemptRef.current = null;
-    }
-  }, [status]);
+  const isHost = state?.isHost ?? session?.isHost ?? false;
 
-  useEffect(() => {
-    if (
-      !isValidRoomCode ||
-      !roomCode ||
-      status !== "connected" ||
-      attemptRef.current ||
-      !session
-    ) {
-      return;
-    }
-
-    if (hadExistingSessionRef.current) {
-      attemptRef.current = "rejoin";
-      socket.emit("rejoin_room", { roomCode, token: session.token });
-      return;
-    }
-
-    attemptRef.current = "join";
-    socket.emit("join_room", {
-      roomCode,
-      name: session.name ?? "Guest",
-      color: session.color,
-      token: session.token,
-      userId: user?.id,
-    });
-  }, [isValidRoomCode, roomCode, status, session, socket, user?.id]);
-
-  useEffect(() => {
-    if (!isValidRoomCode) {
-      return;
-    }
-
-    function handleGameStarted(payload: GameStartedPayload) {
-      navigate(`/play/${payload.roomCode}`, {
-        replace: true,
-        state: {
-          ...state,
-          questionIndex: payload.questionIndex,
-          totalQuestions: payload.totalQuestions,
-          question: payload.question,
-          startedAt: payload.startedAt,
-        },
-      });
-    }
-
-    socket.on("game_started", handleGameStarted);
-    return () => {
-      socket.off("game_started", handleGameStarted);
-    };
-  }, [isValidRoomCode, socket, navigate, state]);
+  const { hostDisconnected, hostReconnecting, chatDisabled } = useRoomPresence({
+    roomCode,
+    isHost,
+  });
 
   const handleStartGame = () => {
     if (!roomCode) {
@@ -260,35 +61,43 @@ function Lobby() {
     socket.emit("set_player_muted", { roomCode, token: playerId, muted });
   };
 
-  if (!isValidRoomCode || roomNotFound || !session) {
+  const blockingState = resolveLobbyBlockingState({
+    isValidRoomCode,
+    roomNotFound,
+    session,
+    joinRejection,
+    hostDisconnected,
+  });
+
+  if (blockingState) {
+    switch (blockingState.screen) {
+      case "room-not-found":
+        return <RoomNotFound roomCode={roomCode} />;
+      case "room-full":
+        return (
+          <RoomNotFound
+            roomCode={roomCode}
+            title="Room is full"
+            message="This room has reached its player limit."
+          />
+        );
+      case "late-join-disabled":
+        return (
+          <RoomNotFound
+            roomCode={roomCode}
+            title="Game already in progress"
+            message="This game has already started and isn't accepting new players."
+          />
+        );
+      case "host-disconnected":
+        return <HostDisconnected />;
+    }
+  }
+
+  if (!roomCode) {
     return <RoomNotFound roomCode={roomCode} />;
   }
 
-  if (joinRejection === "room_full") {
-    return (
-      <RoomNotFound
-        roomCode={roomCode}
-        title="Room is full"
-        message="This room has reached its player limit."
-      />
-    );
-  }
-
-  if (joinRejection === "late_join_disabled") {
-    return (
-      <RoomNotFound
-        roomCode={roomCode}
-        title="Game already in progress"
-        message="This game has already started and isn't accepting new players."
-      />
-    );
-  }
-
-  if (hostDisconnected) {
-    return <HostDisconnected />;
-  }
-
-  const isHost = state?.isHost ?? session?.isHost ?? false;
   const displayName = state?.name ?? session?.name ?? "Guest";
   const displayColor = state?.color ?? session?.color;
   const isMuted = players.find((p) => p.id === session?.token)?.muted ?? false;
