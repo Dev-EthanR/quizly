@@ -98,7 +98,7 @@ function Home() {
         <p className="text-center text-muted">
           Want run the show?{" "}
           <Link
-            to="/host"
+            to="/dashboard"
             className="text-primary font-semibold hover:underline"
           >
             Host your own game
