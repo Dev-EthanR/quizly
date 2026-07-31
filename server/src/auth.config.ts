@@ -11,6 +11,15 @@ import { requireEnv } from "./lib/env.js";
 const secret = requireEnv("AUTH_SECRET");
 const frontendUrl = requireEnv("PUBLIC_FRONTEND_URL");
 
+// Client and server are on separate domains in production, so cookies must be
+// sent cross-site. SameSite=Lax (the Auth.js default) is never sent on
+// cross-site XHR/fetch requests or on cross-site form POST navigations, which
+// breaks the CSRF check on every signin/callback request. SameSite=None
+// requires Secure, so this only applies once the frontend is served over
+// HTTPS (i.e. not local dev).
+const useSecureCookies = frontendUrl.startsWith("https://");
+const cookiePrefix = useSecureCookies ? "__Secure-" : "";
+
 export const authConfig: ExpressAuthConfig = {
   providers: [
     Google({
@@ -63,4 +72,53 @@ export const authConfig: ExpressAuthConfig = {
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" as const },
   basePath: "/api/auth",
+  useSecureCookies,
+  cookies: {
+    sessionToken: {
+      name: `${cookiePrefix}authjs.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: useSecureCookies ? "none" : "lax",
+        path: "/",
+        secure: useSecureCookies,
+      },
+    },
+    callbackUrl: {
+      name: `${cookiePrefix}authjs.callback-url`,
+      options: {
+        sameSite: useSecureCookies ? "none" : "lax",
+        path: "/",
+        secure: useSecureCookies,
+      },
+    },
+    csrfToken: {
+      name: `${useSecureCookies ? "__Host-" : ""}authjs.csrf-token`,
+      options: {
+        httpOnly: true,
+        sameSite: useSecureCookies ? "none" : "lax",
+        path: "/",
+        secure: useSecureCookies,
+      },
+    },
+    state: {
+      name: `${cookiePrefix}authjs.state`,
+      options: {
+        httpOnly: true,
+        sameSite: useSecureCookies ? "none" : "lax",
+        path: "/",
+        secure: useSecureCookies,
+        maxAge: 60 * 15,
+      },
+    },
+    pkceCodeVerifier: {
+      name: `${cookiePrefix}authjs.pkce.code_verifier`,
+      options: {
+        httpOnly: true,
+        sameSite: useSecureCookies ? "none" : "lax",
+        path: "/",
+        secure: useSecureCookies,
+        maxAge: 60 * 15,
+      },
+    },
+  },
 };
