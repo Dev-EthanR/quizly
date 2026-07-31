@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import type { UpdateProfileInput } from "shared";
 import { usersRepository } from "../repositories/users.repository.js";
+import type { UserProfile } from "../entities/user.js";
 
 interface RegisterUserParams {
   name: string;
@@ -29,15 +30,6 @@ export async function registerUser({
   await usersRepository.create({ name, email, password: hashedPassword });
 
   return { status: "created" };
-}
-
-export interface UserProfile {
-  id: string;
-  name: string | null;
-  email: string;
-  image: string | null;
-  avatarColor: string;
-  providers: string[];
 }
 
 export async function getMe(userId: string): Promise<UserProfile | null> {

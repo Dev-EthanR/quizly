@@ -1,9 +1,12 @@
 import {
   roomsRepository,
   DEFAULT_ROOM_SETTINGS,
-  type RoomParticipant,
-  type RoomRecord,
 } from "../repositories/rooms.repository.js";
+import type {
+  JoinRoomResult,
+  RoomParticipant,
+  RoomRecord,
+} from "../entities/room.js";
 
 const ROOM_CODE_LENGTH = 6;
 const ROOM_CODE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -34,10 +37,6 @@ interface JoinRoomParams {
   token: string;
   userId?: string | undefined;
 }
-
-export type JoinRoomResult =
-  | { ok: true; room: RoomRecord }
-  | { ok: false; reason: "not_found" | "late_join_disabled" | "room_full" };
 
 interface RejoinParams {
   socketId: string;

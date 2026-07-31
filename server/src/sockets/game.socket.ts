@@ -10,7 +10,7 @@ import {
 } from "shared";
 import { roomsService, RECONNECT_GRACE_MS } from "../services/rooms.service.js";
 import { gameService, toPublicQuestion } from "../services/game.service.js";
-import type { RoomRecord } from "../repositories/rooms.repository.js";
+import type { RoomRecord } from "../entities/room.js";
 
 const hostDisconnectTimers = new Map<string, NodeJS.Timeout>();
 const playerDisconnectTimers = new Map<string, NodeJS.Timeout>();
